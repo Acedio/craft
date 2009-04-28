@@ -14,11 +14,12 @@ using namespace std;
 #include "game.h"
 #include "texturemanager.h"
 #include "display.h"
-#include "object.h"
+#include "input.h"
 
 Game::Game(){
 	display = new Display(800,600,32);
 	textureManager = new TextureManager();
+	input = new Input();
 }
 
 Game::~Game(){
@@ -28,7 +29,36 @@ Game::~Game(){
 	if(textureManager != NULL){
 		delete textureManager;
 	}
+	if(input != NULL){
+		delete input;
+	}
 }
 
 void Game::Run(){
+	glEnable(GL_TEXTURE_2D);
+
+	TextureRef test = textureManager->LoadTexture("test.png");
+
+	while(!input->WindowClosed()){
+		input->ProcessInput();
+		SDL_Delay(100);
+
+		glClear(GL_COLOR_BUFFER_BIT);
+		glLoadIdentity();
+		glColor3f(1,1,1);
+		glTranslatef(0,0,-100);
+		textureManager->BindTexture(test);
+		glBegin(GL_QUADS);
+			glTexCoord2f(0,0);
+			glVertex3f(-5,-5,0);
+			glTexCoord2f(1,0);
+			glVertex3f(5,-5,0);
+			glTexCoord2f(1,1);
+			glVertex3f(5,5,0);
+			glTexCoord2f(0,1);
+			glVertex3f(-5,5,0);
+		glEnd();
+
+		SDL_GL_SwapBuffers();
+	}
 }

@@ -17,4 +17,19 @@ public:
 private:
 };
 
+class Input{
+public:
+	Input();
+	~Input();
+
+	void ProcessInput();
+
+	bool WindowClosed();
+
+	Keyboard keyboard;
+	Mouse mouse;
+private:
+	bool windowClosed;
+};
+
 #endif

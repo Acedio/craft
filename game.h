@@ -3,6 +3,7 @@
 
 #include "texturemanager.h"
 #include "display.h"
+#include "input.h"
 
 class Game{
 public:
@@ -12,6 +13,7 @@ public:
 	void Run();
 private:
 	Display *display;
+	Input *input;
 	TextureManager *textureManager;
 };
 

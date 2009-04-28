@@ -26,6 +26,8 @@ public:
 
 	TextureRef LoadTexture(string filename);
 	void UnloadTexture(TextureRef ref);
+
+	void BindTexture(TextureRef ref);
 private:
 	map<string, TextureRef> filenames;
 	map<TextureRef, GLuint> textures;

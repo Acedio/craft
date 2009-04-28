@@ -21,9 +21,9 @@ TextureManager::TextureManager(){
 	TextureRef ref = next_unused_ref;
 	next_unused_ref += 1;
 
-	// make the default magenta texture
+	// make the default magenta checkerboard texture
 
-	GLubyte color[12] = {255,0,255, 0,0,0, 0,0,0, 255,0,255};
+	GLfloat color[12] = {1,0,1, 0.1,0.1,0.1, 0.1,0.1,0.1, 1,0,1};
 	GLuint texture;
 
 	glGenTextures(1, &texture);
@@ -31,11 +31,11 @@ TextureManager::TextureManager(){
 	glBindTexture(GL_TEXTURE_2D, texture);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	gluBuild2DMipmaps(GL_TEXTURE_2D,GL_RGB,2,2,GL_RGB,GL_UNSIGNED_BYTE,color);
+	gluBuild2DMipmaps(GL_TEXTURE_2D,GL_RGB,2,2,GL_RGB,GL_FLOAT,color);
 
 	textures[ref] = texture;
 }
@@ -61,6 +61,13 @@ TextureRef TextureManager::LoadTexture(string filename){
 			return 0;
 		}
 		int bpp = surface->format->BytesPerPixel;
+		for(int y = 0; y < surface->h/2; ++y){
+			for(int x = 0; x < surface->w*bpp; ++x){
+				Uint8 temp = ((Uint8*)surface->pixels)[y*surface->w*bpp+x];
+				((Uint8*)surface->pixels)[y*surface->w*bpp+x] = ((Uint8*)surface->pixels)[(surface->h-y-1)*surface->w*bpp+x];
+				((Uint8*)surface->pixels)[(surface->h-y-1)*surface->w*bpp+x] = temp;
+			}
+		}
 		GLenum format;
 		if(bpp == 4){
 			if(surface->format->Rmask == 0x000000ff){
@@ -84,7 +91,7 @@ TextureRef TextureManager::LoadTexture(string filename){
 		glBindTexture(GL_TEXTURE_2D, texture);
 
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
@@ -116,5 +123,14 @@ void TextureManager::UnloadTexture(TextureRef ref){
 				}
 			}
 		}
+	}
+}
+
+void TextureManager::BindTexture(TextureRef ref){
+	map<TextureRef,GLuint>::iterator tex = textures.find(ref);
+	if(tex != textures.end()){
+		glBindTexture(GL_TEXTURE_2D, tex->second);
+	} else {
+		glBindTexture(GL_TEXTURE_2D, textures[0]);
 	}
 }
