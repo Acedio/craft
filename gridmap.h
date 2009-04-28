@@ -7,6 +7,8 @@ class GridMap{
 public:
 	GridMap(int w, int h, int def = 0);
 	~GridMap();
+
+	void Draw();
 private:
 	ObjectRef* object_map;
 };

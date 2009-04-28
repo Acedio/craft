@@ -8,7 +8,7 @@ class Unit : public Object {
 public:
 	Unit();
 	~Unit();
-	virtual void Display() = 0;
+	virtual void Draw() = 0;
 	virtual void MoveTo(Vertex3 tgt);
 	virtual void LookAt(Object* tgt);
 	virtual void LookAt(Vertex3 tgt);

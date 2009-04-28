@@ -7,7 +7,7 @@ class Object{
 public:
 	Object();
 	virtual ~Object();
-	virtual void Display() = 0;
+	virtual void Draw() = 0;
 private:
 	Vertex3 pos;
 };

@@ -8,7 +8,7 @@ Unit::Unit(){
 Unit::~Unit(){
 }
 
-void Unit::Display(){
+void Unit::Draw(){
 }
 
 void Unit::MoveTo(Vertex3 tgt){

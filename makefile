@@ -1,14 +1,31 @@
-TARGET = craft
-SRCS = craft.cpp display.cpp game.cpp gridmap.cpp object.cpp objectmanager.cpp texturemanager.cpp unit.cpp
-OBJS = $(SRCS:.c=.o)
-INCLUDES = 
-LIBS = -lSDL -lSDL_image -lGL -lGLU -lglew
-LDFLAGS = $(LIBS)
-CXX = g++
-CXXFLAGS = -g -Wall
+CXX=g++ -g
+CXXFLAGS=-c -Wall `sdl-config --cflags`
 
-$(TARGET): $(INCLUDES) $(OBJS) $(LIBS)
-	$(CXX) -o $(TARGET) $(OBJS) $(LIBS)
+all: craft
+
+craft: craft.o game.o texturemanager.o display.o object.o unit.o camera.o
+	$(CXX) craft.o game.o texturemanager.o display.o object.o unit.o -lSDL -lSDL_image -lGL -lGLU -lGLEW -o craft
+
+craft.o: craft.cpp game.h
+	$(CXX) $(CXXFLAGS) craft.cpp
+
+game.o: game.cpp game.h texturemanager.h object.h unit.h globals.h
+	$(CXX) $(CXXFLAGS) game.cpp
+
+texturemanager.o: texturemanager.cpp texturemanager.h
+	$(CXX) $(CXXFLAGS) texturemanager.cpp
+
+display.o: display.cpp display.h
+	$(CXX) $(CXXFLAGS) display.cpp
+
+camera.o: camera.cpp camera.h
+	$(CXX) $(CXXFLAGS) camera.cpp
+
+object.o: object.cpp object.h globals.h
+	$(CXX) $(CXXFLAGS) object.cpp
+
+unit.o: unit.cpp unit.h object.h
+	$(CXX) $(CXXFLAGS) unit.cpp
 
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -rf *.o craft
