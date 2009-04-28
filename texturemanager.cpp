@@ -18,10 +18,32 @@ using namespace std;
 
 TextureManager::TextureManager(){
 	next_unused_ref = 0;
-	// TODO: make a default texture at ref 0
+	TextureRef ref = next_unused_ref;
+	next_unused_ref += 1;
+
+	// make the default magenta texture
+
+	GLubyte color[12] = {255,0,255, 0,0,0, 0,0,0, 255,0,255};
+	GLuint texture;
+
+	glGenTextures(1, &texture);
+
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	gluBuild2DMipmaps(GL_TEXTURE_2D,GL_RGB,2,2,GL_RGB,GL_UNSIGNED_BYTE,color);
+
+	textures[ref] = texture;
 }
 
 TextureManager::~TextureManager(){
+	for(map<TextureRef, GLuint>::iterator i = textures.begin(); i != textures.end(); ++i){
+		glDeleteTextures(1,&(i->second));
+	}
 }
 
 TextureRef TextureManager::LoadTexture(string filename){
@@ -82,7 +104,7 @@ TextureRef TextureManager::LoadTexture(string filename){
 }
 
 void TextureManager::UnloadTexture(TextureRef ref){
-	if(refcounts.find(ref) != refcounts.end()){ // if the reference exists in our store
+	if(ref != 0 && refcounts.find(ref) != refcounts.end()){ // if it's not the default texture and the reference exists in our store
 		refcounts[ref] -= 1;
 		if(refcounts[ref] <= 0){ // if the texture is no longer being used by any objects, so we can really remove it
 			refcounts.erase(ref);
