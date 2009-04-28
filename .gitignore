@@ -1,0 +1,9 @@
+*.o
+/craft
+*.ppm
+*.pgm
+vc++/craft/Debug
+vc++/craft/*.user
+vc++/Debug
+*.suo
+*.ncb
