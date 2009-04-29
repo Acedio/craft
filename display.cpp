@@ -1,8 +1,12 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
 #include <SDL/SDL.h>
 
 #include "display.h"
 
-Display::Display(int width, int height, int bitsperpixel){
+Display::Display(int width, int height, int bitsperpixel) throw (DisplayException){
 	w = width;
 	h = height;
 	bpp = bitsperpixel;
@@ -10,6 +14,9 @@ Display::Display(int width, int height, int bitsperpixel){
 	// Initialize SDL
 	SDL_Init(SDL_INIT_EVERYTHING);
 	screen = SDL_SetVideoMode(w, h, bpp, SDL_OPENGL);
+	if(screen == NULL){
+		throw DisplayException(SDL_GetError());
+	}
 	SDL_WM_SetCaption("Craft", NULL);
 
 	// Initialize OpenGL

@@ -17,7 +17,11 @@ using namespace std;
 #include "input.h"
 
 Game::Game(){
-	display = new Display(800,600,32);
+	try{
+		display = new Display(800,600,32);
+	} catch(DisplayException e){
+		cout << "Error initializing display: " << e.what() << endl;
+	}
 	textureManager = new TextureManager();
 	input = new Input();
 }
@@ -46,7 +50,7 @@ void Game::Run(){
 		glClear(GL_COLOR_BUFFER_BIT);
 		glLoadIdentity();
 		glColor3f(1,1,1);
-		glTranslatef(0,0,-100);
+		glTranslatef(0,0,-25);
 		textureManager->BindTexture(test);
 		glBegin(GL_QUADS);
 			glTexCoord2f(0,0);
