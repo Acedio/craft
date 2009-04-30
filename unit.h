@@ -3,19 +3,23 @@
 
 #include "globals.h"
 #include "object.h"
+#include "texturemanager.h"
 
 class Unit : public Object {
 public:
 	Unit();
 	~Unit();
 	virtual void Draw() = 0;
-	virtual void MoveTo(Vertex3 tgt);
+	virtual void MoveTo(VertexF tgt);
 	virtual void LookAt(Object* tgt);
-	virtual void LookAt(Vertex3 tgt);
-private:
-	Vertex3 vel;
-	Vertex3 target;
+	virtual void LookAt(VertexF tgt);
+protected:
+	PointI lastPos, nextPos;
+	float mPercent; // the percent between lastPos and nextPos
+	PointI target;
 	float angle; // TODO: vertical angle as well?
+	TextureRef texture;
+	// ModelRef model; // TODO
 };
 
 #endif

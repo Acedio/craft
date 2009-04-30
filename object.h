@@ -3,13 +3,16 @@
 
 #include "globals.h"
 
+enum ObjectType { OBJ_UNIT_TEST };
+
 class Object{
 public:
 	Object();
 	virtual ~Object();
 	virtual void Draw() = 0;
-private:
-	Vertex3 pos;
+protected:
+	VertexF pos;
+	ObjectType type;
 };
 
 #endif

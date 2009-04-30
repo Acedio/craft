@@ -16,12 +16,12 @@ using namespace std;
 
 class DisplayException : public exception{
 public:
-	DisplayException(char* err){error = err;}
-	virtual char* what() throw(){
+	DisplayException(const char* err){error = err;}
+	virtual const char* what() throw(){
 		return error;
 	}
 private:
-	char* error;
+	const char* error;
 };
 
 class Display{

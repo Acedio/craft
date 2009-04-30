@@ -48,8 +48,9 @@ TextureManager::~TextureManager(){
 
 TextureRef TextureManager::LoadTexture(string filename){
 	TextureRef ref;
-	if(filenames.find(filename) != filenames.end()){ // if we already have a reference to this texture, return the ref
-		ref = filenames[filename];
+	map<string,TextureRef>::iterator fileref = filenames.find(filename);
+	if(fileref != filenames.end()){ // if we already have a reference to this texture, return the ref
+		ref = fileref->second;
 		refcounts[ref] += 1;
 	} else { // otherwise we should load it
 		SDL_Surface *surface;
@@ -111,10 +112,11 @@ TextureRef TextureManager::LoadTexture(string filename){
 }
 
 void TextureManager::UnloadTexture(TextureRef ref){
-	if(ref != 0 && refcounts.find(ref) != refcounts.end()){ // if it's not the default texture and the reference exists in our store
-		refcounts[ref] -= 1;
-		if(refcounts[ref] <= 0){ // if the texture is no longer being used by any objects, so we can really remove it
-			refcounts.erase(ref);
+	map<TextureRef,int>::iterator refcount;
+	if(ref != 0 && (refcount = refcounts.find(ref)) != refcounts.end()){ // if it's not the default texture and the reference exists in our store
+		refcount->second -= 1;
+		if(refcount->second <= 0){ // if the texture is no longer being used by any objects, so we can really remove it
+			refcounts.erase(refcount);
 			textures.erase(ref);
 			for(map<string,TextureRef>::iterator i = filenames.begin(); i != filenames.end(); ++i){
 				if(i->second == ref){

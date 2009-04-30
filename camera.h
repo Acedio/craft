@@ -7,12 +7,14 @@
 class Camera{
 public:
 	Camera();
-	Camera(Vertex3 position);
+	Camera(VertexF position);
 	~Camera();
-	void LookAt(Vertex3 tgt);
+	void LookAt(VertexF tgt);
 	void LookAt(Object *tgt);
+	void MoveTo(VertexF tgt);
+	void LookThrough(); // I know, it's corny ;D
 private:
-	Vertex3 pos;
+	VertexF pos;
 };
 
 #endif

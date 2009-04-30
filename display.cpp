@@ -15,6 +15,7 @@ Display::Display(int width, int height, int bitsperpixel) throw (DisplayExceptio
 	SDL_Init(SDL_INIT_EVERYTHING);
 	screen = SDL_SetVideoMode(w, h, bpp, SDL_OPENGL);
 	if(screen == NULL){
+		SDL_Quit();
 		throw DisplayException(SDL_GetError());
 	}
 	SDL_WM_SetCaption("Craft", NULL);

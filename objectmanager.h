@@ -14,8 +14,11 @@ public:
 	~ObjectManager();
 
 	ObjectRef Add(Object* obj);
+	void AddRef(ObjectRef ref);
+	void RemoveRef(ObjectRef ref);
 private:
 	map<ObjectRef,Object*> objects;
+	map<ObjectRef,int> refcounts;
 	int next_unused_ref;
 };
 
