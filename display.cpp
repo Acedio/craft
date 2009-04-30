@@ -2,6 +2,13 @@
 #include <string>
 using namespace std;
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
+#include <GL/glew.h>
+#include <GL/gl.h>
+#include <GL/glu.h>
 #include <SDL/SDL.h>
 
 #include "display.h"
@@ -22,6 +29,10 @@ Display::Display(int width, int height, int bitsperpixel) throw (DisplayExceptio
 
 	// Initialize OpenGL
 	glClearColor(0,0,0,1);
+
+	glEnable(GL_DEPTH_TEST);
+
+	glShadeModel(GL_SMOOTH);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();

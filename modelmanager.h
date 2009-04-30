@@ -7,6 +7,7 @@
 using namespace std;
 
 #include "globals.h"
+#include "texturemanager.h"
 
 struct Triangle{
 	int v[3];
@@ -24,6 +25,8 @@ private:
 	vector<PointF> tex_coords;
 	vector<VertexF> normals;
 	vector<Triangle> triangles;
+	bool textured;
+	TextureRef texture;
 	friend class Model;
 };
 
@@ -33,17 +36,20 @@ class Model{
 public:
 	~Model();
 	void Draw();
-	void Load(const char* filename);
+	int Load(string filename);
 private:
 	vector<ModelPiece*> pieces;
 };
 
 class ModelManager{
 public:
-	void Load(const char* filename);
+	ModelManager();
+	~ModelManager();
+	ModelRef LoadModel(string filename);
 private:
 	map<ModelRef,Model*> models;
 	map<string,ModelRef> filenames;
+	ModelRef next_unused_ref;
 };
 
 #endif

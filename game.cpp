@@ -17,6 +17,7 @@ using namespace std;
 #include "display.h"
 #include "input.h"
 #include "camera.h"
+#include "modelmanager.h"
 
 Game::Game() throw(GameInitException){
 	try{
@@ -52,15 +53,24 @@ Game::~Game(){
 
 void Game::Run(){
 	glEnable(GL_TEXTURE_2D);
+	glEnable(GL_LIGHTING);
+	glEnable(GL_LIGHT0);
+	GLfloat p[4] = {0,0,10,1};
+	glLightfv(GL_LIGHT0, GL_POSITION, p);
 
-	TextureRef test = textureManager->LoadTexture("test.png");
+	TextureRef test = textureManager->LoadTexture("bell.png");
+
+	Model m;
+	if(m.Load("saturn.obj") < 0){
+		return;
+	}
 
 	float theta = 0;
 
 	VertexF camPos;
-	camPos.x = 5*cos(theta);
-	camPos.y = 2.5*sin(2*theta);
-	camPos.z = 15;
+	camPos.x = 1*cos(theta);
+	camPos.y = .5*sin(2*theta);
+	camPos.z = 3;
 
 	Uint32 ticks = SDL_GetTicks();
 	int frames = 0;
@@ -68,14 +78,15 @@ void Game::Run(){
 	while(!input->WindowClosed()){
 		input->ProcessInput();
 		theta += .001;
-		camPos.x = 5*cos(theta);
-		camPos.y = 2.5*sin(2*theta);
+		camPos.x = 1*cos(theta);
+		camPos.y = .5*sin(2*theta);
 		camera->MoveTo(camPos);
 		camera->LookThrough();
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glColor3f(1,1,1);
 		textureManager->BindTexture(test);
-		glBegin(GL_QUADS);
+		/*glBegin(GL_QUADS);
+			glNormal3f(0,0,1);
 			glTexCoord2f(0,0);
 			glVertex3f(-1,-1,0);
 			glTexCoord2f(1,0);
@@ -84,7 +95,13 @@ void Game::Run(){
 			glVertex3f(1,1,0);
 			glTexCoord2f(0,1);
 			glVertex3f(-1,1,0);
-		glEnd();
+		glEnd();*/
+
+		glRotatef(90*sin(theta),1,0,0);
+		glRotatef(90*cos(theta),0,1,0);
+		//glDisable(GL_TEXTURE_2D);
+		m.Draw();
+		//glEnable(GL_TEXTURE_2D);
 
 		SDL_GL_SwapBuffers();
 

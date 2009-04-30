@@ -10,7 +10,7 @@ craft: $(OBJ)
 
 craft.o: craft.cpp game.h
 
-game.o: game.cpp game.h texturemanager.h object.h unit.h globals.h
+game.o: game.cpp game.h texturemanager.h object.h unit.h globals.h modelmanager.h
 
 texturemanager.o: texturemanager.cpp texturemanager.h
 
