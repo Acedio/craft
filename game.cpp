@@ -28,6 +28,7 @@ Game::Game() throw(GameInitException){
 		throw GameInitException(s); // don't run the game!
 	}
 	textureManager = new TextureManager();
+	modelManager = new ModelManager();
 	input = new Input();
 	VertexF camPos;
 	camPos.x = 0;
@@ -42,6 +43,9 @@ Game::~Game(){
 	}
 	if(textureManager != NULL){
 		delete textureManager;
+	}
+	if(modelManager != NULL){
+		delete modelManager;
 	}
 	if(input != NULL){
 		delete input;
@@ -58,12 +62,8 @@ void Game::Run(){
 	GLfloat p[4] = {0,0,10,1};
 	glLightfv(GL_LIGHT0, GL_POSITION, p);
 
-	TextureRef test = textureManager->LoadTexture("bell.png");
-
-	Model m;
-	if(m.Load("saturn.obj") < 0){
-		return;
-	}
+	ModelRef m;
+	m = modelManager->LoadModel("saturn.obj",textureManager);
 
 	float theta = 0;
 
@@ -84,24 +84,11 @@ void Game::Run(){
 		camera->LookThrough();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glColor3f(1,1,1);
-		textureManager->BindTexture(test);
-		/*glBegin(GL_QUADS);
-			glNormal3f(0,0,1);
-			glTexCoord2f(0,0);
-			glVertex3f(-1,-1,0);
-			glTexCoord2f(1,0);
-			glVertex3f(1,-1,0);
-			glTexCoord2f(1,1);
-			glVertex3f(1,1,0);
-			glTexCoord2f(0,1);
-			glVertex3f(-1,1,0);
-		glEnd();*/
 
 		glRotatef(90*sin(theta),1,0,0);
 		glRotatef(90*cos(theta),0,1,0);
-		//glDisable(GL_TEXTURE_2D);
-		m.Draw();
-		//glEnable(GL_TEXTURE_2D);
+
+		modelManager->DrawModel(m,textureManager);
 
 		SDL_GL_SwapBuffers();
 

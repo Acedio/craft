@@ -5,6 +5,7 @@
 #include "display.h"
 #include "input.h"
 #include "camera.h"
+#include "modelmanager.h"
 
 class GameInitException : public exception{
 public:
@@ -26,6 +27,7 @@ private:
 	Display *display;
 	Input *input;
 	TextureManager *textureManager;
+	ModelManager *modelManager;
 	Camera *camera;
 };
 

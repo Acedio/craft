@@ -15,29 +15,19 @@ struct Triangle{
 	int vn[3];
 };
 
-class ModelPiece{
-public:
-	ModelPiece(string n);
-	void Draw();
-private:
+struct ModelPiece{
 	string name;
-	vector<VertexF> vertices;
-	vector<PointF> tex_coords;
-	vector<VertexF> normals;
 	vector<Triangle> triangles;
 	bool textured;
 	TextureRef texture;
-	friend class Model;
 };
 
 typedef unsigned int ModelRef;
 
-class Model{
-public:
-	~Model();
-	void Draw();
-	int Load(string filename);
-private:
+struct Model{
+	vector<VertexF> vertices;
+	vector<PointF> tex_coords;
+	vector<VertexF> normals;
 	vector<ModelPiece*> pieces;
 };
 
@@ -45,7 +35,9 @@ class ModelManager{
 public:
 	ModelManager();
 	~ModelManager();
-	ModelRef LoadModel(string filename);
+	ModelRef LoadModel(string filename, TextureManager* textureManager);
+	void UnloadModel(ModelRef ref);
+	void DrawModel(ModelRef ref, TextureManager* textureManager);
 private:
 	map<ModelRef,Model*> models;
 	map<string,ModelRef> filenames;
