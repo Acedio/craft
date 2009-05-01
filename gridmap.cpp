@@ -1,7 +1,7 @@
 #include "gridmap.h"
 #include "objectmanager.h"
 
-GridMap::GridMap(int w, int h, int def = 0){
+GridMap::GridMap(int w, int h, int def){
 	object_map = new ObjectRef[w*h];
 	for(int i = 0; i < w*h; i++){
 		object_map[i] = def;
