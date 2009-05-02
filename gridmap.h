@@ -6,9 +6,12 @@
 #include "objectmanager.h"
 #include "globals.h"
 
-struct AStarPoint{
+class AStarPoint{
+public:
+	bool operator==(AStarPoint* b){return (this->point.x == b->point.x) && (this->point.y == b->point.y);}
+	//bool operator<(AStarPoint* b){if(this->point.x == b->point.x) return (this->point.y < b->point.y); else return this->point.x < b->point.x;}
 	PointI point;
-	PointI* parent;
+	AStarPoint* parent;
 	int d,rank;
 };
 
@@ -22,9 +25,12 @@ public:
 	GridMap(int w, int h, ObjectRef def = 0);
 	~GridMap();
 
+	void WriteOut();
+
 	stack<PointI> AStar(PointI start, PointI end);
 private:
 	ObjectRef* object_map;
+	int width,height;
 };
 
 #endif

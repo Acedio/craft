@@ -33,7 +33,7 @@ Game::Game() throw(GameInitException){
 	VertexF camPos;
 	camPos.x = 0;
 	camPos.y = 0;
-	camPos.z = -15;
+	camPos.z = 15;
 	camera = new Camera(camPos);
 }
 
@@ -63,14 +63,14 @@ void Game::Run(){
 	glLightfv(GL_LIGHT0, GL_POSITION, p);
 
 	ModelRef m;
-	m = modelManager->LoadModel("saturn.obj",textureManager);
+	m = modelManager->LoadModel("swordsman.obj",textureManager);
 
 	float theta = 0;
 
 	VertexF camPos;
 	camPos.x = 1*cos(theta);
 	camPos.y = .5*sin(2*theta);
-	camPos.z = 3;
+	camPos.z = 15;
 
 	Uint32 ticks = SDL_GetTicks();
 	int frames = 0;
@@ -84,9 +84,10 @@ void Game::Run(){
 		camera->LookThrough();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glColor3f(1,1,1);
-
-		glRotatef(90*sin(theta),1,0,0);
-		glRotatef(90*cos(theta),0,1,0);
+		
+		glRotatef(90,1,0,0);
+		//glRotatef(90*sin(theta),1,0,0);
+		//glRotatef(90*cos(theta),0,1,0);
 
 		modelManager->DrawModel(m,textureManager);
 
