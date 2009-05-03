@@ -42,6 +42,7 @@ public:
 	void DrawModel(ModelRef ref, TextureManager* textureManager);
 private:
 	vector<ModelPiece*> LoadObj(string filename, Model* model, TextureManager* textureManager);
+	void DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager);
 	map<ModelRef,Model*> models;
 	map<string,ModelRef> filenames;
 	ModelRef next_unused_ref;

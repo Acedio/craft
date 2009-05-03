@@ -4,6 +4,7 @@
 #include "globals.h"
 #include "object.h"
 #include "texturemanager.h"
+#include "modelmanager.h"
 
 class Unit : public Object {
 public:
@@ -19,7 +20,7 @@ protected:
 	PointI target;
 	float angle; // TODO: vertical angle as well?
 	TextureRef texture;
-	// ModelRef model; // TODO
+	ModelRef model;
 };
 
 #endif

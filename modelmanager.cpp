@@ -1,6 +1,7 @@
 #include <fstream>
 #include <vector>
 #include <stack>
+#include <queue>
 #include <sstream>
 #include <string>
 #include <iostream>
@@ -23,9 +24,25 @@ ModelManager::ModelManager(){
 }
 
 ModelManager::~ModelManager(){
-	for(map<ModelRef,Model*>::iterator i = models.begin(); i != models.end(); ++i){
-		assert(i->second != NULL);
-		delete i->second;
+	for(map<ModelRef,Model*>::iterator m = models.begin(); m != models.end(); ++m){
+		if(m->second != NULL){
+			for(vector<ModelPiece*>::iterator piece = m->second->pieces.begin(); piece != m->second->pieces.end(); ++piece){
+				queue<ModelPiece*> pieceQueue;
+				pieceQueue.push(*piece);
+				while(!pieceQueue.empty()){
+					if(pieceQueue.front() != NULL){
+						for(vector<ModelPiece*>::iterator p = (pieceQueue.front())->children.begin(); p != (pieceQueue.front())->children.end(); ++p){
+							pieceQueue.push(*p);
+						}
+						delete pieceQueue.front();
+					} else {
+						cout << "NULL piece in model." << endl;
+					}
+					pieceQueue.pop();
+				}
+			}
+			delete m->second;
+		}
 	}
 }
 
@@ -160,6 +177,9 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 			getline(line,objFile);
 			objPieces = LoadObj(objFile, model, textureManager);
 		} else if(arg == "JOINT"){
+			if(objPieces.empty()){
+				cout << "JOINT found but no pieces exist. Are you missing an OBJ statement?" << endl;
+			}
 			string pieceName;
 			getline(line,pieceName,' ');
 			VertexF joint;
@@ -175,6 +195,9 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 				cout << "Could not find model piece \"" << pieceName << "\". Joint not set." << endl;
 			}
 		} else if(arg == "PIECETREE"){
+			if(objPieces.empty()){
+				cout << "PIECETREE found but no pieces exist. Are you missing an OBJ statement?" << endl;
+			}
 			stack<ModelPiece*> pieceStack;
 			while(!line.eof()){
 				string s;
@@ -183,7 +206,11 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 					if(model->pieces.empty()){ // no pieces defined yet, nothing to push!
 						cout << "No pieces defined, cannot push onto piecetree!" << endl;
 					} else {
-						pieceStack.push(model->pieces.back());
+						if(pieceStack.empty()){
+							pieceStack.push(model->pieces.back());
+						} else {
+							pieceStack.push(pieceStack.top()->children.back());
+						}
 					}
 				} else if(s == "]"){
 					if(pieceStack.empty()){
@@ -192,8 +219,6 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 						pieceStack.pop();
 					}
 				} else {
-					VertexF joint;
-					line >> joint.x >> joint.y >> joint.z;
 					vector<ModelPiece*>::iterator i;
 					for(i = objPieces.begin(); i != objPieces.end(); ++i){
 						if((*i)->name == s){
@@ -251,31 +276,57 @@ void ModelManager::UnloadModel(ModelRef ref){
 	}
 }
 
+void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager){
+	assert(piece != NULL);
+	if(piece->textured){
+		glEnable(GL_TEXTURE_2D);
+		textureManager->BindTexture(piece->texture);
+	} else {
+		glDisable(GL_TEXTURE_2D);
+	}
+	if(piece->name == "RightArm"){
+		glTranslatef(piece->joint.x,piece->joint.y,piece->joint.z);
+		glRotatef(-90,1,0,0);
+		glTranslatef(-piece->joint.x,-piece->joint.y,-piece->joint.z);
+	}
+	if(piece->name == "LeftArm"){
+		glTranslatef(piece->joint.x,piece->joint.y,piece->joint.z);
+		glRotatef(-170,1,0,0);
+		glTranslatef(-piece->joint.x,-piece->joint.y,-piece->joint.z);
+	}
+	glColor3f(1,1,1);
+	glBegin(GL_TRIANGLES);
+	for(vector<Triangle>::iterator tri = piece->triangles.begin(); tri != piece->triangles.end(); tri++){
+		for(int i = 0; i < 3; ++i){
+			if(piece->textured){
+				glTexCoord2f(model->tex_coords[tri->vt[i]].x, model->tex_coords[tri->vt[i]].y);
+			}
+			glNormal3f(model->normals[tri->vn[i]].x, model->normals[tri->vn[i]].y, model->normals[tri->vn[i]].z);
+			glVertex3f(model->vertices[tri->v[i]].x, model->vertices[tri->v[i]].y, model->vertices[tri->v[i]].z);
+		}
+	}
+	glEnd();
+	for(vector<ModelPiece*>::iterator p = piece->children.begin(); p != piece->children.end(); p++){
+		DrawPiece(model,*p,textureManager); // yay recursion :D
+	}
+	if(piece->name == "RightArm"){
+		glTranslatef(piece->joint.x,piece->joint.y,piece->joint.z);
+		glRotatef(90,1,0,0);
+		glTranslatef(-piece->joint.x,-piece->joint.y,-piece->joint.z);
+	}
+	if(piece->name == "LeftArm"){
+		glTranslatef(piece->joint.x,piece->joint.y,piece->joint.z);
+		glRotatef(170,1,0,0);
+		glTranslatef(-piece->joint.x,-piece->joint.y,-piece->joint.z);
+	}
+}
+
 void ModelManager::DrawModel(ModelRef ref, TextureManager* textureManager){
 	map<ModelRef,Model*>::iterator modelIter = models.find(ref);
 	if(modelIter != models.end()){
-		Model* m = modelIter->second;
-		for(vector<ModelPiece*>::iterator pi = m->pieces.begin(); pi != m->pieces.end(); ++pi){
-			ModelPiece* p = *pi;
-			assert(p != NULL);
-			if(p->textured){
-				glEnable(GL_TEXTURE_2D);
-				textureManager->BindTexture(p->texture);
-			} else {
-				glDisable(GL_TEXTURE_2D);
-			}
-			glColor3f(1,1,1);
-			glBegin(GL_TRIANGLES);
-			for(vector<Triangle>::iterator tri = p->triangles.begin(); tri != p->triangles.end(); tri++){
-				for(int i = 0; i < 3; ++i){
-					if(p->textured){
-						glTexCoord2f(m->tex_coords[tri->vt[i]].x, m->tex_coords[tri->vt[i]].y);
-					}
-					glNormal3f(m->normals[tri->vn[i]].x, m->normals[tri->vn[i]].y, m->normals[tri->vn[i]].z);
-					glVertex3f(m->vertices[tri->v[i]].x, m->vertices[tri->v[i]].y, m->vertices[tri->v[i]].z);
-				}
-			}
-			glEnd();
+		Model* model = modelIter->second;
+		for(vector<ModelPiece*>::iterator p = model->pieces.begin(); p != model->pieces.end(); ++p){
+			DrawPiece(model,*p,textureManager);
 		}
 	}
 }

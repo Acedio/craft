@@ -63,7 +63,7 @@ void Game::Run(){
 	glLightfv(GL_LIGHT0, GL_POSITION, p);
 
 	ModelRef joint;
-	joint = modelManager->LoadModel("joint.mdl",textureManager);
+	joint = modelManager->LoadModel("archer.mdl",textureManager);
 
 	float theta = 0;
 
