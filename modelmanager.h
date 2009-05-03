@@ -20,9 +20,9 @@ struct ModelPiece{
 	vector<Triangle> triangles;
 	bool textured;
 	TextureRef texture;
+	vector<ModelPiece*> children;
+	VertexF joint;
 };
-
-typedef unsigned int ModelRef;
 
 struct Model{
 	vector<VertexF> vertices;
@@ -30,6 +30,8 @@ struct Model{
 	vector<VertexF> normals;
 	vector<ModelPiece*> pieces;
 };
+
+typedef unsigned int ModelRef;
 
 class ModelManager{
 public:
@@ -39,6 +41,7 @@ public:
 	void UnloadModel(ModelRef ref);
 	void DrawModel(ModelRef ref, TextureManager* textureManager);
 private:
+	vector<ModelPiece*> LoadObj(string filename, Model* model, TextureManager* textureManager);
 	map<ModelRef,Model*> models;
 	map<string,ModelRef> filenames;
 	ModelRef next_unused_ref;

@@ -62,14 +62,14 @@ void Game::Run(){
 	GLfloat p[4] = {0,0,10,1};
 	glLightfv(GL_LIGHT0, GL_POSITION, p);
 
-	ModelRef m;
-	m = modelManager->LoadModel("swordsman.obj",textureManager);
+	ModelRef joint;
+	joint = modelManager->LoadModel("joint.mdl",textureManager);
 
 	float theta = 0;
 
 	VertexF camPos;
-	camPos.x = 1*cos(theta);
-	camPos.y = .5*sin(2*theta);
+	//camPos.x = 1*cos(theta);
+	//camPos.y = .5*sin(2*theta);
 	camPos.z = 15;
 
 	Uint32 ticks = SDL_GetTicks();
@@ -77,19 +77,19 @@ void Game::Run(){
 
 	while(!input->WindowClosed()){
 		input->ProcessInput();
-		theta += .001;
-		camPos.x = 1*cos(theta);
-		camPos.y = .5*sin(2*theta);
+		theta += .015;
+		//camPos.x = 1*cos(theta);
+		//camPos.y = .5*sin(2*theta);
 		camera->MoveTo(camPos);
 		camera->LookThrough();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glColor3f(1,1,1);
 		
-		glRotatef(90,1,0,0);
 		//glRotatef(90*sin(theta),1,0,0);
 		//glRotatef(90*cos(theta),0,1,0);
+		glRotatef(theta,0,1,0);
 
-		modelManager->DrawModel(m,textureManager);
+		modelManager->DrawModel(joint,textureManager);
 
 		SDL_GL_SwapBuffers();
 

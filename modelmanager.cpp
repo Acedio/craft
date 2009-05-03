@@ -1,5 +1,6 @@
 #include <fstream>
 #include <vector>
+#include <stack>
 #include <sstream>
 #include <string>
 #include <iostream>
@@ -28,14 +29,14 @@ ModelManager::~ModelManager(){
 	}
 }
 
-ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager){
-	Model* model = new Model();
+vector<ModelPiece*> ModelManager::LoadObj(string filename, Model* model, TextureManager* textureManager){
+	vector<ModelPiece*> pieces;
 
 	ifstream fin;
 	fin.open(filename.c_str());
 	if(fin.fail()){
-		cout << "Could not open model file \"" + filename + "\"." << endl;
-		return -1;
+		cout << "Could not open obj file \"" + filename + "\"." << endl;
+		return pieces;
 	}
 	
 	string s;
@@ -51,52 +52,35 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 		if(arg == "#"){
 		} else if(arg == "o"){
 			if(piece != NULL){
-				model->pieces.push_back(piece);
+				pieces.push_back(piece);
 			}
-			string name;
-			getline(line,name,' ');
 			piece = new ModelPiece;
-			piece->name = name;
+			getline(line,piece->name,' ');
 			piece->textured = false;
-			cout << "Loading ModelPiece \"" << name << "\"." << endl;
-		} else if(arg == "v"){
-			if(piece != NULL){
+			VertexF joint;
+			joint.x = joint.y = joint.z = 0;
+			piece->joint = joint;
+			cout << "Loading ModelPiece \"" << piece->name << "\"." << endl;
+		} else if(piece != NULL){ // if we've named a piece we can go on and add stuff to it
+			if(arg == "v"){
 				VertexF v;
 				line >> v.x;
 				line >> v.y;
 				line >> v.z;
 				model->vertices.push_back(v);
-			} else {
-				cout << "Piece accessed before first object named!" << endl;
-				failure = true;
-				break;
-			}
-		} else if(arg == "vt"){
-			if(piece != NULL){
+			} else if(arg == "vt"){
 				piece->textured = true;
 				PointF vt;
 				line >> vt.x;
 				line >> vt.y;
 				model->tex_coords.push_back(vt);
-			} else {
-				cout << "Piece accessed before first object named!" << endl;
-				failure = true;
-				break;
-			}
-		} else if(arg == "vn"){
-			if(piece != NULL){
+			} else if(arg == "vn"){
 				VertexF vn;
 				line >> vn.x;
 				line >> vn.y;
 				line >> vn.z;
 				model->normals.push_back(vn);
-			} else {
-				cout << "Piece accessed before first object named!" << endl;
-				failure = true;
-				break;
-			}
-		} else if(arg == "f"){
-			if(piece != NULL){
+			} else if(arg == "f"){
 				Triangle t;
 				for(int i = 0; i < 3; ++i){ // 3 times for each face (triangle)
 					string temp;
@@ -121,26 +105,119 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 					--t.vn[i];
 				}
 				piece->triangles.push_back(t);
-			} else {
-				cout << "Piece accessed before first object named!" << endl;
-				failure = true; 
-				break;
-			}
-		} else if(arg == "usemtl"){
-			if(piece != NULL){
+			} else if(arg == "usemtl"){
 				string texfile;
 				getline(line,texfile);
 				piece->texture = textureManager->LoadTexture(texfile);
-			} else {
-				cout << "Piece accessed before first object named!" << endl;
-				fin.close();
-				failure = true; 
-				break;
 			}
+		} else { // we aren't creating a new piece and no piece have been created
+			cout << "Piece accessed before first object named!" << endl;
+			failure = true; 
+			break;
 		}
 	}
 	if(piece != NULL){
-		model->pieces.push_back(piece);
+		pieces.push_back(piece); // push back the last piece (as long as we have a piece being defined, that is)
+	}
+
+	fin.close();
+
+	if(failure){
+		cout << "Couldn't load obj file \"" << filename << "\" successfully." << endl;
+		while(!pieces.empty()){
+			if(pieces.back() != NULL){
+				delete pieces.back();
+			}
+			pieces.pop_back();
+		}
+	}
+	return pieces;
+}
+
+ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager){
+	Model* model = new Model();
+
+	ifstream fin;
+	fin.open(filename.c_str());
+	if(fin.fail()){
+		cout << "Could not open model file \"" + filename + "\"." << endl;
+		return -1;
+	}
+	
+	string s;
+
+	bool failure = false;
+
+	vector<ModelPiece*> objPieces; // TODO make me a list!
+
+	while(!getline(fin,s).eof()){
+		stringstream line(s,stringstream::in | stringstream::out);
+		string arg;
+		getline(line,arg,' ');
+		if(arg == "#"){
+		} else if(arg == "OBJ"){
+			string objFile;
+			getline(line,objFile);
+			objPieces = LoadObj(objFile, model, textureManager);
+		} else if(arg == "JOINT"){
+			string pieceName;
+			getline(line,pieceName,' ');
+			VertexF joint;
+			line >> joint.x >> joint.y >> joint.z;
+			vector<ModelPiece*>::iterator i;
+			for(i = objPieces.begin(); i != objPieces.end(); ++i){
+				if((*i)->name == pieceName){
+					(*i)->joint = joint;
+					break;
+				}
+			}
+			if(i == objPieces.end()){
+				cout << "Could not find model piece \"" << pieceName << "\". Joint not set." << endl;
+			}
+		} else if(arg == "PIECETREE"){
+			stack<ModelPiece*> pieceStack;
+			while(!line.eof()){
+				string s;
+				line >> s;
+				if(s == "["){
+					if(model->pieces.empty()){ // no pieces defined yet, nothing to push!
+						cout << "No pieces defined, cannot push onto piecetree!" << endl;
+					} else {
+						pieceStack.push(model->pieces.back());
+					}
+				} else if(s == "]"){
+					if(pieceStack.empty()){
+						cout << "Unexpected ']': piecestack empty." << endl;
+					} else {
+						pieceStack.pop();
+					}
+				} else {
+					VertexF joint;
+					line >> joint.x >> joint.y >> joint.z;
+					vector<ModelPiece*>::iterator i;
+					for(i = objPieces.begin(); i != objPieces.end(); ++i){
+						if((*i)->name == s){
+							break;
+						}
+					}
+					if(i == objPieces.end()){
+						cout << "Could not find model piece \"" << s << "\". Piecetree may be broken." << endl;
+					} else {
+						if(pieceStack.empty()){ // if we're not between [ ], the piece belongs to the "root"
+							model->pieces.push_back(*i);
+						} else { // otherwise it is a child piece
+							pieceStack.top()->children.push_back(*i);
+						}
+						objPieces.erase(i); // no recursive pieces!
+					}
+				}
+			}
+			if(!pieceStack.empty()){
+				cout << "Error: piecestack not empty. Missing ']'?" << endl;
+			}
+		} else {
+			cout << "Unknown argument \"" << arg << "\"." << endl;
+		}
 	}
 
 	fin.close();
@@ -152,7 +229,7 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 		return next_unused_ref - 1;
 	} else {
 		cout << "Couldn't load model \"" << filename << "\" successfully." << endl;
-		return 0;
+		return -1;
 	}
 }
 
