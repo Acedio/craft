@@ -4,10 +4,31 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <list>
 using namespace std;
 
 #include "globals.h"
 #include "texturemanager.h"
+
+struct JointState{
+	float theta, tx, ty, tz;
+};
+
+typedef list<JointState> Frame;
+
+struct Animation{
+	vector<Frame> keyFrames;
+	vector<float> frameDeltas; // these are added to keyframe thetas (keyLength times) to move onto the next state
+	vector<int> keyLengths;
+};
+
+class AnimationInstance{
+public:
+	void NextFrame();
+private:
+	Frame current;
+	Animation* animation;
+};
 
 struct Triangle{
 	int v[3];
@@ -22,6 +43,7 @@ struct ModelPiece{
 	TextureRef texture;
 	vector<ModelPiece*> children;
 	VertexF joint;
+	GLuint displayList;
 };
 
 struct Model{
@@ -29,6 +51,7 @@ struct Model{
 	vector<PointF> tex_coords;
 	vector<VertexF> normals;
 	vector<ModelPiece*> pieces;
+	map<string,Animation*> animations;
 };
 
 typedef unsigned int ModelRef;
@@ -46,6 +69,7 @@ private:
 	map<ModelRef,Model*> models;
 	map<string,ModelRef> filenames;
 	ModelRef next_unused_ref;
+	TextureRef lastTexture;
 };
 
 #endif

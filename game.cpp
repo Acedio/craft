@@ -62,22 +62,22 @@ void Game::Run(){
 	GLfloat p[4] = {0,0,10,1};
 	glLightfv(GL_LIGHT0, GL_POSITION, p);
 
-	ModelRef joint;
-	joint = modelManager->LoadModel("archer.mdl",textureManager);
+	ModelRef archer;
+	archer = modelManager->LoadModel("archer.mdl",textureManager);
 
 	float theta = 0;
 
 	VertexF camPos;
 	//camPos.x = 1*cos(theta);
 	//camPos.y = .5*sin(2*theta);
-	camPos.z = 15;
+	camPos.z = 45;
 
 	Uint32 ticks = SDL_GetTicks();
 	int frames = 0;
 
 	while(!input->WindowClosed()){
 		input->ProcessInput();
-		theta += .015;
+		theta += .15;
 		//camPos.x = 1*cos(theta);
 		//camPos.y = .5*sin(2*theta);
 		camera->MoveTo(camPos);
@@ -85,16 +85,22 @@ void Game::Run(){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glColor3f(1,1,1);
 		
-		//glRotatef(90*sin(theta),1,0,0);
-		//glRotatef(90*cos(theta),0,1,0);
+		glRotatef(90*sin(.01*theta),1,0,0);
+		glRotatef(90*cos(.01*theta),0,1,0);
 		glRotatef(theta,0,1,0);
-
-		modelManager->DrawModel(joint,textureManager);
+		glTranslatef(-20,-5,-20);
+		for(int y = -5; y < 5; y++){
+			for(int x = -5; x < 5; x++){
+				modelManager->DrawModel(archer,textureManager);
+				glTranslatef(4,0,0);
+			}
+			glTranslatef(-40,0,4);
+		}
 
 		SDL_GL_SwapBuffers();
 
 		++frames;
-		if(frames > 5000){
+		if(frames > 500){
 			cout << "FPS: " << (1000*frames)/(SDL_GetTicks() - ticks) << endl;
 			ticks = SDL_GetTicks();
 			frames = 0;

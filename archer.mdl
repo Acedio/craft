@@ -5,6 +5,6 @@ JOINT LeftArm 0.830 3.517 -0.014
 PIECETREE Torso [ Head [ Headband ] LeftArm RightArm [ Bow ] LeftLeg RightLeg Quiver ]
 ANIM walk
 #   FRAMES | TORSO    | HEAD     | HEADBAND | LEFTARM  | RIGHTARM | BOW      | LEFTLEG  | RIGHTLEG | QUIVER
-KEY 400      0  0  0    0  0  0    0  0  0    -30 0  0   30 0  0    0  0  0    40 0  0    -40 0  0   0  0  0
-KEY 400      0  0  0    0  0  0    0  0  0    30 0  0    -30 0  0   0  0  0    -40 0  0   40 0  0    0  0  0
+KEY 400      0  0  0    0  0  0    0  0  0    0 .84 .54  0  0  0    0  0  0    0  0  0    0  0  0    0  0  0
+KEY 400      0  0  0    0  0  0    0  0  0    0 .84 -.54 0  0  0    0  0  0    0  0  0    0  0  0    0  0  0
 # KEY 100      0  0  0    0  0  0    0  0  0    0  0  0    0  0  0    0  0  0    0  0  0    0  0  0    0  0  0

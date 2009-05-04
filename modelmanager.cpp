@@ -77,6 +77,7 @@ vector<ModelPiece*> ModelManager::LoadObj(string filename, Model* model, Texture
 			VertexF joint;
 			joint.x = joint.y = joint.z = 0;
 			piece->joint = joint;
+			piece->displayList = 0;
 			cout << "Loading ModelPiece \"" << piece->name << "\"." << endl;
 		} else if(piece != NULL){ // if we've named a piece we can go on and add stuff to it
 			if(arg == "v"){
@@ -152,113 +153,148 @@ vector<ModelPiece*> ModelManager::LoadObj(string filename, Model* model, Texture
 }
 
 ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager){
-	Model* model = new Model();
-
-	ifstream fin;
-	fin.open(filename.c_str());
-	if(fin.fail()){
-		cout << "Could not open model file \"" + filename + "\"." << endl;
-		return -1;
-	}
-	
-	string s;
-
-	bool failure = false;
-
-	vector<ModelPiece*> objPieces; // TODO make me a list!
-
-	while(!getline(fin,s).eof()){
-		stringstream line(s,stringstream::in | stringstream::out);
-		string arg;
-		getline(line,arg,' ');
-		if(arg == "#"){
-		} else if(arg == "OBJ"){
-			string objFile;
-			getline(line,objFile);
-			objPieces = LoadObj(objFile, model, textureManager);
-		} else if(arg == "JOINT"){
-			if(objPieces.empty()){
-				cout << "JOINT found but no pieces exist. Are you missing an OBJ statement?" << endl;
-			}
-			string pieceName;
-			getline(line,pieceName,' ');
-			VertexF joint;
-			line >> joint.x >> joint.y >> joint.z;
-			vector<ModelPiece*>::iterator i;
-			for(i = objPieces.begin(); i != objPieces.end(); ++i){
-				if((*i)->name == pieceName){
-					(*i)->joint = joint;
-					break;
-				}
-			}
-			if(i == objPieces.end()){
-				cout << "Could not find model piece \"" << pieceName << "\". Joint not set." << endl;
-			}
-		} else if(arg == "PIECETREE"){
-			if(objPieces.empty()){
-				cout << "PIECETREE found but no pieces exist. Are you missing an OBJ statement?" << endl;
-			}
-			stack<ModelPiece*> pieceStack;
-			while(!line.eof()){
-				string s;
-				line >> s;
-				if(s == "["){
-					if(model->pieces.empty()){ // no pieces defined yet, nothing to push!
-						cout << "No pieces defined, cannot push onto piecetree!" << endl;
-					} else {
-						if(pieceStack.empty()){
-							pieceStack.push(model->pieces.back());
-						} else {
-							pieceStack.push(pieceStack.top()->children.back());
-						}
-					}
-				} else if(s == "]"){
-					if(pieceStack.empty()){
-						cout << "Unexpected ']': piecestack empty." << endl;
-					} else {
-						pieceStack.pop();
-					}
-				} else {
-					vector<ModelPiece*>::iterator i;
-					for(i = objPieces.begin(); i != objPieces.end(); ++i){
-						if((*i)->name == s){
-							break;
-						}
-					}
-					if(i == objPieces.end()){
-						cout << "Could not find model piece \"" << s << "\". Piecetree may be broken." << endl;
-					} else {
-						if(pieceStack.empty()){ // if we're not between [ ], the piece belongs to the "root"
-							model->pieces.push_back(*i);
-						} else { // otherwise it is a child piece
-							pieceStack.top()->children.push_back(*i);
-						}
-						objPieces.erase(i); // no recursive pieces!
-					}
-				}
-			}
-			if(!pieceStack.empty()){
-				cout << "Error: piecestack not empty. Missing ']'?" << endl;
-			}
-		} else {
-			cout << "Unknown argument \"" << arg << "\"." << endl;
-		}
-	}
-
-	fin.close();
-
-	if(!failure){ // we loaded the model successfully
-		models[next_unused_ref] = model;
-		filenames[filename] = next_unused_ref;
-		++next_unused_ref;
-		return next_unused_ref - 1;
+	map<string,ModelRef>::iterator f;
+	if((f = filenames.find(filename)) != filenames.end()){
+		return f->second;
 	} else {
-		cout << "Couldn't load model \"" << filename << "\" successfully." << endl;
-		return -1;
+		Model* model = new Model();
+
+		ifstream fin;
+		fin.open(filename.c_str());
+		if(fin.fail()){
+			cout << "Could not open model file \"" + filename + "\"." << endl;
+			return -1;
+		}
+
+		string s;
+
+		bool failure = false;
+
+		vector<ModelPiece*> objPieces; // TODO make me a list!
+
+		string currentAnimation;
+
+		vector<vector<VertexF> > currentAnimationFrames;
+
+		while(!getline(fin,s).eof()){
+			stringstream line(s,stringstream::in | stringstream::out);
+			string arg;
+			getline(line,arg,' ');
+			if(arg == "#"){
+			} else if(arg == "OBJ"){
+				string objFile;
+				getline(line,objFile);
+				objPieces = LoadObj(objFile, model, textureManager);
+			} else if(arg == "JOINT"){
+				if(objPieces.empty()){
+					cout << "JOINT found but no pieces exist. Are you missing an OBJ statement?" << endl;
+				}
+				string pieceName;
+				getline(line,pieceName,' ');
+				VertexF joint;
+				line >> joint.x >> joint.y >> joint.z;
+				vector<ModelPiece*>::iterator i;
+				for(i = objPieces.begin(); i != objPieces.end(); ++i){
+					if((*i)->name == pieceName){
+						(*i)->joint = joint;
+						break;
+					}
+				}
+				if(i == objPieces.end()){
+					cout << "Could not find model piece \"" << pieceName << "\". Joint not set." << endl;
+				}
+			} else if(arg == "PIECETREE"){
+				if(objPieces.empty()){
+					cout << "PIECETREE found but no pieces exist. Are you missing an OBJ statement?" << endl;
+				}
+				stack<ModelPiece*> pieceStack;
+				while(!line.eof()){
+					string s;
+					line >> s;
+					if(s == "["){
+						if(model->pieces.empty()){ // no pieces defined yet, nothing to push!
+							cout << "No pieces defined, cannot push onto piecetree!" << endl;
+						} else {
+							if(pieceStack.empty()){
+								pieceStack.push(model->pieces.back());
+							} else {
+								pieceStack.push(pieceStack.top()->children.back());
+							}
+						}
+					} else if(s == "]"){
+						if(pieceStack.empty()){
+							cout << "Unexpected ']': piecestack empty." << endl;
+						} else {
+							pieceStack.pop();
+						}
+					} else {
+						vector<ModelPiece*>::iterator i;
+						for(i = objPieces.begin(); i != objPieces.end(); ++i){
+							if((*i)->name == s){
+								break;
+							}
+						}
+						if(i == objPieces.end()){
+							cout << "Could not find model piece \"" << s << "\". Piecetree may be broken." << endl;
+						} else {
+							if(pieceStack.empty()){ // if we're not between [ ], the piece belongs to the "root"
+								model->pieces.push_back(*i);
+							} else { // otherwise it is a child piece
+								pieceStack.top()->children.push_back(*i);
+							}
+							objPieces.erase(i); // no recursive pieces!
+						}
+					}
+				}
+				if(!pieceStack.empty()){
+					cout << "Error: piecestack not empty. Missing ']'?" << endl;
+				}
+			} else if(arg == "ANIM"){
+				if(line.eof()){
+					cout << "No animation name specified!" << endl;
+				} else {
+					if(currentAnimation != ""){
+						// TODO do calculations for frame interpolation here (and once afterwards.)
+					}
+					line >> currentAnimation;
+				}
+			} else if(arg == "KEY"){
+				// TODO load all piece normals into keyFrame vectors, then take the cross product of normal n and normal n+1 to get the rotation normal that, along with the initial theta, is stored in Animation.keyFrames
+				// next, divide the angle between n and n+1 by keyLength and store it in frameDeltas. Good luck!
+				if(currentAnimation != ""){
+					int frameLength;
+					line >> frameLength;
+					model->animations[currentAnimation]->keyLengths.push_back(frameLength);
+					vector<VertexF> keyFrame;
+					while(!line.eof()){
+						VertexF v;
+						line >> v.x >> v.y >> v.z;
+						keyFrame.push_back(v);
+					}
+					currentAnimationFrames.push_back(keyFrame);
+				} else {
+					cout << "No current animation: KEY statement before ANIM statement." << endl;
+				}
+			} else {
+				cout << "Unknown argument \"" << arg << "\"." << endl;
+			}
+		}
+
+		fin.close();
+
+		if(!failure){ // we loaded the model successfully
+			models[next_unused_ref] = model;
+			filenames[filename] = next_unused_ref;
+			++next_unused_ref;
+			return next_unused_ref - 1;
+		} else {
+			cout << "Couldn't load model \"" << filename << "\" successfully." << endl;
+			return -1;
+		}
 	}
 }
 
-void ModelManager::UnloadModel(ModelRef ref){
+void ModelManager::UnloadModel(ModelRef ref){ // TODO update me for new hierarchy format
 	map<ModelRef,Model*>::iterator modelIter = models.find(ref);
 	if(modelIter != models.end()){
 		Model* m = modelIter->second;
@@ -278,50 +314,41 @@ void ModelManager::UnloadModel(ModelRef ref){
 
 void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager){
 	assert(piece != NULL);
-	if(piece->textured){
-		glEnable(GL_TEXTURE_2D);
-		textureManager->BindTexture(piece->texture);
-	} else {
-		glDisable(GL_TEXTURE_2D);
-	}
-	if(piece->name == "RightArm"){
-		glTranslatef(piece->joint.x,piece->joint.y,piece->joint.z);
-		glRotatef(-90,1,0,0);
-		glTranslatef(-piece->joint.x,-piece->joint.y,-piece->joint.z);
-	}
-	if(piece->name == "LeftArm"){
-		glTranslatef(piece->joint.x,piece->joint.y,piece->joint.z);
-		glRotatef(-170,1,0,0);
-		glTranslatef(-piece->joint.x,-piece->joint.y,-piece->joint.z);
-	}
-	glColor3f(1,1,1);
-	glBegin(GL_TRIANGLES);
-	for(vector<Triangle>::iterator tri = piece->triangles.begin(); tri != piece->triangles.end(); tri++){
-		for(int i = 0; i < 3; ++i){
-			if(piece->textured){
-				glTexCoord2f(model->tex_coords[tri->vt[i]].x, model->tex_coords[tri->vt[i]].y);
+	if(piece->displayList == 0){ // we haven't created a display list for this piece yet
+		piece->displayList = glGenLists(1);
+		glNewList(piece->displayList,GL_COMPILE_AND_EXECUTE);
+		if(piece->textured){
+			glEnable(GL_TEXTURE_2D);
+			if(piece->texture != lastTexture){
+				//textureManager->BindTexture(piece->texture);
+				lastTexture = piece->texture;
 			}
-			glNormal3f(model->normals[tri->vn[i]].x, model->normals[tri->vn[i]].y, model->normals[tri->vn[i]].z);
-			glVertex3f(model->vertices[tri->v[i]].x, model->vertices[tri->v[i]].y, model->vertices[tri->v[i]].z);
+		} else {
+			glDisable(GL_TEXTURE_2D);
 		}
+		glColor3f(1,1,1);
+		glBegin(GL_TRIANGLES);
+		for(vector<Triangle>::iterator tri = piece->triangles.begin(); tri != piece->triangles.end(); tri++){
+			for(int i = 0; i < 3; ++i){
+				if(piece->textured){
+					glTexCoord2f(model->tex_coords[tri->vt[i]].x, model->tex_coords[tri->vt[i]].y);
+				}
+				glNormal3f(model->normals[tri->vn[i]].x, model->normals[tri->vn[i]].y, model->normals[tri->vn[i]].z);
+				glVertex3f(model->vertices[tri->v[i]].x, model->vertices[tri->v[i]].y, model->vertices[tri->v[i]].z);
+			}
+		}
+		glEnd();
+		glEndList();
+	} else {
+		glCallList(piece->displayList);
 	}
-	glEnd();
 	for(vector<ModelPiece*>::iterator p = piece->children.begin(); p != piece->children.end(); p++){
 		DrawPiece(model,*p,textureManager); // yay recursion :D
-	}
-	if(piece->name == "RightArm"){
-		glTranslatef(piece->joint.x,piece->joint.y,piece->joint.z);
-		glRotatef(90,1,0,0);
-		glTranslatef(-piece->joint.x,-piece->joint.y,-piece->joint.z);
-	}
-	if(piece->name == "LeftArm"){
-		glTranslatef(piece->joint.x,piece->joint.y,piece->joint.z);
-		glRotatef(170,1,0,0);
-		glTranslatef(-piece->joint.x,-piece->joint.y,-piece->joint.z);
 	}
 }
 
 void ModelManager::DrawModel(ModelRef ref, TextureManager* textureManager){
+	lastTexture = -1; // we should always change the texture before drawing
 	map<ModelRef,Model*>::iterator modelIter = models.find(ref);
 	if(modelIter != models.end()){
 		Model* model = modelIter->second;
