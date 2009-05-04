@@ -91,7 +91,7 @@ void Game::Run(){
 		glTranslatef(-20,-5,-20);
 		for(int y = -5; y < 5; y++){
 			for(int x = -5; x < 5; x++){
-				modelManager->DrawModel(archer,textureManager);
+				modelManager->DrawModel(archer,textureManager, NULL, NULL);
 				glTranslatef(4,0,0);
 			}
 			glTranslatef(-40,0,4);
