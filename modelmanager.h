@@ -11,22 +11,25 @@ using namespace std;
 #include "texturemanager.h"
 
 struct JointState{
-	float theta, tx, ty, tz;
+	float theta;
+	VertexF n;
+	JointState* next;
 };
 
-typedef list<JointState> Frame;
-
 struct Animation{
-	vector<Frame> keyFrames;
-	vector<float> frameDeltas; // these are added to keyframe thetas (keyLength times) to move onto the next state
+	vector<JointState*> keyFrames;
+	vector<JointState*> frameDeltas; // these are the rotational velocities that are added to keyframe thetas (keyLength times) to move onto the next state
 	vector<int> keyLengths;
 };
 
 class AnimationInstance{
 public:
+	AnimationInstance(Animation* animation);
 	void NextFrame();
 private:
-	Frame current;
+	unsigned int key;
+	int frame;
+	JointState* currentDelta;
 	Animation* animation;
 };
 
@@ -62,10 +65,11 @@ public:
 	~ModelManager();
 	ModelRef LoadModel(string filename, TextureManager* textureManager);
 	void UnloadModel(ModelRef ref);
-	void DrawModel(ModelRef ref, TextureManager* textureManager);
+	void DrawModel(ModelRef ref, TextureManager* textureManager, JointState* initials, JointState* vels);
 private:
 	vector<ModelPiece*> LoadObj(string filename, Model* model, TextureManager* textureManager);
-	void DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager);
+	void DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, JointState* initials, JointState* vels);
+	Animation* MakeAnimation(vector<vector<VertexF> > frames, vector<int> frameLengths);
 	map<ModelRef,Model*> models;
 	map<string,ModelRef> filenames;
 	ModelRef next_unused_ref;

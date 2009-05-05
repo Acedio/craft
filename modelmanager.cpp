@@ -4,6 +4,7 @@
 #include <queue>
 #include <sstream>
 #include <string>
+#include <cmath>
 #include <iostream>
 #include <cassert>
 using namespace std;
@@ -18,6 +19,18 @@ using namespace std;
 #include "globals.h"
 #include "modelmanager.h"
 #include "texturemanager.h"
+
+AnimationInstance::AnimationInstance(Animation* a){
+	animation = a;
+	key = 0;
+	frame = 0;
+	if(a != NULL){
+		// copy stuff yo
+	}
+}
+
+void AnimationInstance::NextFrame(){
+}
 
 ModelManager::ModelManager(){
 	next_unused_ref = 0;
@@ -152,6 +165,53 @@ vector<ModelPiece*> ModelManager::LoadObj(string filename, Model* model, Texture
 	return pieces;
 }
 
+Animation* ModelManager::MakeAnimation(vector<vector<VertexF> > frames, vector<int> frameLengths){
+	Animation* animation = new Animation;
+	for(unsigned int frame = 0; frame < frames.size(); frame++){
+		if(frames[frame].size() == frames[(frame+1)%frames.size()].size()){
+			JointState *initials = new JointState, *vels = new JointState; // these are fake heads, we'll need to delete these.
+			JointState *initial = initials, *vel = vels;
+			for(unsigned int joint = 0; joint < frames[frame].size(); joint++){
+				VertexF start = frames[frame][joint];
+				VertexF end = frames[(frame+1)%frames.size()][joint];
+				// the normal for all parts is originally 0 -1 0 (straight down), so we need to translate to this frame's initial position
+				initial->next = new JointState;
+				initial = initial->next;
+				initial->n.x = -1*start.z-0;
+				initial->n.y = 0;
+				initial->n.z = 0-start.x*(-1);
+				initial->theta = acos(-1*start.y);
+				// calculate the rotation normal between start and end
+				vel->next = new JointState;
+				vel = vel->next;
+				vel->n.x = start.y*end.z-end.y*start.z;
+				vel->n.y = start.z*end.x-end.z*start.x;
+				vel->n.z = start.x*end.y-end.x*start.y;
+				vel->theta = acos(start.x*end.x+start.y*end.y+start.z*end.z)/frameLengths[frame];
+				cout << vel->theta << " " << vel->n.x << " " << vel->n.y << " " << vel->n.z << "\t\t";
+			}
+			cout << endl;
+			//cap off the lists
+			initial->next = NULL;
+			vel->next = NULL;
+			//remove the false heads
+			JointState *temp;
+			temp = initials;
+			initials = initials->next;
+			delete temp;
+			temp = vels;
+			vels = vels->next;
+			delete temp;
+
+			animation->keyFrames.push_back(initials);
+			animation->frameDeltas.push_back(vels);
+		} else {
+			return NULL;
+		}
+	}
+	return animation;
+}
+
 ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager){
 	map<string,ModelRef>::iterator f;
 	if((f = filenames.find(filename)) != filenames.end()){
@@ -174,7 +234,9 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 
 		string currentAnimation;
 
-		vector<vector<VertexF> > currentAnimationFrames;
+		vector<vector<VertexF> > curFrames;
+		
+		vector<int> curFrameLengths;
 
 		while(!getline(fin,s).eof()){
 			stringstream line(s,stringstream::in | stringstream::out);
@@ -187,7 +249,7 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 				objPieces = LoadObj(objFile, model, textureManager);
 			} else if(arg == "JOINT"){
 				if(objPieces.empty()){
-					cout << "JOINT found but no pieces exist. Are you missing an OBJ statement?" << endl;
+					cout << filename << ": JOINT found but no pieces exist. Are you missing an OBJ statement?" << endl;
 				}
 				string pieceName;
 				getline(line,pieceName,' ');
@@ -201,11 +263,11 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 					}
 				}
 				if(i == objPieces.end()){
-					cout << "Could not find model piece \"" << pieceName << "\". Joint not set." << endl;
+					cout << filename << ": Could not find model piece \"" << pieceName << "\". Joint not set." << endl;
 				}
 			} else if(arg == "PIECETREE"){
 				if(objPieces.empty()){
-					cout << "PIECETREE found but no pieces exist. Are you missing an OBJ statement?" << endl;
+					cout << filename << ": PIECETREE found but no pieces exist. Are you missing an OBJ statement?" << endl;
 				}
 				stack<ModelPiece*> pieceStack;
 				while(!line.eof()){
@@ -213,7 +275,7 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 					line >> s;
 					if(s == "["){
 						if(model->pieces.empty()){ // no pieces defined yet, nothing to push!
-							cout << "No pieces defined, cannot push onto piecetree!" << endl;
+							cout << filename << ": No pieces defined, cannot push onto piecetree!" << endl;
 						} else {
 							if(pieceStack.empty()){
 								pieceStack.push(model->pieces.back());
@@ -223,7 +285,7 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 						}
 					} else if(s == "]"){
 						if(pieceStack.empty()){
-							cout << "Unexpected ']': piecestack empty." << endl;
+							cout << filename << ": Unexpected ']': piecestack empty." << endl;
 						} else {
 							pieceStack.pop();
 						}
@@ -235,7 +297,7 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 							}
 						}
 						if(i == objPieces.end()){
-							cout << "Could not find model piece \"" << s << "\". Piecetree may be broken." << endl;
+							cout << filename << ": Could not find model piece \"" << s << "\". Piecetree may be broken." << endl;
 						} else {
 							if(pieceStack.empty()){ // if we're not between [ ], the piece belongs to the "root"
 								model->pieces.push_back(*i);
@@ -247,16 +309,31 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 					}
 				}
 				if(!pieceStack.empty()){
-					cout << "Error: piecestack not empty. Missing ']'?" << endl;
+					cout << filename << ": Error: piecestack not empty. Missing ']'?" << endl;
 				}
 			} else if(arg == "ANIM"){
 				if(line.eof()){
-					cout << "No animation name specified!" << endl;
+					cout << filename << ": Error: No animation name specified in ANIM statement!" << endl;
 				} else {
 					if(currentAnimation != ""){
 						// TODO do calculations for frame interpolation here (and once afterwards.)
+						model->animations[currentAnimation] = MakeAnimation(curFrames, curFrameLengths);
+						if(model->animations[currentAnimation] == NULL){
+							cout << filename << ": Error making animation \"" << currentAnimation << "\" from given keyframes." << endl;
+							model->animations.erase(currentAnimation);
+						}
+						curFrames.clear();
+						curFrameLengths.clear();
 					}
 					line >> currentAnimation;
+				}
+			} else if(arg == "ENDANIM"){
+				if(currentAnimation != ""){
+					model->animations[currentAnimation] = MakeAnimation(curFrames, curFrameLengths);
+					if(model->animations[currentAnimation] == NULL){
+						cout << filename << ": Error making animation \"" << currentAnimation << "\" from given keyframes." << endl;
+						model->animations.erase(currentAnimation);
+					}
 				}
 			} else if(arg == "KEY"){
 				// TODO load all piece normals into keyFrame vectors, then take the cross product of normal n and normal n+1 to get the rotation normal that, along with the initial theta, is stored in Animation.keyFrames
@@ -264,19 +341,29 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 				if(currentAnimation != ""){
 					int frameLength;
 					line >> frameLength;
-					model->animations[currentAnimation]->keyLengths.push_back(frameLength);
+					curFrameLengths.push_back(frameLength);
 					vector<VertexF> keyFrame;
 					while(!line.eof()){
 						VertexF v;
-						line >> v.x >> v.y >> v.z;
+						line >> v.x;
+						if(!line.eof()){
+							line >> v.y;
+							if(!line.eof()){
+								line >> v.z;
+							} else {
+								cout << filename << ": Error: improper KEY statement." << endl;
+							}
+						} else {
+							cout << filename << ": Error: improper KEY statement." << endl;
+						}
 						keyFrame.push_back(v);
 					}
-					currentAnimationFrames.push_back(keyFrame);
+					curFrames.push_back(keyFrame);
 				} else {
-					cout << "No current animation: KEY statement before ANIM statement." << endl;
+					cout << filename << ": Error: No current animation: KEY statement before ANIM statement." << endl;
 				}
 			} else {
-				cout << "Unknown argument \"" << arg << "\"." << endl;
+				cout << filename << ": Unknown argument \"" << arg << "\"." << endl;
 			}
 		}
 
@@ -312,8 +399,19 @@ void ModelManager::UnloadModel(ModelRef ref){ // TODO update me for new hierarch
 	}
 }
 
-void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager){
+void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, JointState *initials, JointState *vels){
 	assert(piece != NULL);
+	glPushMatrix();
+	if(initials != NULL && vels != NULL){
+		glTranslatef(piece->joint.x, piece->joint.y, piece->joint.z);
+		glRotatef(initials->theta, initials->n.x, initials->n.y, initials->n.z);
+		glRotatef(vels->theta, vels->n.x, vels->n.y, vels->n.z);
+		glTranslatef(-piece->joint.x, -piece->joint.y, -piece->joint.z);
+		if(initials->next != NULL || vels->next != NULL){
+			initials = initials->next;
+			vels = vels->next;
+		}
+	}
 	if(piece->displayList == 0){ // we haven't created a display list for this piece yet
 		piece->displayList = glGenLists(1);
 		glNewList(piece->displayList,GL_COMPILE_AND_EXECUTE);
@@ -343,17 +441,18 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 		glCallList(piece->displayList);
 	}
 	for(vector<ModelPiece*>::iterator p = piece->children.begin(); p != piece->children.end(); p++){
-		DrawPiece(model,*p,textureManager); // yay recursion :D
+		DrawPiece(model,*p,textureManager, initials, vels); // yay recursion :D
 	}
+	glPopMatrix();
 }
 
-void ModelManager::DrawModel(ModelRef ref, TextureManager* textureManager){
+void ModelManager::DrawModel(ModelRef ref, TextureManager* textureManager, JointState *initials, JointState *vels){
 	lastTexture = -1; // we should always change the texture before drawing
 	map<ModelRef,Model*>::iterator modelIter = models.find(ref);
 	if(modelIter != models.end()){
 		Model* model = modelIter->second;
 		for(vector<ModelPiece*>::iterator p = model->pieces.begin(); p != model->pieces.end(); ++p){
-			DrawPiece(model,*p,textureManager);
+			DrawPiece(model,*p,textureManager,initials,vels);
 		}
 	}
 }
