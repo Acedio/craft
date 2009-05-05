@@ -500,7 +500,7 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 			glColor3f(1,1,1);
 		} else {
 			glDisable(GL_TEXTURE_2D);
-			glColor3f(.3,.3,.8);
+			glColor3f(.8,.3,.3);
 		}
 		glBegin(GL_TRIANGLES);
 		for(vector<Triangle>::iterator tri = piece->triangles.begin(); tri != piece->triangles.end(); tri++){

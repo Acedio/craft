@@ -65,9 +65,14 @@ void Game::Run(){
 	glLightfv(GL_LIGHT0, GL_POSITION, p);
 
 	ModelRef archer;
-	archer = modelManager->LoadModel("archer.mdl",textureManager);
+	archer = modelManager->LoadModel("data/units/archer/archer.mdl",textureManager);
 	AnimationInstance archerWalk = modelManager->GetAnimationInstance(archer, "walk");
 	AnimationInstance archerAttack = modelManager->GetAnimationInstance(archer, "attack");
+
+	ModelRef knight;
+	knight = modelManager->LoadModel("data/units/knight/knight.mdl",textureManager);
+	AnimationInstance knightWalk = modelManager->GetAnimationInstance(knight, "walk");
+	AnimationInstance knightAttack = modelManager->GetAnimationInstance(knight, "attack");
 
 	float theta = 0;
 
@@ -81,7 +86,7 @@ void Game::Run(){
 
 	while(!input->WindowClosed()){
 		input->ProcessInput();
-		theta += .5;
+		theta += .05;
 		//camPos.x = 1*cos(theta);
 		//camPos.y = .5*sin(2*theta);
 		camera->MoveTo(camPos);
@@ -89,22 +94,22 @@ void Game::Run(){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glColor3f(1,1,1);
 		
-		glRotatef(90*sin(.01*theta),1,0,0);
-		glRotatef(90*cos(.01*theta),0,1,0);
+		//glRotatef(90*sin(.01*theta),1,0,0);
+		//glRotatef(90*cos(.01*theta),0,1,0);
 		glRotatef(theta,0,1,0);
-		glTranslatef(-40,-5,-40);
-		for(int y = -10; y < 10; y++){
-			for(int x = -10; x < 10; x++){
+		glTranslatef(-20,-5,-20);
+		for(int y = -5; y < 5; y++){
+			for(int x = -5; x < 5; x++){
 				if(x%2){
-					modelManager->DrawModel(archer,textureManager, &archerWalk);
-					archerWalk.NextFrame();
+					modelManager->DrawModel(archer,textureManager, NULL);//&archerWalk);
+					//archerWalk.NextFrame();
 				} else {
-					modelManager->DrawModel(archer,textureManager, &archerAttack);
-					archerAttack.NextFrame();
+					modelManager->DrawModel(knight,textureManager, NULL);//&knightWalk);
+					//knightWalk.NextFrame();
 				}
 				glTranslatef(4,0,0);
 			}
-			glTranslatef(-80,0,4);
+			glTranslatef(-40,0,4);
 		}
 
 		SDL_GL_SwapBuffers();
