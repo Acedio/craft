@@ -125,6 +125,8 @@ vector<ModelPiece*> ModelManager::LoadObj(string filename, Model* model, Texture
 
 	ModelPiece* piece = NULL;
 
+	int triCount = 0;
+
 	while(!getline(fin,s).eof()){
 		stringstream line(s,stringstream::in | stringstream::out);
 		string arg;
@@ -163,6 +165,7 @@ vector<ModelPiece*> ModelManager::LoadObj(string filename, Model* model, Texture
 				model->normals.push_back(vn);
 			} else if(arg == "f"){
 				Triangle t;
+				triCount++;
 				for(int i = 0; i < 3; ++i){ // 3 times for each face (triangle)
 					string temp;
 					stringstream s;
@@ -200,6 +203,8 @@ vector<ModelPiece*> ModelManager::LoadObj(string filename, Model* model, Texture
 	if(piece != NULL){
 		pieces.push_back(piece); // push back the last piece (as long as we have a piece being defined, that is)
 	}
+
+	cout << "TriCount: " << triCount << endl;
 
 	fin.close();
 
@@ -489,13 +494,14 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 		if(piece->textured){
 			glEnable(GL_TEXTURE_2D);
 			if(piece->texture != lastTexture){
-				//textureManager->BindTexture(piece->texture);
+				textureManager->BindTexture(piece->texture);
 				lastTexture = piece->texture;
 			}
+			glColor3f(1,1,1);
 		} else {
 			glDisable(GL_TEXTURE_2D);
+			glColor3f(.3,.3,.8);
 		}
-		glColor3f(1,1,1);
 		glBegin(GL_TRIANGLES);
 		for(vector<Triangle>::iterator tri = piece->triangles.begin(); tri != piece->triangles.end(); tri++){
 			for(int i = 0; i < 3; ++i){

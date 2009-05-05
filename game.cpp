@@ -59,6 +59,8 @@ void Game::Run(){
 	glEnable(GL_TEXTURE_2D);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
+	glEnable(GL_COLOR_MATERIAL);
+	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
 	GLfloat p[4] = {0,0,10,1};
 	glLightfv(GL_LIGHT0, GL_POSITION, p);
 
@@ -79,7 +81,7 @@ void Game::Run(){
 
 	while(!input->WindowClosed()){
 		input->ProcessInput();
-		theta += .15;
+		theta += .5;
 		//camPos.x = 1*cos(theta);
 		//camPos.y = .5*sin(2*theta);
 		camera->MoveTo(camPos);
@@ -90,9 +92,9 @@ void Game::Run(){
 		glRotatef(90*sin(.01*theta),1,0,0);
 		glRotatef(90*cos(.01*theta),0,1,0);
 		glRotatef(theta,0,1,0);
-		glTranslatef(-20,-5,-20);
-		for(int y = -5; y < 5; y++){
-			for(int x = -5; x < 5; x++){
+		glTranslatef(-40,-5,-40);
+		for(int y = -10; y < 10; y++){
+			for(int x = -10; x < 10; x++){
 				if(x%2){
 					modelManager->DrawModel(archer,textureManager, &archerWalk);
 					archerWalk.NextFrame();
@@ -102,7 +104,7 @@ void Game::Run(){
 				}
 				glTranslatef(4,0,0);
 			}
-			glTranslatef(-40,0,4);
+			glTranslatef(-80,0,4);
 		}
 
 		SDL_GL_SwapBuffers();
