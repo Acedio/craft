@@ -519,7 +519,7 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 
 void ModelManager::DrawModel(ModelRef ref, TextureManager *textureManager, AnimationInstance *animationInstance){
 	JointState *initials, *vels;
-	if(animationInstance != NULL){
+	if(animationInstance != NULL && animationInstance->animation != NULL){
 		initials = animationInstance->animation->keyFrames[animationInstance->key];
 		vels = animationInstance->currentDelta;
 	} else {
