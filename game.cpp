@@ -64,6 +64,7 @@ void Game::Run(){
 
 	ModelRef archer;
 	archer = modelManager->LoadModel("archer.mdl",textureManager);
+	AnimationInstance archerWalk = modelManager->GetAnimationInstance(archer, "walk");
 
 	float theta = 0;
 
@@ -89,9 +90,10 @@ void Game::Run(){
 		glRotatef(90*cos(.01*theta),0,1,0);
 		glRotatef(theta,0,1,0);
 		glTranslatef(-20,-5,-20);
-		for(int y = -5; y < 5; y++){
-			for(int x = -5; x < 5; x++){
-				modelManager->DrawModel(archer,textureManager, NULL, NULL);
+		for(int y = -5; y < 4; y++){
+			for(int x = -5; x < 4; x++){
+				modelManager->DrawModel(archer,textureManager, &archerWalk);
+				archerWalk.NextFrame();
 				glTranslatef(4,0,0);
 			}
 			glTranslatef(-40,0,4);

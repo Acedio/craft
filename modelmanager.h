@@ -25,12 +25,14 @@ struct Animation{
 class AnimationInstance{
 public:
 	AnimationInstance(Animation* animation);
+	~AnimationInstance();
 	void NextFrame();
 private:
 	unsigned int key;
 	int frame;
 	JointState* currentDelta;
 	Animation* animation;
+	friend class ModelManager;
 };
 
 struct Triangle{
@@ -65,10 +67,11 @@ public:
 	~ModelManager();
 	ModelRef LoadModel(string filename, TextureManager* textureManager);
 	void UnloadModel(ModelRef ref);
-	void DrawModel(ModelRef ref, TextureManager* textureManager, JointState* initials, JointState* vels);
+	void DrawModel(ModelRef ref, TextureManager* textureManager, AnimationInstance *animationInstance);
+	AnimationInstance GetAnimationInstance(ModelRef modelRef, string animationName);
 private:
 	vector<ModelPiece*> LoadObj(string filename, Model* model, TextureManager* textureManager);
-	void DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, JointState* initials, JointState* vels);
+	void DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, JointState** initials, JointState** vels);
 	Animation* MakeAnimation(vector<vector<VertexF> > frames, vector<int> frameLengths);
 	map<ModelRef,Model*> models;
 	map<string,ModelRef> filenames;

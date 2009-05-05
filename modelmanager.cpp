@@ -24,12 +24,62 @@ AnimationInstance::AnimationInstance(Animation* a){
 	animation = a;
 	key = 0;
 	frame = 0;
+	currentDelta = NULL;
 	if(a != NULL){
-		// copy stuff yo
+		JointState *delta = animation->frameDeltas[frame];
+		JointState *deltaCopy = new JointState;
+		currentDelta = deltaCopy;
+		if(delta != NULL){
+			*deltaCopy = *delta;
+			while(delta->next != NULL){
+				deltaCopy->next = new JointState;
+				deltaCopy = deltaCopy->next;
+				delta = delta->next;
+				*deltaCopy = *delta;
+			}
+			deltaCopy->next = NULL;
+		}
+	}
+}
+
+AnimationInstance::~AnimationInstance(){
+	while(currentDelta != NULL){
+		JointState *temp = currentDelta->next;
+		delete currentDelta;
+		currentDelta = temp;
 	}
 }
 
 void AnimationInstance::NextFrame(){
+	if(animation != NULL){
+		frame++;
+		if(frame > animation->keyLengths[key]){
+			frame = 0;
+			key++;
+			if(key >= animation->keyFrames.size()){
+				key = 0;
+			}
+			// load the new frame deltas
+			JointState *delta = animation->frameDeltas[key];
+			JointState *deltaCopy = currentDelta;
+			while(delta != NULL){
+				deltaCopy->theta = 0;
+				deltaCopy->n.x = delta->n.x;
+				deltaCopy->n.y = delta->n.y;
+				deltaCopy->n.z = delta->n.z;
+				deltaCopy = deltaCopy->next;
+				delta = delta->next;
+			}
+		} else { // otherwise just update the rotation angles
+			JointState *delta = animation->frameDeltas[key];
+			JointState *deltaCopy = currentDelta;
+			while(delta != NULL && deltaCopy != NULL){
+				deltaCopy->theta += delta->theta;
+				deltaCopy = deltaCopy->next;
+				delta = delta->next;
+			}
+		}
+	}
 }
 
 ModelManager::ModelManager(){
@@ -180,17 +230,17 @@ Animation* ModelManager::MakeAnimation(vector<vector<VertexF> > frames, vector<i
 				initial->n.x = -1*start.z-0;
 				initial->n.y = 0;
 				initial->n.z = 0-start.x*(-1);
-				initial->theta = acos(-1*start.y);
+				initial->theta = 180.0*acos(-1*start.y)/3.14159;
 				// calculate the rotation normal between start and end
 				vel->next = new JointState;
 				vel = vel->next;
 				vel->n.x = start.y*end.z-end.y*start.z;
 				vel->n.y = start.z*end.x-end.z*start.x;
 				vel->n.z = start.x*end.y-end.x*start.y;
-				vel->theta = acos(start.x*end.x+start.y*end.y+start.z*end.z)/frameLengths[frame];
-				cout << vel->theta << " " << vel->n.x << " " << vel->n.y << " " << vel->n.z << "\t\t";
+				vel->theta = 180.0*acos(start.x*end.x+start.y*end.y+start.z*end.z)/frameLengths[frame]/3.14159;
+				//cout << vel->theta << " " << vel->n.x << " " << vel->n.y << " " << vel->n.z << "\t\t";
 			}
-			cout << endl;
+			//cout << endl;
 			//cap off the lists
 			initial->next = NULL;
 			vel->next = NULL;
@@ -205,11 +255,28 @@ Animation* ModelManager::MakeAnimation(vector<vector<VertexF> > frames, vector<i
 
 			animation->keyFrames.push_back(initials);
 			animation->frameDeltas.push_back(vels);
+			animation->keyLengths = vector<int>(frameLengths);
 		} else {
 			return NULL;
 		}
 	}
 	return animation;
+}
+
+AnimationInstance ModelManager::GetAnimationInstance(ModelRef modelRef, string animationName){
+	map<ModelRef,Model*>::iterator model = models.find(modelRef);
+	if(model != models.end()){
+		map<string,Animation*>::iterator animation = (model->second)->animations.find(animationName);
+		if(animation != model->second->animations.end()){
+			return AnimationInstance(animation->second);
+		} else {
+			cout << "Can't find animation named \"" << animationName << "\" for model." << endl;
+			return AnimationInstance(NULL);
+		}
+	} else {
+		cout << "Can't find model #" << modelRef << "." << endl;
+		return AnimationInstance(NULL);
+	}
 }
 
 ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager){
@@ -334,6 +401,10 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 						cout << filename << ": Error making animation \"" << currentAnimation << "\" from given keyframes." << endl;
 						model->animations.erase(currentAnimation);
 					}
+					curFrames.clear();
+					curFrameLengths.clear();
+				} else {
+					cout << "Why the early ENDANIM?" << endl;
 				}
 			} else if(arg == "KEY"){
 				// TODO load all piece normals into keyFrame vectors, then take the cross product of normal n and normal n+1 to get the rotation normal that, along with the initial theta, is stored in Animation.keyFrames
@@ -381,7 +452,7 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 	}
 }
 
-void ModelManager::UnloadModel(ModelRef ref){ // TODO update me for new hierarchy format
+void ModelManager::UnloadModel(ModelRef ref){ // TODO update me for new hierarchy format and animations
 	map<ModelRef,Model*>::iterator modelIter = models.find(ref);
 	if(modelIter != models.end()){
 		Model* m = modelIter->second;
@@ -399,17 +470,17 @@ void ModelManager::UnloadModel(ModelRef ref){ // TODO update me for new hierarch
 	}
 }
 
-void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, JointState *initials, JointState *vels){
+void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, JointState **initials, JointState **vels){
 	assert(piece != NULL);
 	glPushMatrix();
-	if(initials != NULL && vels != NULL){
+	if((*initials) != NULL && (*vels) != NULL){
 		glTranslatef(piece->joint.x, piece->joint.y, piece->joint.z);
-		glRotatef(initials->theta, initials->n.x, initials->n.y, initials->n.z);
-		glRotatef(vels->theta, vels->n.x, vels->n.y, vels->n.z);
+		glRotatef((*vels)->theta, (*vels)->n.x, (*vels)->n.y, (*vels)->n.z);
+		glRotatef((*initials)->theta, (*initials)->n.x, (*initials)->n.y, (*initials)->n.z);
 		glTranslatef(-piece->joint.x, -piece->joint.y, -piece->joint.z);
-		if(initials->next != NULL || vels->next != NULL){
-			initials = initials->next;
-			vels = vels->next;
+		if((*initials)->next != NULL || (*vels)->next != NULL){
+			(*initials) = (*initials)->next;
+			(*vels) = (*vels)->next;
 		}
 	}
 	if(piece->displayList == 0){ // we haven't created a display list for this piece yet
@@ -446,13 +517,21 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 	glPopMatrix();
 }
 
-void ModelManager::DrawModel(ModelRef ref, TextureManager* textureManager, JointState *initials, JointState *vels){
+void ModelManager::DrawModel(ModelRef ref, TextureManager *textureManager, AnimationInstance *animationInstance){
+	JointState *initials, *vels;
+	if(animationInstance != NULL){
+		initials = animationInstance->animation->keyFrames[animationInstance->key];
+		vels = animationInstance->currentDelta;
+	} else {
+		initials = NULL;
+		vels = NULL;
+	}
 	lastTexture = -1; // we should always change the texture before drawing
 	map<ModelRef,Model*>::iterator modelIter = models.find(ref);
 	if(modelIter != models.end()){
 		Model* model = modelIter->second;
 		for(vector<ModelPiece*>::iterator p = model->pieces.begin(); p != model->pieces.end(); ++p){
-			DrawPiece(model,*p,textureManager,initials,vels);
+			DrawPiece(model,*p,textureManager,&initials,&vels);
 		}
 	}
 }
