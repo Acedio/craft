@@ -20,6 +20,13 @@ using namespace std;
 #include "modelmanager.h"
 #include "texturemanager.h"
 
+AnimationInstance::AnimationInstance(){
+	animation = NULL;
+	key = 0;
+	frame = 0;
+	currentDelta = NULL;
+}
+
 AnimationInstance::AnimationInstance(Animation* a){
 	animation = a;
 	key = 0;
@@ -87,25 +94,46 @@ ModelManager::ModelManager(){
 }
 
 ModelManager::~ModelManager(){
+	// delete all models
 	for(map<ModelRef,Model*>::iterator m = models.begin(); m != models.end(); ++m){
-		if(m->second != NULL){
-			for(vector<ModelPiece*>::iterator piece = m->second->pieces.begin(); piece != m->second->pieces.end(); ++piece){
-				queue<ModelPiece*> pieceQueue;
-				pieceQueue.push(*piece);
-				while(!pieceQueue.empty()){
-					if(pieceQueue.front() != NULL){
-						for(vector<ModelPiece*>::iterator p = (pieceQueue.front())->children.begin(); p != (pieceQueue.front())->children.end(); ++p){
-							pieceQueue.push(*p);
-						}
-						delete pieceQueue.front();
-					} else {
-						cout << "NULL piece in model." << endl;
+		assert(m->second != NULL);
+		// delete all model pieces of the current model
+		for(vector<ModelPiece*>::iterator piece = m->second->pieces.begin(); piece != m->second->pieces.end(); ++piece){
+			queue<ModelPiece*> pieceQueue;
+			pieceQueue.push(*piece);
+			while(!pieceQueue.empty()){
+				if(pieceQueue.front() != NULL){
+					for(vector<ModelPiece*>::iterator p = (pieceQueue.front())->children.begin(); p != (pieceQueue.front())->children.end(); ++p){
+						pieceQueue.push(*p);
 					}
-					pieceQueue.pop();
+					delete pieceQueue.front();
+				} else {
+					cout << "NULL piece in model." << endl;
+				}
+				pieceQueue.pop();
+			}
+		}
+		// delete all animations of the current model
+		for(map<string,Animation*>::iterator ai = m->second->animations.begin(); ai != m->second->animations.end(); ++ai){
+			assert(ai->second != NULL);
+			for(vector<JointState*>::iterator ji = ai->second->keyFrames.begin(); ji != ai->second->keyFrames.end(); ++ji){
+				JointState* j = *ji;
+				while(j != NULL){
+					JointState* temp = j->next;
+					delete j;
+					j = temp;
 				}
 			}
-			delete m->second;
+			for(vector<JointState*>::iterator ji = ai->second->frameDeltas.begin(); ji != ai->second->frameDeltas.end(); ++ji){
+				JointState* j = *ji;
+				while(j != NULL){
+					JointState* temp = j->next;
+					delete j;
+					j = temp;
+				}
+			}
 		}
+		delete m->second;
 	}
 }
 
@@ -457,24 +485,6 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 	}
 }
 
-void ModelManager::UnloadModel(ModelRef ref){ // TODO update me for new hierarchy format and animations
-	map<ModelRef,Model*>::iterator modelIter = models.find(ref);
-	if(modelIter != models.end()){
-		Model* m = modelIter->second;
-		for(vector<ModelPiece*>::iterator i = m->pieces.begin(); i != m->pieces.end(); ++i){
-			assert(*i != NULL);
-			delete *i;
-		}
-	}
-	models.erase(modelIter);
-	for(map<string,ModelRef>::iterator i = filenames.begin(); i != filenames.end(); ++i){
-		if(i->second == ref){
-			filenames.erase(i);
-			break;
-		}
-	}
-}
-
 void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, JointState **initials, JointState **vels){
 	assert(piece != NULL);
 	glPushMatrix();
@@ -500,7 +510,7 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 			glColor3f(1,1,1);
 		} else {
 			glDisable(GL_TEXTURE_2D);
-			glColor3f(.8,.3,.3);
+			glColor3f(.3,.3,.8);
 		}
 		glBegin(GL_TRIANGLES);
 		for(vector<Triangle>::iterator tri = piece->triangles.begin(); tri != piece->triangles.end(); tri++){

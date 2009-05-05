@@ -2,6 +2,8 @@
 #define _GRIDMAP_H_
 
 #include <list>
+#include <stack>
+using namespace std;
 
 #include "objectmanager.h"
 #include "globals.h"

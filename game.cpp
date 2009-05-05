@@ -64,6 +64,8 @@ void Game::Run(){
 	GLfloat p[4] = {0,0,10,1};
 	glLightfv(GL_LIGHT0, GL_POSITION, p);
 
+	TextureRef bell = textureManager->LoadTexture("bell.png");
+
 	ModelRef archer;
 	archer = modelManager->LoadModel("data/units/archer/archer.mdl",textureManager);
 	AnimationInstance archerWalk = modelManager->GetAnimationInstance(archer, "walk");
@@ -77,8 +79,8 @@ void Game::Run(){
 	float theta = 0;
 
 	VertexF camPos;
-	//camPos.x = 1*cos(theta);
-	//camPos.y = .5*sin(2*theta);
+	camPos.x = 0;// 1*cos(theta);
+	camPos.y = 0;//.5*sin(2*theta);
 	camPos.z = 45;
 
 	Uint32 ticks = SDL_GetTicks();
@@ -94,19 +96,48 @@ void Game::Run(){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glColor3f(1,1,1);
 		
-		//glRotatef(90*sin(.01*theta),1,0,0);
-		//glRotatef(90*cos(.01*theta),0,1,0);
+		glRotatef(90*sin(.01*theta),1,0,0);
+		glRotatef(90*cos(.01*theta),0,1,0);
 		glRotatef(theta,0,1,0);
 		glTranslatef(-20,-5,-20);
+		glEnable(GL_TEXTURE_2D);
+		textureManager->BindTexture(bell);
+		glBegin(GL_QUADS);
+		//glColor3f(.1,.7,.2);
+		glColor3f(1,1,1);
+		glNormal3f(0,1,0);
+		glTexCoord2f(0,0);
+		glVertex3f(-10,0,-10);
+		glTexCoord2f(1,0);
+		glVertex3f(50,0,-10);
+		glTexCoord2f(1,1);
+		glVertex3f(50,0,50);
+		glTexCoord2f(0,1);
+		glVertex3f(-10,0,50);
+		glEnd();
 		for(int y = -5; y < 5; y++){
 			for(int x = -5; x < 5; x++){
-				if(x%2){
-					modelManager->DrawModel(archer,textureManager, NULL);//&archerWalk);
-					//archerWalk.NextFrame();
-				} else {
-					modelManager->DrawModel(knight,textureManager, NULL);//&knightWalk);
-					//knightWalk.NextFrame();
+				glPushMatrix();
+				glRotatef((float)(10*y+x)+10*theta,0,1,0);
+				switch((y+x)&3){
+					case 0:
+						modelManager->DrawModel(archer,textureManager, &archerWalk);
+						break;
+					case 1:
+						modelManager->DrawModel(knight,textureManager, &knightAttack);
+						break;
+					case 2:
+						modelManager->DrawModel(archer,textureManager, &archerAttack);
+						break;
+					case 3: 
+						modelManager->DrawModel(knight,textureManager, &knightWalk);
+						break;
 				}
+				glPopMatrix();
+				archerWalk.NextFrame();
+				knightAttack.NextFrame();
+				archerAttack.NextFrame();
+				knightWalk.NextFrame();
 				glTranslatef(4,0,0);
 			}
 			glTranslatef(-40,0,4);

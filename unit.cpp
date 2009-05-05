@@ -3,15 +3,24 @@
 #include "unit.h"
 
 Unit::Unit(){
+	pos.x = 0;
+	pos.y = 0;
+	mPercent = 0;
 	angle = 0;
-	lastPos.x = 0;
-	lastPos.y = 0;
-	nextPos.x = 0;
-	nextPos.y = 0;
+	target.x = 0;
+	target.y = 0;
+	model = 0;
+	animationName = "stand";
+}
+
+Unit::Unit(PointI p){
+	pos = p;
+	angle = 0;
 	mPercent = 0;
 	target.x = 0;
 	target.y = 0;
-	texture = 0;
+	model = 0;
+	animationName = "stand";
 }
 
 Unit::~Unit(){

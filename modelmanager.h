@@ -24,6 +24,7 @@ struct Animation{
 
 class AnimationInstance{
 public:
+	AnimationInstance();
 	AnimationInstance(Animation* animation);
 	~AnimationInstance();
 	void NextFrame();
@@ -66,7 +67,6 @@ public:
 	ModelManager();
 	~ModelManager();
 	ModelRef LoadModel(string filename, TextureManager* textureManager);
-	void UnloadModel(ModelRef ref);
 	void DrawModel(ModelRef ref, TextureManager* textureManager, AnimationInstance *animationInstance);
 	AnimationInstance GetAnimationInstance(ModelRef modelRef, string animationName);
 private:
