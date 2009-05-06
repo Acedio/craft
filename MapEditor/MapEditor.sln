@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MapEditor", "MapEditor\MapEditor.vcproj", "{BC9EEA80-28FD-4918-86E8-DE26E1262DE7}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BC9EEA80-28FD-4918-86E8-DE26E1262DE7}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BC9EEA80-28FD-4918-86E8-DE26E1262DE7}.Debug|Win32.Build.0 = Debug|Win32
+		{BC9EEA80-28FD-4918-86E8-DE26E1262DE7}.Release|Win32.ActiveCfg = Release|Win32
+		{BC9EEA80-28FD-4918-86E8-DE26E1262DE7}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

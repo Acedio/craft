@@ -1,0 +1,19 @@
+# swordsman model
+OBJ data/units/swordsman/swordsman.obj
+JOINT RIGHTARM -0.830 3.517 -0.014
+JOINT LEFTARM 0.830 3.517 -0.014
+JOINT RIGHTLEG -0.830 2.017 -0.014
+JOINT LEFTLEG 0.830 2.017 -0.014
+JOINT HEAD 0 3.8 0
+PIECETREE BODY [ HEAD [ TC_HELM ] LEFTARM RIGHTARM LEFTLEG RIGHTLEG TC_EMBLEM ]
+ANIM walk
+#   FRAMES | BODY    | HEAD  | TC_HELM    |  LEFTARM  | RIGHTARM | LEFTLEG  | RIGHTLEG | CAPE
+KEY 6000       0 -1  0    0 -1  0  0 -1  0     0 -.7 -.7     0 -.7 .7       0 -.7 .7    0 -.7 -.7    0 -1  0
+KEY 6000       0 -.99 .02    0 -.98 -.05   0 -1 0     0 -.7 .7     0 -.7 -.7       0 -.7 -.7    0 -.7 .7    0 -1  0
+ANIM attack
+KEY 1000       0 -1  0    0 -1  0    0 -1  0    0  0  1    0  0  1        0 -1  0    0 -1  0    0 -1  0
+KEY 500       0 -1  0    0 -1  0     0 -1  0   -.56 0 .82    0  0  1        0 -1  0    0 -1  0    0 -1  0
+KEY 1000       0 -1  0    0 -1  0    0 -1  0    0  0  1    0  0  1       0 -1  0    0 -1  0    0 -1  0
+KEY 500       0 -1  0    0 -1  0    0 -1  0    0 .99 .02    0  0  1        0 -1  0    0 -1  0    0 -1  0
+ENDANIM
+# KEY 100      0  0  0    0  0  0   0  0  0     0  0  0    0  0  0        0  0  0    0  0  0    0  0  0
