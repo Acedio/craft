@@ -169,11 +169,10 @@ void Game::Run(){
 			frameTicks = SDL_GetTicks() - frameTicks;
 			extraTicks -= frameTicks;
 			displayFrames++;
-		}
-
-		if(extraTicks > 0){ // if we STILL have extra time
-			SDL_Delay(extraTicks);
-			extraTicks = 0;
+			if(extraTicks > 0){ // if we STILL have extra time
+				SDL_Delay(extraTicks);
+				extraTicks = 0;
+			}
 		}
 
 		if(gameFrames > 500){
