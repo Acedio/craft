@@ -76,6 +76,11 @@ void Game::Run(){
 	AnimationInstance knightWalk = modelManager->GetAnimationInstance(knight, "walk");
 	AnimationInstance knightAttack = modelManager->GetAnimationInstance(knight, "attack");
 
+	ModelRef swordsman;
+	swordsman = modelManager->LoadModel("data/units/swordsman/swordsman.mdl",textureManager);
+	AnimationInstance swordsmanWalk = modelManager->GetAnimationInstance(swordsman, "walk");
+	AnimationInstance swordsmanAttack = modelManager->GetAnimationInstance(swordsman, "attack");
+
 	float theta = 0;
 
 	VertexF camPos;
@@ -84,72 +89,98 @@ void Game::Run(){
 	camPos.z = 45;
 
 	Uint32 ticks = SDL_GetTicks();
-	int frames = 0;
+
+	int gameFrames = 0;
+	int displayFrames = 0;
+	
+	int mspf = 1000/FPS;
+
+	int extraTicks = 0;
 
 	while(!input->WindowClosed()){
+		Uint32 frameTicks = SDL_GetTicks();
+		
 		input->ProcessInput();
 		theta += .05;
-		//camPos.x = 1*cos(theta);
-		//camPos.y = .5*sin(2*theta);
-		camera->MoveTo(camPos);
-		camera->LookThrough();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glColor3f(1,1,1);
-		
-		glRotatef(90*sin(.01*theta),1,0,0);
-		glRotatef(90*cos(.01*theta),0,1,0);
-		glRotatef(theta,0,1,0);
-		glTranslatef(-20,-5,-20);
-		glEnable(GL_TEXTURE_2D);
-		textureManager->BindTexture(bell);
-		glBegin(GL_QUADS);
-		//glColor3f(.1,.7,.2);
-		glColor3f(1,1,1);
-		glNormal3f(0,1,0);
-		glTexCoord2f(0,0);
-		glVertex3f(-10,0,-10);
-		glTexCoord2f(1,0);
-		glVertex3f(50,0,-10);
-		glTexCoord2f(1,1);
-		glVertex3f(50,0,50);
-		glTexCoord2f(0,1);
-		glVertex3f(-10,0,50);
-		glEnd();
-		for(int y = -5; y < 5; y++){
-			for(int x = -5; x < 5; x++){
-				glPushMatrix();
-				glRotatef((float)(10*y+x)+10*theta,0,1,0);
-				switch((y+x)&3){
-					case 0:
-						modelManager->DrawModel(archer,textureManager, &archerWalk);
-						break;
-					case 1:
-						modelManager->DrawModel(knight,textureManager, &knightAttack);
-						break;
-					case 2:
-						modelManager->DrawModel(archer,textureManager, &archerAttack);
-						break;
-					case 3: 
-						modelManager->DrawModel(knight,textureManager, &knightWalk);
-						break;
+
+		archerAttack.NextFrame();
+		archerWalk.NextFrame();
+		knightAttack.NextFrame();
+		knightWalk.NextFrame();
+		swordsmanAttack.NextFrame();
+		swordsmanWalk.NextFrame();
+
+		++gameFrames;
+
+		frameTicks = SDL_GetTicks() - frameTicks;
+
+		extraTicks += mspf - frameTicks;
+
+		if(extraTicks > 0){ // if we aren't running behind, draw the scene
+			frameTicks = SDL_GetTicks();
+			camera->MoveTo(camPos);
+			camera->LookThrough();
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glColor3f(1,1,1);
+			
+			glRotatef(90*sin(.01*theta),1,0,0);
+			glRotatef(90*cos(.01*theta),0,1,0);
+			glRotatef(theta,0,1,0);
+			glTranslatef(-20,-5,-20);
+			glEnable(GL_TEXTURE_2D);
+			textureManager->BindTexture(bell);
+			glBegin(GL_QUADS);
+			glColor3f(1,1,1);
+			glNormal3f(0,1,0);
+			glTexCoord2f(0,0);
+			glVertex3f(-10,0,-10);
+			glTexCoord2f(1,0);
+			glVertex3f(50,0,-10);
+			glTexCoord2f(1,1);
+			glVertex3f(50,0,50);
+			glTexCoord2f(0,1);
+			glVertex3f(-10,0,50);
+			glEnd();
+			for(int y = -5; y < 5; y++){
+				for(int x = -5; x < 5; x++){
+					glPushMatrix();
+					glRotatef((float)(10*y+x)+10*theta,0,1,0);
+					switch((y+x)&3){
+						case 0:
+							//modelManager->DrawModel(archer,textureManager, &archerWalk);
+							modelManager->DrawModel(swordsman,textureManager, &swordsmanWalk);
+							break;
+						case 1:
+							modelManager->DrawModel(knight,textureManager, &knightAttack);
+							break;
+						case 2:
+							modelManager->DrawModel(archer,textureManager, &archerAttack);
+							break;
+						case 3: 
+							modelManager->DrawModel(knight,textureManager, &knightWalk);
+							break;
+					}
+					glPopMatrix();
+					glTranslatef(4,0,0);
 				}
-				glPopMatrix();
-				archerWalk.NextFrame();
-				knightAttack.NextFrame();
-				archerAttack.NextFrame();
-				knightWalk.NextFrame();
-				glTranslatef(4,0,0);
+				glTranslatef(-40,0,4);
 			}
-			glTranslatef(-40,0,4);
+			SDL_GL_SwapBuffers();
+			frameTicks = SDL_GetTicks() - frameTicks;
+			extraTicks -= frameTicks;
+			displayFrames++;
 		}
 
-		SDL_GL_SwapBuffers();
+		if(extraTicks > 0){ // if we STILL have extra time
+			SDL_Delay(extraTicks);
+			extraTicks = 0;
+		}
 
-		++frames;
-		if(frames > 500){
-			cout << "FPS: " << (1000*frames)/(SDL_GetTicks() - ticks) << endl;
+		if(gameFrames > 500){
+			cout << "Game FPS: " << (1000*gameFrames)/(SDL_GetTicks() - ticks) << " Display FPS: " << (1000*displayFrames)/(SDL_GetTicks() - ticks) << endl;
 			ticks = SDL_GetTicks();
-			frames = 0;
+			gameFrames = 0;
+			displayFrames = 0;
 		}
 	}
 }

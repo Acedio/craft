@@ -3,7 +3,9 @@
 *.ppm
 *.pgm
 vc++/craft/Debug
+vc++/craft/Release
 vc++/craft/*.user
 vc++/Debug
+vc++/Release
 *.suo
 *.ncb

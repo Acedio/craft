@@ -7,6 +7,8 @@
 #include "camera.h"
 #include "modelmanager.h"
 
+const int FPS = 60;
+
 class GameInitException : public exception{
 public:
 	GameInitException(const char* err){error = err;}
