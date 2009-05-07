@@ -1,0 +1,14 @@
+# catapult model
+OBJ data/units/catapult/catapult.obj
+JOINT FRONT 0 1.002 2.61
+JOINT BACK 0 0.99 -2.736
+JOINT ARM 0 1.078 2.536
+PIECETREE BODY [ TC_SPIKES ARM FRONT BACK ]
+ANIM walk
+KEY 30	0 -1 0	0 -1 0	0 -1 0	0 -1 0	0 -1 0
+KEY 30	0 -1 0	0 -1 0	0 -1 0	0 .5 -.866 	0 .5 -.866
+KEY 30	0 -1 0	0 -1 0	0 -1 0	0 .5 .866	0 .5 .866
+ANIM attack
+KEY 10	0 -1 0	0 -1 0	0 -1 0	0 -1 0	0 -1 0
+KEY 150	0 -1 0	0 -1 0	0 -.5 -.866	0 -1 0	0 -1 0
+ENDANIM

@@ -98,7 +98,7 @@ void Game::Run(){
 	int gameFrames = 0;
 	int displayFrames = 0;
 	
-	int mspf = 1000/FPS;
+	int mspf = 1000/60;
 
 	int extraTicks = 0;
 
