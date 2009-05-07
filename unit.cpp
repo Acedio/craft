@@ -11,12 +11,12 @@ Unit::Unit(){
 	target.y = 0;
 	model = 0;
 	animationName = "stand";
-	max_hp;
-	cur_hp;
-	def;
-	atk;
-	mov_speed;
-	atk_speed;
+	max_hp = 0;
+	cur_hp = 0;
+	def = 0;
+	atk = 0;
+	mov_speed = 0;
+	atk_speed = 0;
 }
 
 Unit::Unit(PointI p){
@@ -27,12 +27,12 @@ Unit::Unit(PointI p){
 	target.y = 0;
 	model = 0;
 	animationName = "stand";
-	max_hp;
-	cur_hp;
-	def;
-	atk;
-	mov_speed;
-	atk_speed;
+	max_hp = 0;
+	cur_hp = 0;
+	def = 0;
+	atk = 0;
+	mov_speed = 0;
+	atk_speed = 0;
 }
 
 Unit::~Unit(){

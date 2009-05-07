@@ -46,6 +46,7 @@ struct ModelPiece{
 	string name;
 	vector<Triangle> triangles;
 	bool textured;
+	bool teamColored; // are we coloring this piece the teams color?
 	TextureRef texture;
 	vector<ModelPiece*> children;
 	VertexF joint;

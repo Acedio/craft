@@ -33,7 +33,7 @@ public:
 
 	stack<PointI> AStar(PointI start, PointI end);
 private:
-	ObjectRef** object_map;
+	ObjectRef* object_map;
 	int width,height;
 };
 

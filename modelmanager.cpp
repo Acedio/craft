@@ -166,6 +166,11 @@ vector<ModelPiece*> ModelManager::LoadObj(string filename, Model* model, Texture
 			}
 			piece = new ModelPiece;
 			getline(line,piece->name,' ');
+			if(piece->name.substr(0,3) == "TC_"){
+				piece->teamColored = true;
+			} else {
+				piece->teamColored = false;
+			}
 			piece->textured = false;
 			VertexF joint;
 			joint.x = joint.y = joint.z = 0;
@@ -507,10 +512,13 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 				textureManager->BindTexture(piece->texture);
 				lastTexture = piece->texture;
 			}
-			glColor3f(1,1,1);
 		} else {
 			glDisable(GL_TEXTURE_2D);
+		}
+		if(piece->teamColored){
 			glColor3f(.3,.3,.8);
+		} else {
+			glColor3f(1,1,1);
 		}
 		glBegin(GL_TRIANGLES);
 		for(vector<Triangle>::iterator tri = piece->triangles.begin(); tri != piece->triangles.end(); tri++){

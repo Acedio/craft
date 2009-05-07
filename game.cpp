@@ -81,6 +81,11 @@ void Game::Run(){
 	AnimationInstance swordsmanWalk = modelManager->GetAnimationInstance(swordsman, "walk");
 	AnimationInstance swordsmanAttack = modelManager->GetAnimationInstance(swordsman, "attack");
 
+	ModelRef catapult;
+	catapult = modelManager->LoadModel("data/units/catapult/catapult.mdl",textureManager);
+	AnimationInstance catapultWalk = modelManager->GetAnimationInstance(catapult, "walk");
+	AnimationInstance catapultAttack = modelManager->GetAnimationInstance(catapult, "attack");
+
 	float theta = 0;
 
 	VertexF camPos;
@@ -117,6 +122,8 @@ void Game::Run(){
 		knightWalk.NextFrame();
 		swordsmanAttack.NextFrame();
 		swordsmanWalk.NextFrame();
+		catapultWalk.NextFrame();
+		catapultAttack.NextFrame();
 
 		++gameFrames;
 
@@ -143,11 +150,11 @@ void Game::Run(){
 			glTexCoord2f(0,0);
 			glVertex3f(-10,0,-10);
 			glTexCoord2f(1,0);
-			glVertex3f(50,0,-10);
+			glVertex3f(60,0,-10);
 			glTexCoord2f(1,1);
-			glVertex3f(50,0,50);
+			glVertex3f(60,0,60);
 			glTexCoord2f(0,1);
-			glVertex3f(-10,0,50);
+			glVertex3f(-10,0,60);
 			glEnd();
 			for(int y = -5; y < 5; y++){
 				for(int x = -5; x < 5; x++){
@@ -165,7 +172,7 @@ void Game::Run(){
 							modelManager->DrawModel(archer,textureManager, &archerAttack);
 							break;
 						case 3: 
-							modelManager->DrawModel(knight,textureManager, &knightWalk);
+							modelManager->DrawModel(catapult,textureManager,&catapultAttack);
 							break;
 					}
 					glPopMatrix();

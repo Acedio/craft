@@ -57,22 +57,22 @@ void GridMap::WriteOut(){
 	of.close();
 }
 
-GridMap::LoadMap(string mapname)
+void GridMap::LoadMap(string mapname)
 {
 	fstream mapfile;
-	mapfile.open(mapname , fstream::in);
+	mapfile.open(mapname.c_str(), fstream::in);
 
 	int width, height;
 
 	mapfile >> width;
 	mapfile >> height;
-	
-	object_map = new int* [height];
+
+	delete[] object_map;
+
+	object_map = new ObjectRef[height];
 
 	for (int i = 0; i < height; i++)
 	{
-		object_map[i] = new int [width];
-
 		for (int j = 0; j < width; j++)
 		{
 			string s;
