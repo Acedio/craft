@@ -42,7 +42,6 @@ int main (int argc, char **argv)
 	getline(filestr, temp);
 	filestr >> width;
 	filestr >> height;
-	cout << width << height;
 	getline(filestr, temp);
 	getline(filestr, temp);
 

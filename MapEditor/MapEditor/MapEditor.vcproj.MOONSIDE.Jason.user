@@ -10,7 +10,7 @@
 			>
 			<DebugSettings
 				Command="$(TargetPath)"
-				WorkingDirectory="C:\Documents and Settings\Jason\My Documents\Visual Studio 2008\Projects\MapEditor\Debug"
+				WorkingDirectory="C:\Documents and Settings\Jason\Desktop\craft\data\maps"
 				CommandArguments="map.ppm"
 				Attach="false"
 				DebuggerType="3"

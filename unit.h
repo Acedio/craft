@@ -24,6 +24,12 @@ protected:
 	PointI target;
 	float angle; // TODO: vertical angle as well?
 	ModelRef model;
+	int max_hp;
+	int cur_hp;
+	int def;
+	int atk;
+	int mov_speed;
+	int atk_speed;
 	AnimationInstance animationInstance;
 	string animationName;
 };
