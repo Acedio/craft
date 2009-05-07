@@ -35,6 +35,9 @@ void Unit::Update(){
 Unit::~Unit(){
 }
 
+void Unit::Update(){
+}
+
 void Unit::Draw(){
 }
 

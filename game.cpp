@@ -86,6 +86,11 @@ void Game::Run(){
 	AnimationInstance swordsmanWalk = modelManager->GetAnimationInstance(swordsman, "walk");
 	AnimationInstance swordsmanAttack = modelManager->GetAnimationInstance(swordsman, "attack");
 
+	ModelRef worker;
+	worker = modelManager->LoadModel("data/units/worker/worker.mdl",textureManager);
+	AnimationInstance workerWalk = modelManager->GetAnimationInstance(worker, "walk");
+	AnimationInstance workerAttack = modelManager->GetAnimationInstance(worker, "attack");
+
 	ModelRef catapult;
 	catapult = modelManager->LoadModel("data/units/catapult/catapult.mdl",textureManager);
 	AnimationInstance catapultWalk = modelManager->GetAnimationInstance(catapult, "walk");
