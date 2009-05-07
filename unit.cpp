@@ -1,8 +1,18 @@
 #include "globals.h"
 #include "object.h"
 #include "unit.h"
+#include <ctime>
+#include <cstdlib>
+
+string RandomName()
+{
+	srand(time(NULL));
+
+	return names[rand()%nameCount];
+}
 
 Unit::Unit(int x, int y){
+	name = RandomName();
 	pos.x = x;
 	pos.y = y;
 	angle = 0;

@@ -5,6 +5,7 @@ Object::Object(){
 	pos.x = 0;
 	pos.y = 0;
 	pos.z = 0;
+	expired = false;
 }
 
 Object::~Object(){
