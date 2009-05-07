@@ -4,7 +4,7 @@ ObjectManager::ObjectManager(){
 	next_unused_ref = 0;
 }
 
-ObjectManager::UpdateAll(){
+void ObjectManager::UpdateAll(){
 	for(map<ObjectRef,Object*>::iterator i = objects.begin(); i != objects.end(); ++i){
 		if(i->second != NULL){
 			i->second->Update();
@@ -39,7 +39,7 @@ void ObjectManager::RemoveRef(ObjectRef ref){
 	if(ref != 0 && (refcount = refcounts.find(ref)) != refcounts.end()){
 		refcount->second -= 1;
 		map<ObjectRef, Object*>::iterator obj = objects.find(ref);
-		if(refcount->second <= 0 && obj ->second.expired == true){
+		if(refcount->second <= 0 && obj ->second->expired == true){
 			refcounts.erase(refcount);
 			objects.erase(ref);
 		}

@@ -32,6 +32,9 @@ Unit::Unit(int x, int y){
 Unit::~Unit(){
 }
 
+void Unit::Update(){
+}
+
 void Unit::Draw(){
 }
 

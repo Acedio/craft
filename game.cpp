@@ -81,6 +81,11 @@ void Game::Run(){
 	AnimationInstance swordsmanWalk = modelManager->GetAnimationInstance(swordsman, "walk");
 	AnimationInstance swordsmanAttack = modelManager->GetAnimationInstance(swordsman, "attack");
 
+	ModelRef worker;
+	worker = modelManager->LoadModel("data/units/worker/worker.mdl",textureManager);
+	AnimationInstance workerWalk = modelManager->GetAnimationInstance(worker, "walk");
+	AnimationInstance workerAttack = modelManager->GetAnimationInstance(worker, "attack");
+
 	ModelRef catapult;
 	catapult = modelManager->LoadModel("data/units/catapult/catapult.mdl",textureManager);
 	AnimationInstance catapultWalk = modelManager->GetAnimationInstance(catapult, "walk");
@@ -122,6 +127,8 @@ void Game::Run(){
 		knightWalk.NextFrame();
 		swordsmanAttack.NextFrame();
 		swordsmanWalk.NextFrame();
+		workerWalk.NextFrame();
+		workerAttack.NextFrame();
 		catapultWalk.NextFrame();
 		catapultAttack.NextFrame();
 
@@ -162,17 +169,16 @@ void Game::Run(){
 					glRotatef((float)(10*y+x)+10*theta,0,1,0);
 					switch((y+x)&3){
 						case 0:
-							//modelManager->DrawModel(archer,textureManager, &archerWalk);
 							modelManager->DrawModel(swordsman,textureManager, &swordsmanWalk);
 							break;
 						case 1:
-							modelManager->DrawModel(knight,textureManager, &knightAttack);
+							modelManager->DrawModel(swordsman,textureManager, &swordsmanAttack);
 							break;
 						case 2:
-							modelManager->DrawModel(archer,textureManager, &archerAttack);
+							modelManager->DrawModel(worker,textureManager,&workerAttack);
 							break;
 						case 3: 
-							modelManager->DrawModel(catapult,textureManager,&catapultAttack);
+							modelManager->DrawModel(worker,textureManager,&workerWalk);
 							break;
 					}
 					glPopMatrix();
