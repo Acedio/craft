@@ -2,6 +2,7 @@
 #define _INPUT_H_
 
 #include <SDL/SDL.h>
+#include "globals.h"
 
 enum KeyName {/* The keyboard syms have been cleverly chosen to map to ASCII */
 	KEY_UNKNOWN		=	SDLK_UNKNOWN,
@@ -261,24 +262,17 @@ enum KeyName {/* The keyboard syms have been cleverly chosen to map to ASCII */
 
 enum KeyState {KS_UP, KS_PRESSED, KS_DOWN, KS_RELEASED};
 
-class Keyboard{
-public:
-	Keyboard();
-	~Keyboard();
-
-	void UpdateKeys(); // changes KS_PRESSED to KS_DOWN and KS_RELEASED to KS_UP
-	void UpdateKey(KeyName key, KeyState state); // update a single key
-private:
-	KeyState *keys;
-	int keyCount;
+enum ButtonName {
+		BUTTON_LEFT = SDL_BUTTON_LEFT,
+		BUTTON_MIDDLE = SDL_BUTTON_MIDDLE,
+		BUTTON_RIGHT = SDL_BUTTON_RIGHT,
+		BUTTON_WHEELUP = SDL_BUTTON_WHEELUP,
+		BUTTON_WHEELDOWN = SDL_BUTTON_WHEELDOWN
 };
 
-class Mouse{
-public:
-	Mouse();
-	~Mouse();
-private:
-};
+enum ButtonState {BS_UP, BS_PRESSED, BS_DOWN, BS_RELEASED};
+
+const int MOUSE_BUTTONS = 6;
 
 class Input{
 public:
@@ -287,11 +281,24 @@ public:
 
 	void ProcessInput();
 
-	bool WindowClosed();
+	KeyState GetKeyState(KeyName name);
+	ButtonState GetMouseButtonState(ButtonName name);
+	PointI GetMousePos();
 
-	Keyboard keyboard;
-	Mouse mouse;
+	bool WindowClosed();
 private:
+	void UpdateKeys(); // changes KS_PRESSED to KS_DOWN and KS_RELEASED to KS_UP
+	void UpdateKey(KeyName key, KeyState state); // update a single key
+
+	void UpdateMouse();
+	void UpdateMouseButton(ButtonName button, ButtonState state);
+	void UpdateMousePos(int x, int y);
+
+	KeyState *keys;
+	int keyCount;
+
+	struct { PointI pos; ButtonState buttons[MOUSE_BUTTONS]; } mouse;
+
 	bool windowClosed;
 };
 
