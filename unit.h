@@ -89,6 +89,7 @@ public:
 	virtual void MoveTo(VertexF tgt);
 	virtual void LookAt(Object* tgt);
 	virtual void LookAt(VertexF tgt);
+	virtual void Update();
 protected:
 	PointI pos;
 	float mPercent; // the percent between lastPos and nextPos

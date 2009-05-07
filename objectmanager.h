@@ -16,6 +16,7 @@ public:
 	ObjectRef Add(Object* obj);
 	void AddRef(ObjectRef ref);
 	void RemoveRef(ObjectRef ref);
+	void UpdateAll();
 private:
 	map<ObjectRef,Object*> objects;
 	map<ObjectRef,int> refcounts;

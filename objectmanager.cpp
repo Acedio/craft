@@ -4,6 +4,14 @@ ObjectManager::ObjectManager(){
 	next_unused_ref = 1;
 }
 
+ObjectManager::UpdateAll(){
+	for(map<ObjectRef,Object*>::iterator i = objects.begin(); i != objects.end(); ++i){
+		if(i->second != NULL){
+			i->second->Update();
+		}
+	}
+}
+
 ObjectManager::~ObjectManager(){
 	for(map<ObjectRef,Object*>::iterator i = objects.begin(); i != objects.end(); ++i){
 		if(i->second != NULL){
