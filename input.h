@@ -260,7 +260,7 @@ enum KeyName {/* The keyboard syms have been cleverly chosen to map to ASCII */
 	KEY_LAST		=	SDLK_LAST
 };
 
-enum KeyState {KS_UP, KS_PRESSED, KS_DOWN, KS_RELEASED};
+enum KeyState {KS_UP = 0, KS_PRESSED = 1, KS_DOWN = 2, KS_RELEASED = 3};
 
 enum ButtonName {
 		BUTTON_LEFT = SDL_BUTTON_LEFT,
@@ -270,7 +270,7 @@ enum ButtonName {
 		BUTTON_WHEELDOWN = SDL_BUTTON_WHEELDOWN
 };
 
-enum ButtonState {BS_UP, BS_PRESSED, BS_DOWN, BS_RELEASED};
+enum ButtonState {BS_UP = 0, BS_PRESSED = 1, BS_DOWN = 2, BS_RELEASED = 3};
 
 const int MOUSE_BUTTONS = 6;
 

@@ -18,6 +18,7 @@ using namespace std;
 #include "input.h"
 #include "camera.h"
 #include "modelmanager.h"
+#include "gridmap.h"
 
 Game::Game() throw(GameInitException){
 	try{
@@ -35,9 +36,13 @@ Game::Game() throw(GameInitException){
 	camPos.y = 0;
 	camPos.z = 15;
 	camera = new Camera(camPos);
+	gridMap = new GridMap(30,30,0);
 }
 
 Game::~Game(){
+	if(gridMap != NULL){
+		delete gridMap;
+	}
 	if(textureManager != NULL){
 		delete textureManager;
 	}
@@ -86,12 +91,15 @@ void Game::Run(){
 	AnimationInstance catapultWalk = modelManager->GetAnimationInstance(catapult, "walk");
 	AnimationInstance catapultAttack = modelManager->GetAnimationInstance(catapult, "attack");
 
-	float theta = 0;
-
 	VertexF camPos;
-	camPos.x = 0;// 1*cos(theta);
-	camPos.y = 0;//.5*sin(2*theta);
-	camPos.z = 45;
+	camPos.x = 0;
+	camPos.y = 30;
+	camPos.z = 55;
+
+	VertexF camDir;
+	camDir.x = 0;
+	camDir.y = 0;
+	camDir.z = 1;
 
 	Uint32 ticks = SDL_GetTicks();
 
@@ -106,7 +114,11 @@ void Game::Run(){
 
 	while(running){
 		Uint32 frameTicks = SDL_GetTicks();
-		
+
+		///////////////////////////////
+		// START MAIN GAME LOOP CODE //
+		//\/\/\/\/\/\/\/\/\/\/\/\/\/\//
+
 		input->ProcessInput();
 		if(input->WindowClosed()){
 			running = false;
@@ -114,16 +126,29 @@ void Game::Run(){
 		if(input->GetKeyState(KEY_ESCAPE) == KS_DOWN){
 			running = false;
 		}
-		theta += .15;
+		
+		if(input->GetKeyState(KEY_w) == KS_DOWN){
+			camPos.z -= .5;
+		}
+		if(input->GetKeyState(KEY_s) == KS_DOWN){
+			camPos.z += .5;
+		}
+		if(input->GetKeyState(KEY_a) == KS_DOWN){
+			camPos.x -= .5;
+		}
+		if(input->GetKeyState(KEY_d) == KS_DOWN){
+			camPos.x += .5;
+		}
+		if(input->GetKeyState(KEY_DOWN)){
+			camDir.y -= .01;
+		}
+		if(input->GetKeyState(KEY_UP)){
+			camDir.y += .01;
+		}
 
-		archerAttack.NextFrame();
-		archerWalk.NextFrame();
-		knightAttack.NextFrame();
-		knightWalk.NextFrame();
-		swordsmanAttack.NextFrame();
-		swordsmanWalk.NextFrame();
-		catapultWalk.NextFrame();
-		catapultAttack.NextFrame();
+		//\/\/\/\/\/\/\/\/\/\/\/\/\//
+		// END MAIN GAME LOOP CODE //
+		/////////////////////////////
 
 		++gameFrames;
 
@@ -133,60 +158,49 @@ void Game::Run(){
 
 		if(extraTicks > 0){ // if we aren't running behind, draw the scene
 			frameTicks = SDL_GetTicks();
-			camera->MoveTo(camPos);
-			camera->LookThrough();
+
+			////////////////////////
+			// START DISPLAY CODE //
+			//\/\/\/\/\/\/\/\/\/\///
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glColor3f(1,1,1);
-			
-			glRotatef(90*sin(.01*theta),1,0,0);
-			glRotatef(90*cos(.01*theta),0,1,0);
-			glRotatef(.25*theta,0,1,0);
-			glTranslatef(-25,-5,-25);
+
+			camera->MoveTo(camPos);
+			camera->LookTo(camDir);
+			camera->LookThrough();
+
 			glEnable(GL_TEXTURE_2D);
 			textureManager->BindTexture(bell);
+
 			glBegin(GL_QUADS);
-			glColor3f(1,1,1);
-			glNormal3f(0,1,0);
-			glTexCoord2f(0,0);
-			glVertex3f(-10,0,-10);
-			glTexCoord2f(1,0);
-			glVertex3f(60,0,-10);
-			glTexCoord2f(1,1);
-			glVertex3f(60,0,60);
-			glTexCoord2f(0,1);
-			glVertex3f(-10,0,60);
+				glColor3f(1,1,1);
+
+				glNormal3f(0,1,0);
+
+				glTexCoord2f(0,1);
+				glVertex3f(-30,0,-30);
+
+				glTexCoord2f(1,1);
+				glVertex3f(30,0,-30);
+
+				glTexCoord2f(1,0);
+				glVertex3f(30,0,30);
+
+				glTexCoord2f(0,0);
+				glVertex3f(-30,0,30);
 			glEnd();
-			for(int y = -5; y < 5; y++){
-				for(int x = -5; x < 5; x++){
-					glPushMatrix();
-					glRotatef((float)(10*y+x)+10*theta,0,1,0);
-					switch((y+x)&3){
-						case 0:
-							//modelManager->DrawModel(archer,textureManager, &archerWalk);
-							modelManager->DrawModel(swordsman,textureManager, &swordsmanWalk);
-							break;
-						case 1:
-							modelManager->DrawModel(knight,textureManager, &knightAttack);
-							break;
-						case 2:
-							modelManager->DrawModel(archer,textureManager, &archerAttack);
-							break;
-						case 3: 
-							modelManager->DrawModel(catapult,textureManager,&catapultAttack);
-							break;
-					}
-					glPopMatrix();
-					glTranslatef(5,0,0);
-				}
-				glTranslatef(-50,0,5);
-			}
+
 			SDL_GL_SwapBuffers();
+			
+			//\/\/\/\/\/\/\/\/\///
+			// END DISPLAY CODE //
+			//////////////////////
+
 			frameTicks = SDL_GetTicks() - frameTicks;
 			extraTicks -= frameTicks;
 			displayFrames++;
-			if(extraTicks > 0){ // if we STILL have extra time
+			if(extraTicks > 0){ // TODO: Rather than simply limiting frame rate I really should do some sort of delta calculations and update animations accordingly
 				SDL_Delay(extraTicks);
-				extraTicks = 0;
 			}
 		}
 

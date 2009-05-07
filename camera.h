@@ -8,13 +8,14 @@ class Camera{
 public:
 	Camera();
 	Camera(VertexF position);
+	Camera(VertexF position, VertexF direction);
 	~Camera();
-	void LookAt(VertexF tgt);
-	void LookAt(Object *tgt);
-	void MoveTo(VertexF tgt);
+	void MoveTo(VertexF position);
+	void LookTo(VertexF direction);
 	void LookThrough(); // I know, it's corny ;D
 private:
 	VertexF pos;
+	VertexF dir;
 };
 
 #endif

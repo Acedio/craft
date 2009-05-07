@@ -9,7 +9,7 @@
 #include <string>
 using namespace std;
 
-const string const names[] =   {"John the ",
+string const names[] =   {"John the ",
 								"Marcus the ",
 								"Thomas the ",
 								"Bob the ",
