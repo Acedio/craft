@@ -30,7 +30,8 @@ void ObjectManager::RemoveRef(ObjectRef ref){
 	map<ObjectRef,int>::iterator refcount;
 	if(ref != 0 && (refcount = refcounts.find(ref)) != refcounts.end()){
 		refcount->second -= 1;
-		if(refcount->second <= 0){
+		map<ObjectRef, Object*>::iterator obj = objects.find(ref);
+		if(refcount->second <= 0 && obj ->second.expired == true){
 			refcounts.erase(refcount);
 			objects.erase(ref);
 		}

@@ -13,6 +13,8 @@ public:
 protected:
 	VertexF pos;
 	ObjectType type;
+	bool expired;
+	friend class ObjectManager;
 };
 
 #endif
