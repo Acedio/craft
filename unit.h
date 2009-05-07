@@ -11,8 +11,7 @@ using namespace std;
 
 class Unit : public Object {
 public:
-	Unit();
-	Unit(PointI p);
+	Unit(int x = 0, int y = 0);
 	~Unit();
 	virtual void Draw();
 	virtual void MoveTo(VertexF tgt);
