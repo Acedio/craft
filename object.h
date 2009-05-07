@@ -10,6 +10,7 @@ public:
 	Object();
 	virtual ~Object();
 	virtual void Draw() = 0;
+	virtual void Update() = 0;
 protected:
 	VertexF pos;
 	ObjectType type;
