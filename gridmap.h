@@ -24,10 +24,11 @@ public:
 
 class GridMap{
 public:
+	GridMap(string mapFileName);
 	GridMap(int w, int h, ObjectRef def = 0);
 	~GridMap();
 
-	void LoadMap(string mapname);
+	void LoadMap(string mapFileName);
 
 	void WriteOut();
 

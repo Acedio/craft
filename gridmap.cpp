@@ -12,16 +12,17 @@ using namespace std;
 #include "objectmanager.h"
 #include "globals.h"
 
+GridMap::GridMap(string mapFileName){
+	object_map = NULL;
+	LoadMap(mapFileName);
+}
+
 GridMap::GridMap(int w, int h, ObjectRef def){
 	width = w;
 	height = h;
 	object_map = new ObjectRef[w*h];
 	for(int i = 0; i < w*h; i++){
-		if(i%6 && (i%11 || i > 790)){
-			object_map[i] = def;
-		} else {
-			object_map[i] = 1;
-		}
+		object_map[i] = def;
 	}
 }
 
@@ -57,33 +58,35 @@ void GridMap::WriteOut(){
 	of.close();
 }
 
-void GridMap::LoadMap(string mapname)
+void GridMap::LoadMap(string mapFileName)
 {
-	fstream mapfile;
-	mapfile.open(mapname.c_str(), fstream::in);
+	fstream mapFile;
+	mapFile.open(mapFileName.c_str(), fstream::in);
 
 	int width, height;
 
-	mapfile >> width;
-	mapfile >> height;
-
-	delete[] object_map;
+	mapFile >> width;
+	mapFile >> height;
+	
+	if(object_map != NULL){
+		delete[] object_map;
+	}
 
 	object_map = new ObjectRef[height];
 
-	for (int i = 0; i < height; i++)
+	for (int y = 0; y < height; y++)
 	{
-		for (int j = 0; j < width; j++)
+		for (int x = 0; x < width; x++)
 		{
 			string s;
-			mapfile >> s;
+			mapFile >> s;
 
 			switch(s[0])
 			{
 				case '.': //walkable
+					object_map[y*width+height] = 0;
 					break;
-				case '#': //non-walkable
-					break;
+				case '#': //non-walkable (trees for now)
 				case '^': //trees
 					break;
 				case '*': //gold
@@ -93,11 +96,12 @@ void GridMap::LoadMap(string mapname)
 				case '2': //player2 start
 					break;
 				default:
+					object_map[y*width+height] = 0;
 					break;
 			}
 		}
 	}
-	mapfile.close();
+	mapFile.close();
 }
 
 stack<PointI> GridMap::AStar(PointI a, PointI b){
