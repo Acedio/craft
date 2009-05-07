@@ -5,6 +5,7 @@
 #include <iostream>
 #include <fstream>
 #include <cmath>
+#include <string>
 using namespace std;
 
 #include "gridmap.h"
@@ -54,6 +55,49 @@ void GridMap::WriteOut(){
 		}
 	}
 	of.close();
+}
+
+GridMap::LoadMap(string mapname)
+{
+	fstream mapfile;
+	mapfile.open(mapname , fstream::in);
+
+	int width, height;
+
+	mapfile >> width;
+	mapfile >> height;
+	
+	object_map = new int* [height];
+
+	for (int i = 0; i < height; i++)
+	{
+		object_map[i] = new int [width];
+
+		for (int j = 0; j < width; j++)
+		{
+			string s;
+			mapfile >> s;
+
+			switch(s[0])
+			{
+				case '.': //walkable
+					break;
+				case '#': //non-walkable
+					break;
+				case '^': //trees
+					break;
+				case '*': //gold
+					break;
+				case '1': //player1 start
+					break;
+				case '2': //player2 start
+					break;
+				default:
+					break;
+			}
+		}
+	}
+	mapfile.close();
 }
 
 stack<PointI> GridMap::AStar(PointI a, PointI b){

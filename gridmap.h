@@ -27,12 +27,15 @@ public:
 	GridMap(int w, int h, ObjectRef def = 0);
 	~GridMap();
 
+	void LoadMap(string mapname);
+
 	void WriteOut();
 
 	stack<PointI> AStar(PointI start, PointI end);
 private:
-	ObjectRef* object_map;
+	ObjectRef** object_map;
 	int width,height;
 };
+
 
 #endif
