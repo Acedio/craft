@@ -21,7 +21,7 @@ using namespace std;
 
 Game::Game() throw(GameInitException){
 	try{
-		display = new Display(800,600,32);
+		display = new Display(800,600,32); // display must be initialized first because it initializes SDL
 	} catch(DisplayException e){
 		cout << "Error initializing display: " << e.what() << endl;
 		const char* s = "Error initializing display."; // const char* so g++ doesn't complain about string -> char deprecation
@@ -38,9 +38,6 @@ Game::Game() throw(GameInitException){
 }
 
 Game::~Game(){
-	if(display != NULL){
-		delete display;
-	}
 	if(textureManager != NULL){
 		delete textureManager;
 	}
@@ -52,6 +49,9 @@ Game::~Game(){
 	}
 	if(camera != NULL){
 		delete camera;
+	}
+	if(display != NULL){ // display must be deleted last because it will uninitialize SDL
+		delete display;
 	}
 }
 
@@ -97,11 +97,19 @@ void Game::Run(){
 
 	int extraTicks = 0;
 
-	while(!input->WindowClosed()){
+	bool running = true;
+
+	while(running){
 		Uint32 frameTicks = SDL_GetTicks();
 		
 		input->ProcessInput();
-		theta += .05;
+		if(input->WindowClosed()){
+			running = false;
+		}
+		if(input->GetKeyState(KEY_ESCAPE) == KS_DOWN){
+			running = false;
+		}
+		theta += .15;
 
 		archerAttack.NextFrame();
 		archerWalk.NextFrame();
@@ -125,8 +133,8 @@ void Game::Run(){
 			
 			glRotatef(90*sin(.01*theta),1,0,0);
 			glRotatef(90*cos(.01*theta),0,1,0);
-			glRotatef(theta,0,1,0);
-			glTranslatef(-20,-5,-20);
+			glRotatef(.25*theta,0,1,0);
+			glTranslatef(-25,-5,-25);
 			glEnable(GL_TEXTURE_2D);
 			textureManager->BindTexture(bell);
 			glBegin(GL_QUADS);
@@ -161,9 +169,9 @@ void Game::Run(){
 							break;
 					}
 					glPopMatrix();
-					glTranslatef(4,0,0);
+					glTranslatef(5,0,0);
 				}
-				glTranslatef(-40,0,4);
+				glTranslatef(-50,0,5);
 			}
 			SDL_GL_SwapBuffers();
 			frameTicks = SDL_GetTicks() - frameTicks;
