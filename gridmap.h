@@ -32,7 +32,11 @@ public:
 
 	void WriteOut();
 
-	stack<PointI> AStar(PointI start, PointI end);
+	list<PointI> AStar(PointI start, PointI end);
+
+	bool MoveObject(PointI a, PointI b);
+
+	bool PointIsValid(PointI a);
 private:
 	ObjectRef* object_map;
 	int width,height;

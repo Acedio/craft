@@ -29,6 +29,9 @@ Unit::Unit(int x, int y){
 	atk_speed = 0;
 }
 
+void Unit::Update(){
+}
+
 Unit::~Unit(){
 }
 

@@ -1,5 +1,5 @@
 #include <queue>
-#include <stack>
+#include <list>
 #include <vector>
 #include <set>
 #include <iostream>
@@ -104,7 +104,23 @@ void GridMap::LoadMap(string mapFileName)
 	mapFile.close();
 }
 
-stack<PointI> GridMap::AStar(PointI a, PointI b){
+bool GridMap::PointIsValid(PointI a){
+	return (a.x >= 0 && a.y >= 0 && a.x < width && a.y < height);
+}
+
+bool GridMap::MoveObject(PointI a, PointI b){
+	// Attempts to move object at point A to point B
+	// If an object exists at point B, return false, else return true
+	if(PointIsValid(a) && PointIsValid(b) && object_map[b.y*width+b.x] == 0){
+		// Points are valid and no object is at B
+		object_map[b.y*width+b.x] = object_map[a.y*width+a.x];
+		object_map[a.y*width+a.x] = 0;
+		return true;
+	}
+	return false;
+}
+
+list<PointI> GridMap::AStar(PointI a, PointI b){
 	priority_queue<AStarPoint*,vector<AStarPoint*>,ASPComp> open;
 	set<PointI> closed;
 	vector<AStarPoint*> toDelete;
@@ -147,19 +163,15 @@ stack<PointI> GridMap::AStar(PointI a, PointI b){
 			cur = open.top();
 		}
 	}
-	stack<PointI> pathStack;
+	list<PointI> pathList;
 	if(cur->point.x == b.x && cur->point.y == b.y){
 		while(cur->parent != NULL){
-			pathStack.push(cur->point);
-			//object_map[cur->point.y*width+cur->point.x] = 2; // draw on our map, remove me!
+			pathList.push_front(cur->point);
 			cur = cur->parent;
 		}
 	}
 	for(vector<AStarPoint*>::iterator i = toDelete.begin(); i != toDelete.end(); ++i){
-		/*if(object_map[(*i)->point.y*width+(*i)->point.x] != 2){
-			object_map[(*i)->point.y*width+(*i)->point.x] = 3;
-		}*/
 		delete *i;
 	}
-	return pathStack;
+	return pathList;
 }

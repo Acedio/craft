@@ -4,7 +4,7 @@ ObjectManager::ObjectManager(){
 	next_unused_ref = 1;
 }
 
-ObjectManager::UpdateAll(){
+void ObjectManager::UpdateAll(){
 	for(map<ObjectRef,Object*>::iterator i = objects.begin(); i != objects.end(); ++i){
 		if(i->second != NULL){
 			i->second->Update();

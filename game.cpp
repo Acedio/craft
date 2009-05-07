@@ -101,19 +101,20 @@ void Game::Run(){
 	camDir.y = 0;
 	camDir.z = 1;
 
-	Uint32 ticks = SDL_GetTicks();
-
-	int gameFrames = 0;
-	int displayFrames = 0;
+	int frames = 0;
 	
-	int mspf = 1000/60;
-
-	int extraTicks = 0;
-
 	bool running = true;
 
+	Uint32 lastFPSCheck = SDL_GetTicks();
+
+	Uint32 ticks = SDL_GetTicks();
+
 	while(running){
-		Uint32 frameTicks = SDL_GetTicks();
+		ticks = SDL_GetTicks() - ticks;
+
+		Uint32 frameTicks = ticks;
+
+		ticks = SDL_GetTicks();
 
 		///////////////////////////////
 		// START MAIN GAME LOOP CODE //
@@ -126,89 +127,72 @@ void Game::Run(){
 		if(input->GetKeyState(KEY_ESCAPE) == KS_DOWN){
 			running = false;
 		}
-		
 		if(input->GetKeyState(KEY_w) == KS_DOWN){
-			camPos.z -= .5;
+			camPos.z -= .05*frameTicks;
 		}
 		if(input->GetKeyState(KEY_s) == KS_DOWN){
-			camPos.z += .5;
+			camPos.z += .05*frameTicks;
 		}
 		if(input->GetKeyState(KEY_a) == KS_DOWN){
-			camPos.x -= .5;
+			camPos.x -= .05*frameTicks;
 		}
 		if(input->GetKeyState(KEY_d) == KS_DOWN){
-			camPos.x += .5;
+			camPos.x += .05*frameTicks;
 		}
 		if(input->GetKeyState(KEY_DOWN)){
-			camDir.y -= .01;
+			camDir.y -= .001*frameTicks;
 		}
 		if(input->GetKeyState(KEY_UP)){
-			camDir.y += .01;
+			camDir.y += .001*frameTicks;
 		}
 
 		//\/\/\/\/\/\/\/\/\/\/\/\/\//
 		// END MAIN GAME LOOP CODE //
 		/////////////////////////////
 
-		++gameFrames;
+		////////////////////////
+		// START DISPLAY CODE //
+		//\/\/\/\/\/\/\/\/\/\///
 
-		frameTicks = SDL_GetTicks() - frameTicks;
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		extraTicks += mspf - frameTicks;
+		camera->MoveTo(camPos);
+		camera->LookTo(camDir);
+		camera->LookThrough();
 
-		if(extraTicks > 0){ // if we aren't running behind, draw the scene
-			frameTicks = SDL_GetTicks();
+		glEnable(GL_TEXTURE_2D);
+		textureManager->BindTexture(bell);
 
-			////////////////////////
-			// START DISPLAY CODE //
-			//\/\/\/\/\/\/\/\/\/\///
+		glBegin(GL_QUADS);
+			glColor3f(1,1,1);
 
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glNormal3f(0,1,0);
 
-			camera->MoveTo(camPos);
-			camera->LookTo(camDir);
-			camera->LookThrough();
+			glTexCoord2f(0,1);
+			glVertex3f(-30,0,-30);
 
-			glEnable(GL_TEXTURE_2D);
-			textureManager->BindTexture(bell);
+			glTexCoord2f(1,1);
+			glVertex3f(30,0,-30);
 
-			glBegin(GL_QUADS);
-				glColor3f(1,1,1);
+			glTexCoord2f(1,0);
+			glVertex3f(30,0,30);
 
-				glNormal3f(0,1,0);
+			glTexCoord2f(0,0);
+			glVertex3f(-30,0,30);
+		glEnd();
 
-				glTexCoord2f(0,1);
-				glVertex3f(-30,0,-30);
+		SDL_GL_SwapBuffers();
+		
+		//\/\/\/\/\/\/\/\/\///
+		// END DISPLAY CODE //
+		//////////////////////
 
-				glTexCoord2f(1,1);
-				glVertex3f(30,0,-30);
+		frames++;
 
-				glTexCoord2f(1,0);
-				glVertex3f(30,0,30);
-
-				glTexCoord2f(0,0);
-				glVertex3f(-30,0,30);
-			glEnd();
-
-			SDL_GL_SwapBuffers();
-			
-			//\/\/\/\/\/\/\/\/\///
-			// END DISPLAY CODE //
-			//////////////////////
-
-			frameTicks = SDL_GetTicks() - frameTicks;
-			extraTicks -= frameTicks;
-			displayFrames++;
-			if(extraTicks > 0){ // TODO: Rather than simply limiting frame rate I really should do some sort of delta calculations and update animations accordingly
-				SDL_Delay(extraTicks);
-			}
-		}
-
-		if(gameFrames > 500){
-			cout << "Game FPS: " << (1000*gameFrames)/(SDL_GetTicks() - ticks) << " Display FPS: " << (1000*displayFrames)/(SDL_GetTicks() - ticks) << endl;
-			ticks = SDL_GetTicks();
-			gameFrames = 0;
-			displayFrames = 0;
+		if(frames > 500){
+			cout << "Game FPS: " << (1000*frames)/(SDL_GetTicks() - lastFPSCheck) << endl;
+			lastFPSCheck = SDL_GetTicks();
+			frames = 0;
 		}
 	}
 }
