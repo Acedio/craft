@@ -22,6 +22,8 @@ public:
 	bool operator() (AStarPoint* a, AStarPoint* b){return a->rank > b->rank;}
 };
 
+const int TILE_SIZE = 5;
+
 class GridMap{
 public:
 	GridMap(string mapFileName);

@@ -2,6 +2,7 @@
 #define _OBJECTMANAGER_H_
 
 #include <map>
+#include <set>
 using namespace std;
 
 #include "object.h"
@@ -16,7 +17,8 @@ public:
 	ObjectRef Add(Object* obj);
 	void AddRef(ObjectRef ref);
 	void RemoveRef(ObjectRef ref);
-	void UpdateAll();
+	void UpdateAll(int tickss);
+	void DrawObjects(set<ObjectRef> refs);
 private:
 	map<ObjectRef,Object*> objects;
 	map<ObjectRef,int> refcounts;

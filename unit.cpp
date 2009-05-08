@@ -29,13 +29,10 @@ Unit::Unit(int x, int y){
 	atk_speed = 0;
 }
 
-void Unit::Update(){
-}
-
 Unit::~Unit(){
 }
 
-void Unit::Update(){
+void Unit::Update(int ticks){
 }
 
 void Unit::Draw(){

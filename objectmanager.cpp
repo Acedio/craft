@@ -1,13 +1,29 @@
 #include "objectmanager.h"
 
+#include <set>
+#include <map>
+#include <iostream>
+using namespace std;
+
 ObjectManager::ObjectManager(){
 	next_unused_ref = 1;
 }
 
-void ObjectManager::UpdateAll(){
+void ObjectManager::UpdateAll(int ticks){
 	for(map<ObjectRef,Object*>::iterator i = objects.begin(); i != objects.end(); ++i){
 		if(i->second != NULL){
-			i->second->Update();
+			i->second->Update(ticks);
+		}
+	}
+}
+
+void ObjectManager::DrawObjects(set<ObjectRef> refs){
+	for(set<ObjectRef>::iterator ref = refs.begin(); ref != refs.end(); ref++){
+		map<ObjectRef,Object*>::iterator obj = objects.find(*ref);
+		if(obj != objects.end()){
+			obj->second->Draw();
+		} else {
+			cout << "Can't find object " << *ref << "." << endl;
 		}
 	}
 }

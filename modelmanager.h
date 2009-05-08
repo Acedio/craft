@@ -27,7 +27,7 @@ public:
 	AnimationInstance();
 	AnimationInstance(Animation* animation);
 	~AnimationInstance();
-	void NextFrame();
+	void AdvanceFrames(int frames);
 private:
 	unsigned int key;
 	int frame;

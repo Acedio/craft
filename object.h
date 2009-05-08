@@ -3,16 +3,15 @@
 
 #include "globals.h"
 
-enum ObjectType { OBJ_UNIT_TEST };
+enum ObjectType { OBJ_UNIT_WORKER };
 
 class Object{
 public:
 	Object();
 	virtual ~Object();
 	virtual void Draw() = 0;
-	virtual void Update() = 0;
+	virtual void Update(int frames) = 0;
 protected:
-	VertexF pos;
 	ObjectType type;
 	bool expired;
 	friend class ObjectManager;

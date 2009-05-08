@@ -57,20 +57,22 @@ AnimationInstance::~AnimationInstance(){
 	}
 }
 
-void AnimationInstance::NextFrame(){
+void AnimationInstance::AdvanceFrames(int frames){
 	if(animation != NULL){
-		frame++;
-		if(frame > animation->keyLengths[key]){
-			frame = 0;
-			key++;
-			if(key >= animation->keyFrames.size()){
-				key = 0;
+		frame += frames;
+		if(frame >= animation->keyLengths[key]){
+			while(frame >= animation->keyLengths[key]){
+				frame -= animation->keyLengths[key];
+				key++;
+				if(key >= animation->keyFrames.size()){
+					key = 0;
+				}
 			}
 			// load the new frame deltas
 			JointState *delta = animation->frameDeltas[key];
 			JointState *deltaCopy = currentDelta;
 			while(delta != NULL){
-				deltaCopy->theta = 0;
+				deltaCopy->theta = delta->theta*frame;
 				deltaCopy->n.x = delta->n.x;
 				deltaCopy->n.y = delta->n.y;
 				deltaCopy->n.z = delta->n.z;
@@ -81,7 +83,7 @@ void AnimationInstance::NextFrame(){
 			JointState *delta = animation->frameDeltas[key];
 			JointState *deltaCopy = currentDelta;
 			while(delta != NULL && deltaCopy != NULL){
-				deltaCopy->theta += delta->theta;
+				deltaCopy->theta = frame*delta->theta;
 				deltaCopy = deltaCopy->next;
 				delta = delta->next;
 			}

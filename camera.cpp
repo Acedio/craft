@@ -14,20 +14,21 @@
 #include "object.h"
 
 Camera::Camera(){
-	VertexF temp = {0,0,0};
-	pos = temp;
-	dir = temp;
+	VertexF tp = {0,0,0};
+	PointF ta = {0,0};
+	pos = tp;
+	angle = ta;
 }
 
 Camera::Camera(VertexF position){
-	VertexF temp = {0,0,0};
 	pos = position;
-	dir = temp;
+	PointF ta = {0,0};
+	angle = ta;
 }
 
-Camera::Camera(VertexF position, VertexF direction){
+Camera::Camera(VertexF position, PointF a){
 	pos = position;
-	dir = direction;
+	angle = a;
 }
 
 Camera::~Camera(){
@@ -37,12 +38,13 @@ void Camera::MoveTo(VertexF position){
 	pos = position;
 }
 
-void Camera::LookTo(VertexF direction){
-	dir = direction;
+void Camera::ChangeAngle(PointF a){
+	angle = a;
 }
 
 void Camera::LookThrough(){
 	glLoadIdentity();
-	glRotatef(-180*atan2(dir.y,dir.z)/3.14159,1,0,0);
+	glRotatef(-180*angle.x/3.14159,1,0,0);
+	glRotatef(-180*angle.y/3.14159,0,1,0);
 	glTranslatef(-pos.x,-pos.y,-pos.z);
 }

@@ -35,7 +35,10 @@ Game::Game() throw(GameInitException){
 	camPos.x = 0;
 	camPos.y = 0;
 	camPos.z = 15;
-	camera = new Camera(camPos);
+	PointF camAngle;
+	camAngle.x = -3.14159/3;
+	camAngle.y = 0;
+	camera = new Camera(camPos, camAngle);
 	gridMap = new GridMap(30,30,0);
 }
 
@@ -99,12 +102,11 @@ void Game::Run(){
 	VertexF camPos;
 	camPos.x = 0;
 	camPos.y = 30;
-	camPos.z = 55;
+	camPos.z = 0;
 
-	VertexF camDir;
-	camDir.x = 0;
-	camDir.y = 0;
-	camDir.z = 1;
+	PointF camAngle;
+	camAngle.x = -3.14159/3;
+	camAngle.y = 0;
 
 	int frames = 0;
 	
@@ -145,11 +147,19 @@ void Game::Run(){
 			camPos.x += .05*frameTicks;
 		}
 		if(input->GetKeyState(KEY_DOWN)){
-			camDir.y -= .001*frameTicks;
+			camAngle.x -= .001*frameTicks;
 		}
 		if(input->GetKeyState(KEY_UP)){
-			camDir.y += .001*frameTicks;
+			camAngle.x += .001*frameTicks;
 		}
+		if(input->GetKeyState(KEY_LEFT)){
+			camAngle.y += .001*frameTicks;
+		}
+		if(input->GetKeyState(KEY_RIGHT)){
+			camAngle.y -= .001*frameTicks;
+		}
+
+		workerAttack.AdvanceFrames(frameTicks);
 
 		//\/\/\/\/\/\/\/\/\/\/\/\/\//
 		// END MAIN GAME LOOP CODE //
@@ -162,7 +172,7 @@ void Game::Run(){
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		camera->MoveTo(camPos);
-		camera->LookTo(camDir);
+		camera->ChangeAngle(camAngle);
 		camera->LookThrough();
 
 		glEnable(GL_TEXTURE_2D);
@@ -173,18 +183,20 @@ void Game::Run(){
 
 			glNormal3f(0,1,0);
 
-			glTexCoord2f(0,1);
+			glTexCoord2f(0,12);
 			glVertex3f(-30,0,-30);
 
-			glTexCoord2f(1,1);
+			glTexCoord2f(12,12);
 			glVertex3f(30,0,-30);
 
-			glTexCoord2f(1,0);
+			glTexCoord2f(12,0);
 			glVertex3f(30,0,30);
 
 			glTexCoord2f(0,0);
 			glVertex3f(-30,0,30);
 		glEnd();
+
+		modelManager->DrawModel(worker,textureManager,&workerAttack);
 
 		SDL_GL_SwapBuffers();
 		
@@ -195,7 +207,7 @@ void Game::Run(){
 		frames++;
 
 		if(frames > 500){
-			cout << "Game FPS: " << (1000*frames)/(SDL_GetTicks() - lastFPSCheck) << endl;
+			cout << "FPS: " << (1000*frames)/(SDL_GetTicks() - lastFPSCheck) << endl;
 			lastFPSCheck = SDL_GetTicks();
 			frames = 0;
 		}
