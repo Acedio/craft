@@ -20,14 +20,6 @@ using namespace std;
 #include "modelmanager.h"
 #include "texturemanager.h"
 
-void printDeltas(JointState *head){
-	while(head != NULL){
-		cout << head << endl;
-		cout.flush();
-		head = head->next;
-	}
-}
-
 AnimationInstance::AnimationInstance(){
 	animation = NULL;
 	key = 0;
@@ -49,30 +41,20 @@ AnimationInstance::AnimationInstance(Animation* a){
 			currentDelta = deltaCopy;
 			if(delta != NULL){
 				*deltaCopy = *delta;
-				int x = 0;
-				cout << "constructor" << endl;
 				while(delta->next != NULL){
-					cout << x << ": " << deltaCopy->next << endl;
-					x++;
 					deltaCopy->next = new JointState;
 					deltaCopy = deltaCopy->next;
 					delta = delta->next;
 					*deltaCopy = *delta;
 				}
 				deltaCopy->next = NULL;
-				cout << x << ": " << deltaCopy->next << endl;
 			}
 		}
 	}
 }
 
 AnimationInstance::~AnimationInstance(){
-	int x = 0;
-	cout << "destructor" << endl;
 	while(currentDelta != NULL){
-		cout << x << ": " << currentDelta->next << endl;
-		x++;
-		cout.flush();
 		JointState *temp = currentDelta->next;
 		delete currentDelta;
 		currentDelta = temp;
@@ -96,11 +78,7 @@ void AnimationInstance::AdvanceFrames(int frames){
 			JointState *delta = animation->frameDeltas[key];
 			JointState *deltaCopy = currentDelta;
 			int deltaCopySize = 0;
-			int x = 0;
-			cout << "advance" << endl;
 			while(delta != NULL){
-				cout << deltaCopy->next << endl;
-				x++;
 				if(deltaCopy != NULL){
 					deltaCopy->theta = delta->theta*frame;
 					deltaCopy->n.x = delta->n.x;
@@ -120,11 +98,7 @@ void AnimationInstance::AdvanceFrames(int frames){
 		} else { // otherwise just update the rotation angles
 			JointState *delta = animation->frameDeltas[key];
 			JointState *deltaCopy = currentDelta;
-			cout << "advance else" << endl;
-			int x = 0;
 			while(delta != NULL && deltaCopy != NULL){
-				cout << x << ": " << deltaCopy->next << endl;
-				x++;
 				deltaCopy->theta = frame*delta->theta;
 				deltaCopy = deltaCopy->next;
 				delta = delta->next;
@@ -347,20 +321,19 @@ Animation* ModelManager::MakeAnimation(vector<vector<VertexF> > frames, vector<i
 	return animation;
 }
 
-AnimationInstance ModelManager::GetAnimationInstance(ModelRef modelRef, string animationName){
+AnimationInstance* ModelManager::GetAnimationInstance(ModelRef modelRef, string animationName){
 	map<ModelRef,Model*>::iterator model = models.find(modelRef);
 	if(model != models.end() && model->second != NULL){
 		map<string,Animation*>::iterator animation = (model->second)->animations.find(animationName);
 		if(animation != model->second->animations.end() && animation->second != NULL){
-			cout << "Making new Anim Inst." << endl;
-			return AnimationInstance(animation->second);
+			return new AnimationInstance(animation->second);
 		} else {
 			cout << "Can't find animation named \"" << animationName << "\" for model." << endl;
-			return AnimationInstance(NULL);
+			return new AnimationInstance(NULL);
 		}
 	} else {
 		cout << "Can't find model #" << modelRef << "." << endl;
-		return AnimationInstance(NULL);
+		return new AnimationInstance(NULL);
 	}
 }
 

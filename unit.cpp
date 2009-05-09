@@ -24,6 +24,7 @@ Unit::Unit(ModelManager *modelManager, TextureManager *textureManager) : Object(
 	mPercent = 0;
 	model = 0;
 	animationName = "";
+	animationInstance = NULL;
 	max_hp = 0;
 	cur_hp = 0;
 	def = 0;
@@ -39,13 +40,13 @@ Unit::~Unit(){
 }
 
 void Unit::Update(int ticks){
-	animationInstance.AdvanceFrames(ticks);
+	animationInstance->AdvanceFrames(ticks);
 }
 
 void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
 	glPushMatrix();
 	glTranslatef(-(pos.x-lastPos.x)*mPercent,-(pos.y-lastPos.y)*mPercent,0);
-	modelManager->DrawModel(model,textureManager,cr,cg,cb,&animationInstance);
+	modelManager->DrawModel(model,textureManager,cr,cg,cb,animationInstance);
 	//modelManager->DrawModel(model,textureManager,cr,cg,cb,NULL);
 	glPopMatrix();
 }

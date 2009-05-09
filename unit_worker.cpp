@@ -8,3 +8,9 @@ Unit_Worker::Unit_Worker(ModelManager* modelManager, TextureManager *textureMana
 	animationInstance = modelManager->GetAnimationInstance(model,animationName);
 	name += "Worker";
 }
+
+Unit_Worker::~Unit_Worker(){
+	if(animationInstance != NULL){
+		delete animationInstance;
+	}
+}

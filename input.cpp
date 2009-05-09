@@ -60,6 +60,7 @@ PointI Input::GetMousePos(){
 }
 
 Input::Input(){
+	keyCount = 0;
 	Uint8 *keyboardState = SDL_GetKeyState(&keyCount);
 	keys = new KeyState[keyCount];
 	for(int key = 0; key < keyCount; key++){
@@ -71,6 +72,7 @@ Input::Input(){
 	}
 	int x, y;
 	Uint8 bstate = SDL_GetMouseState(&x, &y);
+	mouse.buttons[0] = BS_UP;
 	mouse.buttons[BUTTON_LEFT] = bstate&SDL_BUTTON(1)?BS_DOWN:BS_UP;
 	mouse.buttons[BUTTON_MIDDLE] = bstate&SDL_BUTTON(2)?BS_DOWN:BS_UP;
 	mouse.buttons[BUTTON_RIGHT] = bstate&SDL_BUTTON(3)?BS_DOWN:BS_UP;
@@ -82,7 +84,7 @@ Input::Input(){
 }
 
 Input::~Input(){
-	delete keys;
+	delete[] keys;
 }
 
 void Input::ProcessInput(){

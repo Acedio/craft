@@ -6,6 +6,7 @@
 class Unit_Worker : public Unit {
 public:
 	Unit_Worker(ModelManager* modelManager, TextureManager* textureManager);
+	~Unit_Worker();
 };
 
 #endif

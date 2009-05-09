@@ -103,7 +103,7 @@ protected:
 	int atk;
 	int mov_speed;
 	int atk_speed;
-	AnimationInstance animationInstance;
+	AnimationInstance *animationInstance;
 	string animationName;
 	string name;
 };
