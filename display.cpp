@@ -21,6 +21,7 @@ Display::Display(int width, int height, int bitsperpixel) throw (DisplayExceptio
 	// Initialize SDL
 	SDL_Init(SDL_INIT_EVERYTHING | SDL_INIT_NOPARACHUTE);
 	screen = SDL_SetVideoMode(w, h, bpp, SDL_OPENGL);
+	SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
 	if(screen == NULL){
 		SDL_Quit();
 		throw DisplayException(SDL_GetError());

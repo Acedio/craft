@@ -17,7 +17,8 @@ public:
 	ObjectRef Add(Object* obj);
 	void AddRef(ObjectRef ref);
 	void RemoveRef(ObjectRef ref);
-	void UpdateAll(int tickss);
+	void UpdateAll(int ticks);
+	//void DrawObjects(ModelManager *modelManager, TextureManager *textureManager, ObjectRef ref);
 	void DrawObjects(ModelManager *modelManager, TextureManager *textureManager, set<ObjectRef> refs);
 private:
 	map<ObjectRef,Object*> objects;
