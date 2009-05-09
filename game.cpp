@@ -80,7 +80,7 @@ void Game::Run(){
 
 	TextureRef bell = textureManager->LoadTexture("bell.png");
 
-	ObjectRef worker = objectManager->Add(new Unit_Worker(modelManager, textureManager));
+	//ObjectRef worker = objectManager->Add(new Unit_Worker(modelManager, textureManager));
 
 	VertexF camPos;
 	camPos.x = 0;
@@ -142,9 +142,9 @@ void Game::Run(){
 			camAngle.y -= .001*frameTicks;
 		}
 
-		objectManager->UpdateAll(frameTicks);
+		//objectManager->UpdateAll(frameTicks);
 
-		PointI mousePos = input->GetMousePos();
+		/*PointI mousePos = input->GetMousePos();
 		GLdouble modelview[16];
 		GLdouble projection[16];
 		GLint viewport[4];
@@ -164,7 +164,7 @@ void Game::Run(){
 			if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED && oy > 0.2){
 				cout << "Yes m'lord?" << endl;
 			}
-		}
+		}*/
 
 		//\/\/\/\/\/\/\/\/\/\/\/\/\//
 		// END MAIN GAME LOOP CODE //
@@ -174,18 +174,18 @@ void Game::Run(){
 		// START DISPLAY CODE //
 		//\/\/\/\/\/\/\/\/\/\///
 
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		camera->MoveTo(camPos);
-		camera->ChangeAngle(camAngle);
-		camera->LookThrough();
+		//camera->MoveTo(camPos);
+		//camera->ChangeAngle(camAngle);
+		//camera->LookThrough();
 
-		glPushMatrix(); // we want to save this matrix so we can use it for picking in the next game loop
+		//glPushMatrix(); // we want to save this matrix so we can use it for picking in the next game loop
 
-		glEnable(GL_TEXTURE_2D);
-		textureManager->BindTexture(bell);
+		//glEnable(GL_TEXTURE_2D);
+		//textureManager->BindTexture(bell);
 
-		glBegin(GL_QUADS);
+		/*glBegin(GL_QUADS);
 			glColor3f(1,1,1);
 
 			glNormal3f(0,1,0);
@@ -201,14 +201,14 @@ void Game::Run(){
 
 			glTexCoord2f(0,0);
 			glVertex3f(-30,0,30);
-		glEnd();
+		glEnd();*/
 
-		set<ObjectRef> refs;
-		refs.insert(worker);
+		//set<ObjectRef> refs;
+		//refs.insert(worker);
 
-		objectManager->DrawObjects(modelManager,textureManager,refs);
+		//objectManager->DrawObjects(modelManager,textureManager,refs);
 
-		glPopMatrix(); // bring back the matrix for picking
+		//glPopMatrix(); // bring back the matrix for picking
 
 		SDL_GL_SwapBuffers();
 		

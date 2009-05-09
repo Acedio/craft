@@ -77,7 +77,7 @@ string const names[] =   {"John the ",
 								"Giygas the ",
 								"Alex the "};
 
-const int nameCount = sizeof(names)/sizeof(char*);
+const int nameCount = 67;
 
 string RandomName();
 

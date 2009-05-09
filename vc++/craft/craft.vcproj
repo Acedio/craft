@@ -269,11 +269,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\unit_test.cpp"
+				RelativePath="..\..\unit_worker.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\unit_test.h"
+				RelativePath="..\..\unit_worker.h"
 				>
 			</File>
 		</Filter>

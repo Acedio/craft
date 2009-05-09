@@ -9,7 +9,7 @@ enum ObjectType { OBJ_UNIT_WORKER };
 
 class Object{
 public:
-	Object(ModelManager *modelManager, TextureManager *textureManager);
+	Object(ModelManager *modelManager = NULL, TextureManager *textureManager = NULL);
 	virtual ~Object();
 	virtual void Draw(ModelManager *modelManager, TextureManager *textureManager) = 0;
 	virtual void Update(int frames) = 0;

@@ -19,7 +19,8 @@ void ObjectManager::UpdateAll(int ticks){
 
 void ObjectManager::DrawObjects(ModelManager *modelManager, TextureManager *textureManager, set<ObjectRef> refs){
 	for(set<ObjectRef>::iterator ref = refs.begin(); ref != refs.end(); ref++){
-		map<ObjectRef,Object*>::iterator obj = objects.find(*ref);
+		map<ObjectRef,Object*>::iterator obj;
+		obj = objects.find(*ref);
 		if(obj != objects.end() && obj->second != NULL){
 			obj->second->Draw(modelManager,textureManager);
 		} else {
