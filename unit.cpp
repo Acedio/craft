@@ -1,6 +1,9 @@
 #include "globals.h"
 #include "object.h"
 #include "unit.h"
+#include "modelmanager.h"
+#include "texturemanager.h"
+
 #include <ctime>
 #include <cstdlib>
 
@@ -11,16 +14,16 @@ string RandomName()
 	return names[rand()%nameCount];
 }
 
-Unit::Unit(int x, int y){
+Unit::Unit(ModelManager *modelManager, TextureManager *textureManager) : Object(modelManager, textureManager){
 	name = RandomName();
-	pos.x = x;
-	pos.y = y;
+	lastPos.x = 0;
+	lastPos.y = 0;
+	pos.x = 0;
+	pos.y = 0;
 	angle = 0;
 	mPercent = 0;
-	target.x = 0;
-	target.y = 0;
 	model = 0;
-	animationName = "stand";
+	animationName = "";
 	max_hp = 0;
 	cur_hp = 0;
 	def = 0;
@@ -33,9 +36,14 @@ Unit::~Unit(){
 }
 
 void Unit::Update(int ticks){
+	animationInstance.AdvanceFrames(ticks);
 }
 
-void Unit::Draw(){
+void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
+	glPushMatrix();
+	glTranslatef(-(pos.x-lastPos.x)*mPercent,-(pos.y-lastPos.y)*mPercent,0);
+	modelManager->DrawModel(model,textureManager,cr,cg,cb,&animationInstance);
+	glPopMatrix();
 }
 
 void Unit::MoveTo(VertexF tgt){

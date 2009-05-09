@@ -14,10 +14,12 @@ using namespace std;
 #include "globals.h"
 #include "game.h"
 #include "texturemanager.h"
+#include "modelmanager.h"
+#include "objectmanager.h"
+#include "unit_worker.h"
 #include "display.h"
 #include "input.h"
 #include "camera.h"
-#include "modelmanager.h"
 #include "gridmap.h"
 
 Game::Game() throw(GameInitException){
@@ -30,6 +32,7 @@ Game::Game() throw(GameInitException){
 	}
 	textureManager = new TextureManager();
 	modelManager = new ModelManager();
+	objectManager = new ObjectManager();
 	input = new Input();
 	VertexF camPos;
 	camPos.x = 0;
@@ -51,6 +54,9 @@ Game::~Game(){
 	}
 	if(modelManager != NULL){
 		delete modelManager;
+	}
+	if(objectManager != NULL){
+		delete objectManager;
 	}
 	if(input != NULL){
 		delete input;
@@ -74,34 +80,11 @@ void Game::Run(){
 
 	TextureRef bell = textureManager->LoadTexture("bell.png");
 
-	ModelRef archer;
-	archer = modelManager->LoadModel("data/units/archer/archer.mdl",textureManager);
-	AnimationInstance archerWalk = modelManager->GetAnimationInstance(archer, "walk");
-	AnimationInstance archerAttack = modelManager->GetAnimationInstance(archer, "attack");
-
-	ModelRef knight;
-	knight = modelManager->LoadModel("data/units/knight/knight.mdl",textureManager);
-	AnimationInstance knightWalk = modelManager->GetAnimationInstance(knight, "walk");
-	AnimationInstance knightAttack = modelManager->GetAnimationInstance(knight, "attack");
-
-	ModelRef swordsman;
-	swordsman = modelManager->LoadModel("data/units/swordsman/swordsman.mdl",textureManager);
-	AnimationInstance swordsmanWalk = modelManager->GetAnimationInstance(swordsman, "walk");
-	AnimationInstance swordsmanAttack = modelManager->GetAnimationInstance(swordsman, "attack");
-
-	ModelRef worker;
-	worker = modelManager->LoadModel("data/units/worker/worker.mdl",textureManager);
-	AnimationInstance workerWalk = modelManager->GetAnimationInstance(worker, "walk");
-	AnimationInstance workerAttack = modelManager->GetAnimationInstance(worker, "attack");
-
-	ModelRef catapult;
-	catapult = modelManager->LoadModel("data/units/catapult/catapult.mdl",textureManager);
-	AnimationInstance catapultWalk = modelManager->GetAnimationInstance(catapult, "walk");
-	AnimationInstance catapultAttack = modelManager->GetAnimationInstance(catapult, "attack");
+	ObjectRef worker = objectManager->Add(new Unit_Worker(modelManager, textureManager));
 
 	VertexF camPos;
 	camPos.x = 0;
-	camPos.y = 30;
+	camPos.y = 40;
 	camPos.z = 0;
 
 	PointF camAngle;
@@ -159,7 +142,29 @@ void Game::Run(){
 			camAngle.y -= .001*frameTicks;
 		}
 
-		workerAttack.AdvanceFrames(frameTicks);
+		objectManager->UpdateAll(frameTicks);
+
+		PointI mousePos = input->GetMousePos();
+		GLdouble modelview[16];
+		GLdouble projection[16];
+		GLint viewport[4];
+
+		glGetDoublev(GL_MODELVIEW_MATRIX,modelview);
+		glGetDoublev(GL_PROJECTION_MATRIX,projection);
+		glGetIntegerv(GL_VIEWPORT,viewport);
+
+		GLfloat z;
+		glReadPixels(mousePos.x,viewport[3]-mousePos.y,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&z);
+
+		double ox,oy,oz;
+
+		if(gluUnProject(mousePos.x,viewport[3]-mousePos.y,z,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
+			cout << "fail" << endl;
+		} else {
+			if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED && oy > 0.2){
+				cout << "Yes m'lord?" << endl;
+			}
+		}
 
 		//\/\/\/\/\/\/\/\/\/\/\/\/\//
 		// END MAIN GAME LOOP CODE //
@@ -174,6 +179,8 @@ void Game::Run(){
 		camera->MoveTo(camPos);
 		camera->ChangeAngle(camAngle);
 		camera->LookThrough();
+
+		glPushMatrix(); // we want to save this matrix so we can use it for picking in the next game loop
 
 		glEnable(GL_TEXTURE_2D);
 		textureManager->BindTexture(bell);
@@ -196,7 +203,12 @@ void Game::Run(){
 			glVertex3f(-30,0,30);
 		glEnd();
 
-		modelManager->DrawModel(worker,textureManager,&workerAttack);
+		set<ObjectRef> refs;
+		refs.insert(worker);
+
+		objectManager->DrawObjects(modelManager,textureManager,refs);
+
+		glPopMatrix(); // bring back the matrix for picking
 
 		SDL_GL_SwapBuffers();
 		

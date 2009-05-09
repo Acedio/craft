@@ -92,7 +92,7 @@ void AnimationInstance::AdvanceFrames(int frames){
 }
 
 ModelManager::ModelManager(){
-	next_unused_ref = 0;
+	next_unused_ref = 1;
 }
 
 ModelManager::~ModelManager(){
@@ -108,6 +108,7 @@ ModelManager::~ModelManager(){
 					for(vector<ModelPiece*>::iterator p = (pieceQueue.front())->children.begin(); p != (pieceQueue.front())->children.end(); ++p){
 						pieceQueue.push(*p);
 					}
+					glDeleteLists(pieceQueue.front()->displayList,1);
 					delete pieceQueue.front();
 				} else {
 					cout << "NULL piece in model." << endl;
@@ -492,7 +493,7 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 	}
 }
 
-void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, JointState **initials, JointState **vels){
+void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, float cr, float cg, float cb, JointState **initials, JointState **vels){
 	assert(piece != NULL);
 	glPushMatrix();
 	if((*initials) != NULL && (*vels) != NULL){
@@ -518,7 +519,7 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 			glDisable(GL_TEXTURE_2D);
 		}
 		if(piece->teamColored){
-			glColor3f(.3,.3,.8);
+			glColor3f(cr,cg,cb);
 		} else {
 			glColor3f(1,1,1);
 		}
@@ -538,12 +539,12 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 		glCallList(piece->displayList);
 	}
 	for(vector<ModelPiece*>::iterator p = piece->children.begin(); p != piece->children.end(); p++){
-		DrawPiece(model,*p,textureManager, initials, vels); // yay recursion :D
+		DrawPiece(model,*p,textureManager, cr, cg, cb, initials, vels); // yay recursion :D
 	}
 	glPopMatrix();
 }
 
-void ModelManager::DrawModel(ModelRef ref, TextureManager *textureManager, AnimationInstance *animationInstance){
+void ModelManager::DrawModel(ModelRef ref, TextureManager *textureManager, float cr, float cg, float cb, AnimationInstance *animationInstance){
 	JointState *initials, *vels;
 	if(animationInstance != NULL && animationInstance->animation != NULL){
 		initials = animationInstance->animation->keyFrames[animationInstance->key];
@@ -557,7 +558,7 @@ void ModelManager::DrawModel(ModelRef ref, TextureManager *textureManager, Anima
 	if(modelIter != models.end()){
 		Model* model = modelIter->second;
 		for(vector<ModelPiece*>::iterator p = model->pieces.begin(); p != model->pieces.end(); ++p){
-			DrawPiece(model,*p,textureManager,&initials,&vels);
+			DrawPiece(model,*p,textureManager,cr,cg,cb,&initials,&vels);
 		}
 	}
 }

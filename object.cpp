@@ -1,7 +1,7 @@
 #include "globals.h"
 #include "object.h"
 
-Object::Object(){
+Object::Object(ModelManager *modelManager, TextureManager *textureManager){
 	expired = false;
 }
 

@@ -77,25 +77,26 @@ string const names[] =   {"John the ",
 								"Giygas the ",
 								"Alex the "};
 
-const int nameCount = sizeof(names);
+const int nameCount = sizeof(names)/sizeof(char*);
 
 string RandomName();
 
 class Unit : public Object {
 public:
-	Unit(int x = 0, int y = 0);
+	Unit(ModelManager* modelManager, TextureManager* textureManager);
 	~Unit();
-	virtual void Draw();
+	virtual void Draw(ModelManager *modelManager, TextureManager *textureManager);
 	virtual void MoveTo(VertexF tgt);
 	virtual void LookAt(Object* tgt);
 	virtual void LookAt(VertexF tgt);
 	virtual void Update(int ticks);
 protected:
+	PointI lastPos;
 	PointI pos;
-	float mPercent; // the percent between lastPos and nextPos
-	PointI target;
-	float angle; // TODO: vertical angle as well?
+	float mPercent; // the percent between pos and lastPos
+	float angle;
 	ModelRef model;
+	float cr, cg, cb;
 	int max_hp;
 	int cur_hp;
 	int def;

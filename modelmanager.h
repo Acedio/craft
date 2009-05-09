@@ -68,11 +68,11 @@ public:
 	ModelManager();
 	~ModelManager();
 	ModelRef LoadModel(string filename, TextureManager* textureManager);
-	void DrawModel(ModelRef ref, TextureManager* textureManager, AnimationInstance *animationInstance);
+	void DrawModel(ModelRef ref, TextureManager* textureManager, float cr = 1, float cg = 1, float cb = 1, AnimationInstance *animationInstance = NULL);
 	AnimationInstance GetAnimationInstance(ModelRef modelRef, string animationName);
 private:
 	vector<ModelPiece*> LoadObj(string filename, Model* model, TextureManager* textureManager);
-	void DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, JointState** initials, JointState** vels);
+	void DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, float cr, float cg, float cb, JointState** initials, JointState** vels);
 	Animation* MakeAnimation(vector<vector<VertexF> > frames, vector<int> frameLengths);
 	map<ModelRef,Model*> models;
 	map<string,ModelRef> filenames;

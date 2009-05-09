@@ -17,11 +17,11 @@ void ObjectManager::UpdateAll(int ticks){
 	}
 }
 
-void ObjectManager::DrawObjects(set<ObjectRef> refs){
+void ObjectManager::DrawObjects(ModelManager *modelManager, TextureManager *textureManager, set<ObjectRef> refs){
 	for(set<ObjectRef>::iterator ref = refs.begin(); ref != refs.end(); ref++){
 		map<ObjectRef,Object*>::iterator obj = objects.find(*ref);
-		if(obj != objects.end()){
-			obj->second->Draw();
+		if(obj != objects.end() && obj->second != NULL){
+			obj->second->Draw(modelManager,textureManager);
 		} else {
 			cout << "Can't find object " << *ref << "." << endl;
 		}
@@ -56,6 +56,7 @@ void ObjectManager::RemoveRef(ObjectRef ref){
 		refcount->second -= 1;
 		map<ObjectRef, Object*>::iterator obj = objects.find(ref);
 		if(refcount->second <= 0 && obj->second->expired == true){
+			cout << "Object " << ref << " removed." << endl;
 			refcounts.erase(refcount);
 			objects.erase(ref);
 		}

@@ -18,7 +18,7 @@ public:
 	void AddRef(ObjectRef ref);
 	void RemoveRef(ObjectRef ref);
 	void UpdateAll(int tickss);
-	void DrawObjects(set<ObjectRef> refs);
+	void DrawObjects(ModelManager *modelManager, TextureManager *textureManager, set<ObjectRef> refs);
 private:
 	map<ObjectRef,Object*> objects;
 	map<ObjectRef,int> refcounts;
