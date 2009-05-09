@@ -19,6 +19,7 @@ using namespace std;
 #include "globals.h"
 #include "modelmanager.h"
 #include "texturemanager.h"
+#include "gridmap.h"
 
 AnimationInstance::AnimationInstance(){
 	animation = NULL;

@@ -3,121 +3,64 @@
 #include <vector>
 #include <set>
 #include <iostream>
-#include <fstream>
 #include <cmath>
 #include <string>
 using namespace std;
 
 #include "gridmap.h"
 #include "objectmanager.h"
+#include "camera.h"
 #include "globals.h"
 
-GridMap::GridMap(string mapFileName){
-	object_map = NULL;
-	LoadMap(mapFileName);
+GridMap::GridMap(){
+}
+
+GridMap::GridMap(vector<vector<ObjectRef> > omap){
+	object_map = omap;
 }
 
 GridMap::GridMap(int w, int h, ObjectRef def){
-	width = w;
-	height = h;
-	object_map = new ObjectRef[w*h];
-	for(int i = 0; i < w*h; i++){
-		object_map[i] = def;
-	}
-}
-
-GridMap::~GridMap(){
-	if(object_map != NULL){
-		delete[] object_map;
-	}
-}
-
-void GridMap::WriteOut(){
-	ofstream of("test.ppm");
-	of << "P3" << endl;
-	of << width << " " << height << endl;
-	of << "255" << endl;
-	for(int y = 0; y < height; y++){
-		for(int x = 0; x < width; x++){
-			switch(object_map[y*width+x]){
-				case 0:
-					of << "0 0 0" << endl;
-					break;
-				case 1:
-					of << "255 255 255" << endl;
-					break;
-				case 2:
-					of << "0 255 0" << endl;
-					break;
-				case 3:
-					of << "0 255 255" << endl;
-					break;
-			}
+	for(int y = 0; y < h; y++){
+		vector<ObjectRef> temp;
+		for(int x = 0; x < w; x++){
+			temp.push_back(def);
 		}
+		object_map.push_back(temp);
 	}
-	of.close();
-}
-
-void GridMap::LoadMap(string mapFileName)
-{
-	fstream mapFile;
-	mapFile.open(mapFileName.c_str(), fstream::in);
-
-	int width, height;
-
-	mapFile >> width;
-	mapFile >> height;
-	
-	if(object_map != NULL){
-		delete[] object_map;
-	}
-
-	object_map = new ObjectRef[height];
-
-	for (int y = 0; y < height; y++)
-	{
-		for (int x = 0; x < width; x++)
-		{
-			string s;
-			mapFile >> s;
-
-			switch(s[0])
-			{
-				case '.': //walkable
-					object_map[y*width+height] = 0;
-					break;
-				case '#': //non-walkable (trees for now)
-				case '^': //trees
-					break;
-				case '*': //gold
-					break;
-				case '1': //player1 start
-					break;
-				case '2': //player2 start
-					break;
-				default:
-					object_map[y*width+height] = 0;
-					break;
-			}
-		}
-	}
-	mapFile.close();
 }
 
 bool GridMap::PointIsValid(PointI a){
-	return (a.x >= 0 && a.y >= 0 && a.x < width && a.y < height);
+	return (a.x >= 0 && a.y >= 0 && a.y < (int)object_map.size() && a.x < (int)object_map[a.y].size());
 }
 
 bool GridMap::MoveObject(PointI a, PointI b){
 	// Attempts to move object at point A to point B
 	// If an object exists at point B, return false, else return true
-	if(PointIsValid(a) && PointIsValid(b) && object_map[b.y*width+b.x] == 0){
+	if(PointIsValid(a) && PointIsValid(b) && object_map[b.y][b.x] == 0){
 		// Points are valid and no object is at B
-		object_map[b.y*width+b.x] = object_map[a.y*width+a.x];
-		object_map[a.y*width+a.x] = 0;
+		object_map[b.y][b.x] = object_map[a.y][a.x];
+		object_map[a.y][a.x] = 0;
 		return true;
 	}
 	return false;
+}
+
+bool GridMap::AddObject(ObjectRef ref, PointI pos){
+	if(PointIsValid(pos) && object_map[pos.y][pos.x] == 0){
+		object_map[pos.y][pos.x] = ref;
+		return true;
+	}
+	return false;
+}
+
+set<ObjectRef> GridMap::GetDrawSet(Camera camera){
+	set<ObjectRef> drawSet;
+	for(vector<vector<ObjectRef> >::iterator row = object_map.begin(); row != object_map.end(); ++row){
+		for(vector<ObjectRef>::iterator tile = row->begin(); tile != row->end(); ++tile){
+			drawSet.insert(*tile);
+		}
+	}
+	return drawSet;
 }
 
 list<PointI> GridMap::AStar(PointI a, PointI b){
@@ -144,7 +87,7 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 				temp.x = cur->point.x + ((d&1)?((d&2)-1):0);
 				temp.y = cur->point.y + ((d&1)?0:((d&2)-1));
 			}
-			if(temp.x >= 0 && temp.x < width && temp.y >= 0 && temp.y < height && object_map[temp.y*width+temp.x] == 0 && closed.find(temp) == closed.end()){
+			if(PointIsValid(temp) && object_map[temp.y][temp.x] == 0 && closed.find(temp) == closed.end()){
 				AStarPoint* n = new AStarPoint;
 				toDelete.push_back(n);
 				n->point = temp;

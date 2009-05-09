@@ -12,6 +12,7 @@ using namespace std;
 #include <SDL/SDL.h>
 
 #include "display.h"
+#include "globals.h"
 
 Display::Display(int width, int height, int bitsperpixel) throw (DisplayException){
 	w = width;
@@ -47,4 +48,31 @@ Display::~Display(){
 	SDL_FreeSurface(screen);
 
 	SDL_Quit();
+}
+
+VertexF Display::ScreenToWorld(PointI screenPos){
+	GLdouble modelview[16];
+	GLdouble projection[16];
+	GLint viewport[4];
+
+	glGetDoublev(GL_MODELVIEW_MATRIX,modelview);
+	glGetDoublev(GL_PROJECTION_MATRIX,projection);
+	glGetIntegerv(GL_VIEWPORT,viewport);
+
+	GLfloat z;
+	glReadPixels(screenPos.x,viewport[3]-screenPos.y,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&z);
+
+	double ox,oy,oz;
+
+	VertexF temp;
+	if(gluUnProject(screenPos.x,viewport[3]-screenPos.y,z,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
+		temp.x = 0;
+		temp.y = 0;
+		temp.z = 0;
+	} else {
+		temp.x = ox;
+		temp.y = oy;
+		temp.z = oz;
+	}
+	return temp;
 }

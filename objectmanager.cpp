@@ -1,8 +1,10 @@
 #include "objectmanager.h"
+#include "gridmap.h"
 
 #include <set>
 #include <map>
 #include <iostream>
+#include <fstream>
 using namespace std;
 
 ObjectManager::ObjectManager(){
@@ -17,23 +19,16 @@ void ObjectManager::UpdateAll(int ticks){
 	}
 }
 
-/*void ObjectManager::DrawObjects(ModelManager *modelManager, TextureManager *textureManager, ObjectRef ref){
-	map<ObjectRef,Object*>::iterator obj = objects.find(ref);
-	if(obj != objects.end() && obj->second != NULL){
-		obj->second->Draw(modelManager,textureManager);
-	} else {
-		cout << "Can't find object " << ref << "." << endl;
-	}
-}*/
-
 void ObjectManager::DrawObjects(ModelManager *modelManager, TextureManager *textureManager, set<ObjectRef> refs){
 	for(set<ObjectRef>::iterator ref = refs.begin(); ref != refs.end(); ref++){
-		map<ObjectRef,Object*>::iterator obj;
-		obj = objects.find(*ref);
-		if(obj != objects.end() && obj->second != NULL){
-			obj->second->Draw(modelManager,textureManager);
-		} else {
-			cout << "Can't find object " << *ref << "." << endl;
+		if(*ref != 0){ // there is no object 0
+			map<ObjectRef,Object*>::iterator obj;
+			obj = objects.find(*ref);
+			if(obj != objects.end() && obj->second != NULL){
+				obj->second->Draw(modelManager,textureManager);
+			} else {
+				cout << "Can't find object " << *ref << "." << endl;
+			}
 		}
 	}
 }
@@ -48,6 +43,13 @@ ObjectManager::~ObjectManager(){
 
 ObjectRef ObjectManager::Add(Object* obj){
 	objects[next_unused_ref] = obj;
+	++next_unused_ref;
+	return next_unused_ref - 1;
+}
+
+ObjectRef ObjectManager::Add(Unit *unit, GridMap *gridMap){
+	objects[next_unused_ref] = unit;
+	gridMap->AddObject(next_unused_ref,unit->pos);
 	++next_unused_ref;
 	return next_unused_ref - 1;
 }
@@ -71,4 +73,50 @@ void ObjectManager::RemoveRef(ObjectRef ref){
 			objects.erase(ref);
 		}
 	}
+}
+
+vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName)
+{
+	fstream mapFile;
+	mapFile.open(mapFileName.c_str(), fstream::in);
+
+	int width, height;
+
+	mapFile >> width;
+	mapFile >> height;
+
+	vector<vector<ObjectRef> > object_map;
+	
+	for (int y = 0; y < height; y++)
+	{
+		vector<ObjectRef> temp;
+		for (int x = 0; x < width; x++)
+		{
+			string s;
+			mapFile >> s;
+			
+			switch(s[0])
+			{
+				/*case '.': //walkable
+					temp.push_back(0);
+					break;
+				case '#': //non-walkable (trees for now)
+				case '^': //trees
+					break;
+				case '*': //gold
+					break;
+				case '1': //player1 start
+					break;
+				case '2': //player2 start
+					break;*/
+				default:
+					temp.push_back(0);
+					break;
+			}
+		}
+		object_map.push_back(temp);
+	}
+	mapFile.close();
+
+	return object_map;
 }

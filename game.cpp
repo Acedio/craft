@@ -41,14 +41,10 @@ Game::Game() throw(GameInitException){
 	PointF camAngle;
 	camAngle.x = -3.14159/3;
 	camAngle.y = 0;
-	camera = new Camera(camPos, camAngle);
-	gridMap = new GridMap(30,30,0);
+	camera = Camera(camPos, camAngle);
 }
 
 Game::~Game(){
-	if(gridMap != NULL){
-		delete gridMap;
-	}
 	if(textureManager != NULL){
 		delete textureManager;
 	}
@@ -60,9 +56,6 @@ Game::~Game(){
 	}
 	if(input != NULL){
 		delete input;
-	}
-	if(camera != NULL){
-		delete camera;
 	}
 	if(display != NULL){ // display must be deleted last because it will uninitialize SDL
 		delete display;
@@ -80,12 +73,18 @@ void Game::Run(){
 
 	TextureRef bell = textureManager->LoadTexture("bell.png");
 
-	ObjectRef worker = objectManager->Add(new Unit_Worker(modelManager, textureManager));
+	gridMap = GridMap(objectManager->LoadObjectMap("test.map"));
+
+	for(int y = 0; y < 10; y++){
+		for(int x = 0; x < 10; x++){
+			objectManager->Add(new Unit_Worker(modelManager, textureManager, x, y),&gridMap);
+		}
+	}
 
 	VertexF camPos;
-	camPos.x = 0;
+	camPos.x = 30;
 	camPos.y = 40;
-	camPos.z = 0;
+	camPos.z = 30;
 
 	PointF camAngle;
 	camAngle.x = -3.14159/3;
@@ -144,26 +143,8 @@ void Game::Run(){
 
 		objectManager->UpdateAll(frameTicks);
 
-		PointI mousePos = input->GetMousePos();
-		GLdouble modelview[16];
-		GLdouble projection[16];
-		GLint viewport[4];
-
-		glGetDoublev(GL_MODELVIEW_MATRIX,modelview);
-		glGetDoublev(GL_PROJECTION_MATRIX,projection);
-		glGetIntegerv(GL_VIEWPORT,viewport);
-
-		GLfloat z;
-		glReadPixels(mousePos.x,viewport[3]-mousePos.y,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&z);
-
-		double ox,oy,oz;
-
-		if(gluUnProject(mousePos.x,viewport[3]-mousePos.y,z,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
-			cout << "fail" << endl;
-		} else {
-			if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED && oy > 0.2){
-				cout << "Yes m'lord?" << endl;
-			}
+		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED && display->ScreenToWorld(input->GetMousePos()).y > 0.2){
+			cout << "Yes m'lord?" << endl;
 		}
 
 		//\/\/\/\/\/\/\/\/\/\/\/\/\//
@@ -176,9 +157,9 @@ void Game::Run(){
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		camera->MoveTo(camPos);
-		camera->ChangeAngle(camAngle);
-		camera->LookThrough();
+		camera.MoveTo(camPos);
+		camera.ChangeAngle(camAngle);
+		camera.LookThrough();
 
 		glPushMatrix(); // we want to save this matrix so we can use it for picking in the next game loop
 
@@ -190,23 +171,20 @@ void Game::Run(){
 
 			glNormal3f(0,1,0);
 
-			glTexCoord2f(0,12);
-			glVertex3f(-30,0,-30);
+			glTexCoord2f(0,10);
+			glVertex3f(0,0,0);
 
-			glTexCoord2f(12,12);
-			glVertex3f(30,0,-30);
+			glTexCoord2f(10,10);
+			glVertex3f(50,0,0);
 
-			glTexCoord2f(12,0);
-			glVertex3f(30,0,30);
+			glTexCoord2f(10,0);
+			glVertex3f(50,0,50);
 
 			glTexCoord2f(0,0);
-			glVertex3f(-30,0,30);
+			glVertex3f(0,0,50);
 		glEnd();
 
-		set<ObjectRef> refs;
-		refs.insert(worker);
-
-		objectManager->DrawObjects(modelManager,textureManager,refs);
+		objectManager->DrawObjects(modelManager,textureManager,gridMap.GetDrawSet(camera));
 
 		glPopMatrix(); // bring back the matrix for picking
 

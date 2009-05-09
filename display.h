@@ -14,6 +14,8 @@ using namespace std;
 #include <GL/glu.h>
 #include <SDL/SDL.h>
 
+#include "globals.h"
+
 class DisplayException : public exception{
 public:
 	DisplayException(const char* err){error = err;}
@@ -28,6 +30,7 @@ class Display{
 public:
 	Display(int width, int height, int bitsperpixel) throw(DisplayException);
 	~Display();
+	VertexF ScreenToWorld(PointI screen);
 private:
 	SDL_Surface *screen;
 	int w, h, bpp;

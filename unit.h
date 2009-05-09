@@ -83,7 +83,7 @@ string RandomName();
 
 class Unit : public Object {
 public:
-	Unit(ModelManager* modelManager, TextureManager* textureManager);
+	Unit(ModelManager* modelManager, TextureManager* textureManager, int x, int y);
 	~Unit();
 	virtual void Draw(ModelManager *modelManager, TextureManager *textureManager);
 	virtual void MoveTo(VertexF tgt);
@@ -106,6 +106,7 @@ protected:
 	AnimationInstance *animationInstance;
 	string animationName;
 	string name;
+	friend class ObjectManager;
 };
 
 #endif

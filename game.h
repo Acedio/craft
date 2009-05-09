@@ -7,6 +7,7 @@
 #include "camera.h"
 #include "modelmanager.h"
 #include "gridmap.h"
+#include "objectmanager.h"
 
 const int FPS = 60;
 
@@ -32,8 +33,8 @@ private:
 	TextureManager *textureManager;
 	ModelManager *modelManager;
 	ObjectManager *objectManager;
-	Camera *camera;
-	GridMap *gridMap;
+	Camera camera;
+	GridMap gridMap;
 };
 
 #endif

@@ -14,12 +14,12 @@ string RandomName()
 	return names[rand()%nameCount];
 }
 
-Unit::Unit(ModelManager *modelManager, TextureManager *textureManager) : Object(modelManager, textureManager){
+Unit::Unit(ModelManager *modelManager, TextureManager *textureManager, int x, int y) : Object(modelManager, textureManager){
 	name = RandomName();
-	lastPos.x = 0;
-	lastPos.y = 0;
-	pos.x = 0;
-	pos.y = 0;
+	lastPos.x = x;
+	lastPos.y = y;
+	pos.x = x;
+	pos.y = y;
 	angle = 0;
 	mPercent = 0;
 	model = 0;
@@ -45,7 +45,7 @@ void Unit::Update(int ticks){
 
 void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
 	glPushMatrix();
-	glTranslatef(-(pos.x-lastPos.x)*mPercent,-(pos.y-lastPos.y)*mPercent,0);
+	glTranslatef(TILE_SIZE*((float)pos.x-(pos.x-lastPos.x)*mPercent)+2.5,0,TILE_SIZE*((float)pos.y-(pos.y-lastPos.y)*mPercent)+2.5);
 	modelManager->DrawModel(model,textureManager,cr,cg,cb,animationInstance);
 	//modelManager->DrawModel(model,textureManager,cr,cg,cb,NULL);
 	glPopMatrix();

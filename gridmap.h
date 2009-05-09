@@ -3,10 +3,14 @@
 
 #include <list>
 #include <stack>
+#include <vector>
+#include <set>
 using namespace std;
 
-#include "objectmanager.h"
+typedef unsigned int ObjectRef;
+
 #include "globals.h"
+#include "camera.h"
 
 class AStarPoint{
 public:
@@ -22,15 +26,13 @@ public:
 	bool operator() (AStarPoint* a, AStarPoint* b){return a->rank > b->rank;}
 };
 
-const int TILE_SIZE = 5;
+const float TILE_SIZE = 5;
 
 class GridMap{
 public:
-	GridMap(string mapFileName);
+	GridMap();
+	GridMap(vector<vector<ObjectRef> > omap);
 	GridMap(int w, int h, ObjectRef def = 0);
-	~GridMap();
-
-	void LoadMap(string mapFileName);
 
 	void WriteOut();
 
@@ -38,10 +40,13 @@ public:
 
 	bool MoveObject(PointI a, PointI b);
 
+	bool AddObject(ObjectRef ref, PointI pos);
+
 	bool PointIsValid(PointI a);
+
+	set<ObjectRef> GetDrawSet(Camera camera);
 private:
-	ObjectRef* object_map;
-	int width,height;
+	vector<vector<ObjectRef> > object_map;
 };
 
 
