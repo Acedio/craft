@@ -39,14 +39,14 @@ Unit::~Unit(){
 }
 
 void Unit::Update(int ticks){
-	//animationInstance.AdvanceFrames(ticks);
+	animationInstance.AdvanceFrames(ticks);
 }
 
 void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
 	glPushMatrix();
 	glTranslatef(-(pos.x-lastPos.x)*mPercent,-(pos.y-lastPos.y)*mPercent,0);
-	//modelManager->DrawModel(model,textureManager,cr,cg,cb,&animationInstance);
-	modelManager->DrawModel(model,textureManager,cr,cg,cb,NULL);
+	modelManager->DrawModel(model,textureManager,cr,cg,cb,&animationInstance);
+	//modelManager->DrawModel(model,textureManager,cr,cg,cb,NULL);
 	glPopMatrix();
 }
 

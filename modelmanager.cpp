@@ -20,6 +20,14 @@ using namespace std;
 #include "modelmanager.h"
 #include "texturemanager.h"
 
+void printDeltas(JointState *head){
+	while(head != NULL){
+		cout << head << endl;
+		cout.flush();
+		head = head->next;
+	}
+}
+
 AnimationInstance::AnimationInstance(){
 	animation = NULL;
 	key = 0;
@@ -32,25 +40,39 @@ AnimationInstance::AnimationInstance(Animation* a){
 	key = 0;
 	frame = 0;
 	currentDelta = NULL;
-	if(a != NULL){
-		JointState *delta = animation->frameDeltas[frame];
-		JointState *deltaCopy = new JointState;
-		currentDelta = deltaCopy;
-		if(delta != NULL){
-			*deltaCopy = *delta;
-			while(delta->next != NULL){
-				deltaCopy->next = new JointState;
-				deltaCopy = deltaCopy->next;
-				delta = delta->next;
+	if(animation != NULL){
+		if(animation->frameDeltas.size() <= 0){
+			cout << "Can't create animation instance: No frame deltas." << endl;
+		} else {
+			JointState *delta = animation->frameDeltas[0]; // load the first frame
+			JointState *deltaCopy = new JointState;
+			currentDelta = deltaCopy;
+			if(delta != NULL){
 				*deltaCopy = *delta;
+				int x = 0;
+				cout << "constructor" << endl;
+				while(delta->next != NULL){
+					cout << x << ": " << deltaCopy->next << endl;
+					x++;
+					deltaCopy->next = new JointState;
+					deltaCopy = deltaCopy->next;
+					delta = delta->next;
+					*deltaCopy = *delta;
+				}
+				deltaCopy->next = NULL;
+				cout << x << ": " << deltaCopy->next << endl;
 			}
-			deltaCopy->next = NULL;
 		}
 	}
 }
 
 AnimationInstance::~AnimationInstance(){
+	int x = 0;
+	cout << "destructor" << endl;
 	while(currentDelta != NULL){
+		cout << x << ": " << currentDelta->next << endl;
+		x++;
+		cout.flush();
 		JointState *temp = currentDelta->next;
 		delete currentDelta;
 		currentDelta = temp;
@@ -60,7 +82,8 @@ AnimationInstance::~AnimationInstance(){
 void AnimationInstance::AdvanceFrames(int frames){
 	if(animation != NULL){
 		frame += frames;
-		if(frame >= animation->keyLengths[key]){
+		assert(key < animation->keyLengths.size());
+		if(frame >= animation->keyLengths[key]){ // key should already be in bounds (hopefully)
 			while(frame >= animation->keyLengths[key]){
 				frame -= animation->keyLengths[key];
 				key++;
@@ -69,20 +92,39 @@ void AnimationInstance::AdvanceFrames(int frames){
 				}
 			}
 			// load the new frame deltas
+			assert(key < animation->frameDeltas.size());
 			JointState *delta = animation->frameDeltas[key];
 			JointState *deltaCopy = currentDelta;
+			int deltaCopySize = 0;
+			int x = 0;
+			cout << "advance" << endl;
 			while(delta != NULL){
-				deltaCopy->theta = delta->theta*frame;
-				deltaCopy->n.x = delta->n.x;
-				deltaCopy->n.y = delta->n.y;
-				deltaCopy->n.z = delta->n.z;
-				deltaCopy = deltaCopy->next;
-				delta = delta->next;
+				cout << deltaCopy->next << endl;
+				x++;
+				if(deltaCopy != NULL){
+					deltaCopy->theta = delta->theta*frame;
+					deltaCopy->n.x = delta->n.x;
+					deltaCopy->n.y = delta->n.y;
+					deltaCopy->n.z = delta->n.z;
+					deltaCopy = deltaCopy->next;
+					delta = delta->next;
+				} else {
+					cout << "Error: DeltaCopy is smaller than Delta! DeltaCopy is " << deltaCopySize << " JointStates long." << endl;
+					break;
+				}
+				deltaCopySize++;
+			}
+			if(delta == NULL && deltaCopy != NULL){
+				cout << "Error: DeltaCopy is larger than Delta!" << endl;
 			}
 		} else { // otherwise just update the rotation angles
 			JointState *delta = animation->frameDeltas[key];
 			JointState *deltaCopy = currentDelta;
+			cout << "advance else" << endl;
+			int x = 0;
 			while(delta != NULL && deltaCopy != NULL){
+				cout << x << ": " << deltaCopy->next << endl;
+				x++;
 				deltaCopy->theta = frame*delta->theta;
 				deltaCopy = deltaCopy->next;
 				delta = delta->next;
@@ -298,6 +340,7 @@ Animation* ModelManager::MakeAnimation(vector<vector<VertexF> > frames, vector<i
 			animation->frameDeltas.push_back(vels);
 			animation->keyLengths = vector<int>(frameLengths);
 		} else {
+			cout << "Error: Mismatched frame sizes." << endl;
 			return NULL;
 		}
 	}
@@ -306,9 +349,10 @@ Animation* ModelManager::MakeAnimation(vector<vector<VertexF> > frames, vector<i
 
 AnimationInstance ModelManager::GetAnimationInstance(ModelRef modelRef, string animationName){
 	map<ModelRef,Model*>::iterator model = models.find(modelRef);
-	if(model != models.end()){
+	if(model != models.end() && model->second != NULL){
 		map<string,Animation*>::iterator animation = (model->second)->animations.find(animationName);
-		if(animation != model->second->animations.end()){
+		if(animation != model->second->animations.end() && animation->second != NULL){
+			cout << "Making new Anim Inst." << endl;
 			return AnimationInstance(animation->second);
 		} else {
 			cout << "Can't find animation named \"" << animationName << "\" for model." << endl;
@@ -424,11 +468,12 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 					cout << filename << ": Error: No animation name specified in ANIM statement!" << endl;
 				} else {
 					if(currentAnimation != ""){
-						// TODO do calculations for frame interpolation here (and once afterwards.)
 						model->animations[currentAnimation] = MakeAnimation(curFrames, curFrameLengths);
 						if(model->animations[currentAnimation] == NULL){
 							cout << filename << ": Error making animation \"" << currentAnimation << "\" from given keyframes." << endl;
 							model->animations.erase(currentAnimation);
+						} else {
+							cout << "Animation \"" << currentAnimation << "\" loaded." <<  endl;
 						}
 						curFrames.clear();
 						curFrameLengths.clear();
@@ -438,6 +483,7 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 			} else if(arg == "ENDANIM"){
 				if(currentAnimation != ""){
 					model->animations[currentAnimation] = MakeAnimation(curFrames, curFrameLengths);
+					cout << "Animation \"" << currentAnimation << "\" loaded." <<  endl;
 					if(model->animations[currentAnimation] == NULL){
 						cout << filename << ": Error making animation \"" << currentAnimation << "\" from given keyframes." << endl;
 						model->animations.erase(currentAnimation);
