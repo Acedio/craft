@@ -60,6 +60,7 @@ VertexF Display::ScreenToWorld(PointI screenPos){
 	glGetIntegerv(GL_VIEWPORT,viewport);
 
 	GLfloat z;
+	// TODO this is, sadly, HOLY CRAP slow. It works REALLY wellm but it's ridiculously slow.
 	glReadPixels(screenPos.x,viewport[3]-screenPos.y,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&z);
 
 	double ox,oy,oz;

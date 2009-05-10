@@ -78,9 +78,15 @@ void Unit::Update(int ticks){
 }
 
 void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
+	glDisable(GL_TEXTURE_2D);
 	glPushMatrix();
 	glTranslatef(2.5,0,2.5);
 	GLUquadric* q = gluNewQuadric();
+	glPushMatrix();
+	glTranslatef(pos.x*TILE_SIZE,2,pos.y*TILE_SIZE);
+	glColor3f(0,1,0);
+	gluSphere(q,.5,16,8);
+	glPopMatrix();
 	for(list<PointI>::iterator i = moveList.begin(); i != moveList.end(); ++i){
 		glPushMatrix();
 		glTranslatef(i->x*TILE_SIZE,2,i->y*TILE_SIZE);

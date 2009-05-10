@@ -150,7 +150,8 @@ void Game::Run(){
 		VertexF worldPos = display->ScreenToWorld(input->GetMousePos());
 
 		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED){
-			if(true || worldPos.y > 0.2){ // We probably hit something higher than a foot ;D
+			cout << worldPos.y << endl;
+			if(worldPos.y >= -1){ // If we're below -1 then we've definitely missed the platform
 				PointI pos;
 				pos.x = worldPos.x/TILE_SIZE;
 				pos.y = worldPos.z/TILE_SIZE;
@@ -159,13 +160,15 @@ void Game::Run(){
 			}
 		}
 		if(input->GetMouseButtonState(BUTTON_RIGHT) == BS_PRESSED){
-			PointI pos;
-			pos.x = worldPos.x/TILE_SIZE;
-			pos.y = worldPos.z/TILE_SIZE;
-			Object *obj = objectManager->GetObject(selected);
-			if(obj != NULL){
-				if(obj->GetType()&OBJ_UNIT){
-					((Unit*)obj)->MoveTo(pos,&gridMap);
+			if(worldPos.y >= -1){// If we're below -1 then we've definitely missed the platform
+				PointI pos;
+				pos.x = worldPos.x/TILE_SIZE;
+				pos.y = worldPos.z/TILE_SIZE;
+				Object *obj = objectManager->GetObject(selected);
+				if(obj != NULL){
+					if(obj->GetType()&OBJ_UNIT){
+						((Unit*)obj)->MoveTo(pos,&gridMap);
+					}
 				}
 			}
 		}

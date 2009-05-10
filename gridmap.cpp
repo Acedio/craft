@@ -71,7 +71,7 @@ ObjectRef GridMap::GetObjectRefAt(PointI pos){
 }
 
 list<PointI> GridMap::AStar(PointI a, PointI b){
-	if(GetObjectRefAt(b) != 0){ // we're trying to move into a filled space
+	if(!PointIsValid(a) || !PointIsValid(b) || GetObjectRefAt(b) != 0){ // we're trying to move into a filled space
 		return list<PointI>();
 	}
 	priority_queue<AStarPoint*,vector<AStarPoint*>,ASPComp> open;
@@ -104,9 +104,12 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 				n->d = cur->d+1;
 				int x = b.x-n->point.x;
 				int y = b.y-n->point.y;
+				int cx = b.x-cur->point.x;
+				int cy = b.y-cur->point.y;
+				int dot = x*cx+y*cy; // dot product, greater when moving directly towards dest
 				x = x<0?-x:x;
 				y = y<0?-y:y;
-				n->rank = n->d + ((x>y)?x:y); // total distance traveled + manhattan distance w/ unit diagonals (nice heuristic)
+				n->rank = n->d + ((x>y)?x:y) + (dot>>1); // total distance traveled + manhattan distance w/ unit diagonals + half the dot product (works really well)
 				n->parent = cur;
 				//cout << temp.x << " " << temp.y << " " << n->rank << endl;
 				open.push(n);
