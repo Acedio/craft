@@ -76,16 +76,19 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 	}
 	priority_queue<AStarPoint*,vector<AStarPoint*>,ASPComp> open;
 	set<PointI> closed;
-	vector<AStarPoint*> toDelete;
+	set<AStarPoint*> toDelete;
 	AStarPoint* start = new AStarPoint;
-	toDelete.push_back(start);
+	toDelete.insert(start);
 	start->point = a;
 	start->parent = NULL;
 	start->d = 0;
 	start->rank = 0;
 	open.push(start);
 	AStarPoint* cur = open.top();
+	int x = 0;
+	// TODO open is getting really big really quickly. Might need to find some sort of priority set? I want to make sure that I have only the best of the current point.
 	while(!open.empty() && (cur->point.x != b.x || cur->point.y != b.y)){
+		cout << x++ << " " << cur->point.x << " " << cur->point.y << endl;
 		open.pop();
 		closed.insert(cur->point);
 		for(int d = 0; d < 8; ++d){
@@ -99,7 +102,7 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 			}
 			if(PointIsValid(temp) && object_map[temp.y][temp.x] == 0 && closed.find(temp) == closed.end()){
 				AStarPoint* n = new AStarPoint;
-				toDelete.push_back(n);
+				toDelete.insert(n);
 				n->point = temp;
 				n->d = cur->d+1;
 				int x = b.x-n->point.x;
@@ -126,7 +129,7 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 			cur = cur->parent;
 		}
 	}
-	for(vector<AStarPoint*>::iterator i = toDelete.begin(); i != toDelete.end(); ++i){
+	for(set<AStarPoint*>::iterator i = toDelete.begin(); i != toDelete.end(); ++i){
 		delete *i;
 	}
 	return pathList;
