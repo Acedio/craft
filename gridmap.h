@@ -45,6 +45,8 @@ public:
 	bool PointIsValid(PointI a);
 
 	set<ObjectRef> GetDrawSet(Camera camera);
+
+	ObjectRef GetObjectRefAt(PointI pos);
 private:
 	vector<vector<ObjectRef> > object_map;
 };

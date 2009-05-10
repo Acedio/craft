@@ -77,7 +77,9 @@ string const names[] =   {"John the ",
 								"Giygas the ",
 								"Alex the "};
 
-const int nameCount = 67;
+const int NAME_COUNT = 67;
+
+const int MAX_OCCUPIED_TILES = 10; // the maximum number of occupied tiles before just scrapping the path and re-pathing
 
 string RandomName();
 
@@ -86,14 +88,14 @@ public:
 	Unit(ModelManager* modelManager, TextureManager* textureManager, int x, int y);
 	~Unit();
 	virtual void Draw(ModelManager *modelManager, TextureManager *textureManager);
-	virtual void MoveTo(VertexF tgt);
-	virtual void LookAt(Object* tgt);
-	virtual void LookAt(VertexF tgt);
+	virtual void MoveTo(PointI tgt, GridMap *gridMap);
 	virtual void Update(int ticks);
+	virtual void Update(int ticks, GridMap *gridMap);
 protected:
 	PointI lastPos;
 	PointI pos;
 	float mPercent; // the percent between pos and lastPos
+	list<PointI> moveList;
 	float angle;
 	ModelRef model;
 	float cr, cg, cb;
@@ -101,7 +103,7 @@ protected:
 	int cur_hp;
 	int def;
 	int atk;
-	int mov_speed;
+	float mov_speed;
 	int atk_speed;
 	AnimationInstance *animationInstance;
 	string animationName;

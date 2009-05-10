@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cmath>
+#include <ctime>
+#include <cstdlib>
 using namespace std;
 
 #ifdef _WIN32
@@ -75,11 +77,11 @@ void Game::Run(){
 
 	gridMap = GridMap(objectManager->LoadObjectMap("test.map"));
 
-	for(int y = 0; y < 10; y++){
-		for(int x = 0; x < 10; x++){
-			objectManager->Add(new Unit_Worker(modelManager, textureManager, x, y),&gridMap);
-		}
-	}
+	objectManager->Add(new Unit_Worker(modelManager, textureManager, 0, 0),&gridMap);
+	objectManager->Add(new Unit_Worker(modelManager, textureManager, 1, 1),&gridMap);
+	objectManager->Add(new Unit_Worker(modelManager, textureManager, 2, 2),&gridMap);
+	objectManager->Add(new Unit_Worker(modelManager, textureManager, 3, 3),&gridMap);
+	objectManager->Add(new Unit_Worker(modelManager, textureManager, 4, 4),&gridMap);
 
 	VertexF camPos;
 	camPos.x = 30;
@@ -97,6 +99,8 @@ void Game::Run(){
 	Uint32 lastFPSCheck = SDL_GetTicks();
 
 	Uint32 ticks = SDL_GetTicks();
+
+	ObjectRef selected = 0;
 
 	while(running){
 		ticks = SDL_GetTicks() - ticks;
@@ -141,10 +145,29 @@ void Game::Run(){
 			camAngle.y -= .001*frameTicks;
 		}
 
-		objectManager->UpdateAll(frameTicks);
+		objectManager->UpdateAll(frameTicks,&gridMap);
 
-		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED && display->ScreenToWorld(input->GetMousePos()).y > 0.2){
-			cout << "Yes m'lord?" << endl;
+		VertexF worldPos = display->ScreenToWorld(input->GetMousePos());
+
+		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED){
+			if(true || worldPos.y > 0.2){ // We probably hit something higher than a foot ;D
+				PointI pos;
+				pos.x = worldPos.x/TILE_SIZE;
+				pos.y = worldPos.z/TILE_SIZE;
+				selected = gridMap.GetObjectRefAt(pos);
+				cout << selected << ": Yes m'lord?" << endl;
+			}
+		}
+		if(input->GetMouseButtonState(BUTTON_RIGHT) == BS_PRESSED){
+			PointI pos;
+			pos.x = worldPos.x/TILE_SIZE;
+			pos.y = worldPos.z/TILE_SIZE;
+			Object *obj = objectManager->GetObject(selected);
+			if(obj != NULL){
+				if(obj->GetType()&OBJ_UNIT){
+					((Unit*)obj)->MoveTo(pos,&gridMap);
+				}
+			}
 		}
 
 		//\/\/\/\/\/\/\/\/\/\/\/\/\//

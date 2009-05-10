@@ -4,14 +4,13 @@
 #include "modelmanager.h"
 #include "texturemanager.h"
 
+#include <cmath>
 #include <ctime>
 #include <cstdlib>
 
 string RandomName()
 {
-	srand(time(NULL));
-
-	return names[rand()%nameCount];
+	return names[rand()%NAME_COUNT];
 }
 
 Unit::Unit(ModelManager *modelManager, TextureManager *textureManager, int x, int y) : Object(modelManager, textureManager){
@@ -39,23 +38,66 @@ Unit::Unit(ModelManager *modelManager, TextureManager *textureManager, int x, in
 Unit::~Unit(){
 }
 
-void Unit::Update(int ticks){
+void Unit::Update(int ticks, GridMap* gridMap){
+	mPercent += ticks*mov_speed;
+	while(mPercent > 1){
+		mPercent -= 1;
+		lastPos = pos;
+		if(!moveList.empty()){
+			int occupiedTiles = 0;
+			while(!moveList.empty() && gridMap->GetObjectRefAt(moveList.front()) != 0){ // while there isn't an empty space found
+				occupiedTiles++;
+				moveList.pop_front();
+			}
+			if(!moveList.empty() && occupiedTiles > 0){ // something is in our way
+				if(occupiedTiles < MAX_OCCUPIED_TILES){
+					list<PointI> prepended = gridMap->AStar(pos, moveList.front());
+					if(!prepended.empty()){
+						prepended.pop_back(); // we already have prependeds destination in our moveList
+						moveList.insert(moveList.begin(),prepended.begin(),prepended.end());
+					} else { // there are no other paths to the destination
+						moveList.clear();
+					}
+				} else { // too many things in our current path so we just recalc
+					MoveTo(moveList.back(),gridMap);
+				}
+			}
+			if(!moveList.empty()){
+				pos = moveList.front();
+				gridMap->MoveObject(lastPos,pos);
+				moveList.pop_front();
+				angle = atan2(-(pos.y-lastPos.y),pos.x-lastPos.x)+3.14159/2; // y is flipped on the map and 0 degrees is straight down the y axis
+			}
+		}
+	}
 	animationInstance->AdvanceFrames(ticks);
+}
+
+void Unit::Update(int ticks){
+	cout << "Error: Unit: I'm blind, I'm blind! Where is my GridMap??" << endl;
 }
 
 void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
 	glPushMatrix();
-	glTranslatef(TILE_SIZE*((float)pos.x-(pos.x-lastPos.x)*mPercent)+2.5,0,TILE_SIZE*((float)pos.y-(pos.y-lastPos.y)*mPercent)+2.5);
+	glTranslatef(2.5,0,2.5);
+	GLUquadric* q = gluNewQuadric();
+	for(list<PointI>::iterator i = moveList.begin(); i != moveList.end(); ++i){
+		glPushMatrix();
+		glTranslatef(i->x*TILE_SIZE,2,i->y*TILE_SIZE);
+		glColor3f(0,1,0);
+		gluSphere(q,.5,16,8);
+		glPopMatrix();
+	}
+	gluDeleteQuadric(q);
+	glTranslatef(TILE_SIZE*((float)lastPos.x+(pos.x-lastPos.x)*mPercent),0,TILE_SIZE*((float)lastPos.y+(pos.y-lastPos.y)*mPercent));
+	glRotatef(180.0*angle/3.14159,0,1,0);
 	modelManager->DrawModel(model,textureManager,cr,cg,cb,animationInstance);
-	//modelManager->DrawModel(model,textureManager,cr,cg,cb,NULL);
 	glPopMatrix();
 }
 
-void Unit::MoveTo(VertexF tgt){
-}
-
-void Unit::LookAt(Object* tgt){
-}
-
-void Unit::LookAt(VertexF tgt){
+void Unit::MoveTo(PointI tgt, GridMap* gridMap){
+	moveList = gridMap->AStar(pos,tgt);
+	if(pos.x == lastPos.x && pos.y == lastPos.y){ // we're already at our current destination TODO this might be risky, not sure if we could ever have the same location twice in one path
+		mPercent = 1;
+	}
 }

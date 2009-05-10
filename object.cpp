@@ -7,3 +7,7 @@ Object::Object(ModelManager *modelManager, TextureManager *textureManager){
 
 Object::~Object(){
 }
+
+ObjectType Object::GetType(){
+	return type;
+}

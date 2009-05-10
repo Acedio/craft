@@ -5,7 +5,7 @@
 #include "modelmanager.h"
 #include "texturemanager.h"
 
-enum ObjectType { OBJ_UNIT_WORKER };
+enum ObjectType { OBJ_UNIT = 0x10, OBJ_UNIT_WORKER = 0x10 };
 
 class Object{
 public:
@@ -13,6 +13,7 @@ public:
 	virtual ~Object();
 	virtual void Draw(ModelManager *modelManager, TextureManager *textureManager) = 0;
 	virtual void Update(int frames) = 0;
+	ObjectType GetType();
 protected:
 	ObjectType type;
 	bool expired;

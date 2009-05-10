@@ -20,9 +20,10 @@ public:
 	ObjectRef Add(Unit *unit, GridMap *gridMap);
 	void AddRef(ObjectRef ref);
 	void RemoveRef(ObjectRef ref);
-	void UpdateAll(int ticks);
+	void UpdateAll(int ticks,GridMap *gridMap);
 	void DrawObjects(ModelManager *modelManager, TextureManager *textureManager, set<ObjectRef> refs);
 	vector<vector<ObjectRef> > LoadObjectMap(string mapFileName);
+	Object* GetObject(ObjectRef ref);
 private:
 	map<ObjectRef,Object*> objects;
 	map<ObjectRef,int> refcounts;

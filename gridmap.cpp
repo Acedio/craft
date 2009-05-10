@@ -63,7 +63,17 @@ set<ObjectRef> GridMap::GetDrawSet(Camera camera){
 	return drawSet;
 }
 
+ObjectRef GridMap::GetObjectRefAt(PointI pos){
+	if(PointIsValid(pos)){
+		return object_map[pos.y][pos.x];
+	}
+	return 0;
+}
+
 list<PointI> GridMap::AStar(PointI a, PointI b){
+	if(GetObjectRefAt(b) != 0){ // we're trying to move into a filled space
+		return list<PointI>();
+	}
 	priority_queue<AStarPoint*,vector<AStarPoint*>,ASPComp> open;
 	set<PointI> closed;
 	vector<AStarPoint*> toDelete;

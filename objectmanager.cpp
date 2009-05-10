@@ -1,4 +1,5 @@
 #include "objectmanager.h"
+#include "object.h"
 #include "gridmap.h"
 
 #include <set>
@@ -11,10 +12,14 @@ ObjectManager::ObjectManager(){
 	next_unused_ref = 1;
 }
 
-void ObjectManager::UpdateAll(int ticks){
+void ObjectManager::UpdateAll(int ticks, GridMap *gridMap){
 	for(map<ObjectRef,Object*>::iterator i = objects.begin(); i != objects.end(); ++i){
 		if(i->second != NULL){
-			i->second->Update(ticks);
+			if(i->second->type&OBJ_UNIT){
+				((Unit*)i->second)->Update(ticks,gridMap);
+			} else {
+				i->second->Update(ticks);
+			}
 		}
 	}
 }
@@ -73,6 +78,14 @@ void ObjectManager::RemoveRef(ObjectRef ref){
 			objects.erase(ref);
 		}
 	}
+}
+
+Object* ObjectManager::GetObject(ObjectRef ref){
+	map<ObjectRef,Object*>::iterator obj = objects.find(ref);
+	if(obj != objects.end()){
+		return obj->second;
+	}
+	return NULL;
 }
 
 vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName)
