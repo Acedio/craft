@@ -92,6 +92,11 @@ vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName)
 {
 	fstream mapFile;
 	mapFile.open(mapFileName.c_str(), fstream::in);
+	
+	if(mapFile.fail()){
+		cout << "Error: Could not load object map file \"" << mapFileName << "\"." << endl;
+		return vector<vector<ObjectRef> >();
+	}
 
 	int width, height;
 
