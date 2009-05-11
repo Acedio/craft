@@ -16,6 +16,7 @@ struct PointF{
 struct PointI{
 	int x,y;
 	bool operator<(const PointI b) const {if(x == b.x){ return y < b.y; } else { return x < b.x;}};
+	bool operator==(const PointI b) const {return (x == b.x) && (y == b.y);};
 };
 
 #endif
