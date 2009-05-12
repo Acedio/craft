@@ -66,7 +66,7 @@ void Unit::Update(int ticks, GridMap* gridMap){
 				pos = moveList.front();
 				gridMap->MoveObject(lastPos,pos);
 				moveList.pop_front();
-				angle = atan2(-(pos.y-lastPos.y),pos.x-lastPos.x)+3.14159/2; // y is flipped on the map and 0 degrees is straight down the y axis
+				angle = atan2(-(float)(pos.y-lastPos.y),(float)(pos.x-lastPos.x))+3.14159/2; // y is flipped on the map and 0 degrees is straight down the y axis
 			}
 		}
 	}
