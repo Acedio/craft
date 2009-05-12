@@ -5,6 +5,7 @@
 #include <stack>
 #include <vector>
 #include <set>
+#include <iostream>
 using namespace std;
 
 typedef unsigned int ObjectRef;
@@ -14,7 +15,7 @@ typedef unsigned int ObjectRef;
 
 class AStarPoint{
 public:
-	bool operator==(AStarPoint* b){return (this->point.x == b->point.x) && (this->point.y == b->point.y);}
+	//bool operator==(AStarPoint* b){return (this->point.x == b->point.x) && (this->point.y == b->point.y);}
 	//bool operator<(AStarPoint* b){if(this->point.x == b->point.x) return (this->point.y < b->point.y); else return this->point.x < b->point.x;}
 	PointI point;
 	AStarPoint* parent;
@@ -23,7 +24,7 @@ public:
 
 class ASPComp{
 public:
-	bool operator() (AStarPoint* a, AStarPoint* b){return a->rank > b->rank;}
+	bool operator() (AStarPoint* a, AStarPoint* b){if(a->rank == b->rank){return a < b;} else {return a->rank < b->rank;}}
 };
 
 const float TILE_SIZE = 5;

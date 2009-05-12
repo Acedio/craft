@@ -74,19 +74,20 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 	if(!PointIsValid(a) || !PointIsValid(b) || GetObjectRefAt(b) != 0){ // we're trying to move into a filled space
 		return list<PointI>();
 	}
-	priority_queue<AStarPoint*,vector<AStarPoint*>,ASPComp> open;
+	set<AStarPoint*,ASPComp> open;
 	set<PointI> closed;
-	vector<AStarPoint*> toDelete;
+	set<AStarPoint*> toDelete;
 	AStarPoint* start = new AStarPoint;
-	toDelete.push_back(start);
+	toDelete.insert(start);
 	start->point = a;
 	start->parent = NULL;
 	start->d = 0;
 	start->rank = 0;
-	open.push(start);
-	AStarPoint* cur = open.top();
-	while(!open.empty() && (cur->point.x != b.x || cur->point.y != b.y)){
-		open.pop();
+	open.insert(start);
+	AStarPoint* cur = *(open.begin());
+	// TODO open is getting really big really quickly. Might need to find some sort of priority set? I want to make sure that I have only the best of the current point.
+	while(!open.empty() && !(cur->point == b)){
+		open.erase(open.begin());
 		closed.insert(cur->point);
 		for(int d = 0; d < 8; ++d){
 			PointI temp;
@@ -99,24 +100,32 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 			}
 			if(PointIsValid(temp) && object_map[temp.y][temp.x] == 0 && closed.find(temp) == closed.end()){
 				AStarPoint* n = new AStarPoint;
-				toDelete.push_back(n);
+				toDelete.insert(n);
 				n->point = temp;
 				n->d = cur->d+1;
 				int x = b.x-n->point.x;
 				int y = b.y-n->point.y;
-				int cx = b.x-cur->point.x;
-				int cy = b.y-cur->point.y;
-				int dot = x*cx+y*cy; // dot product, greater when moving directly towards dest
 				x = x<0?-x:x;
 				y = y<0?-y:y;
-				n->rank = n->d + ((x>y)?x:y) + (dot>>1); // total distance traveled + manhattan distance w/ unit diagonals + half the dot product (works really well)
+				n->rank = n->d + 2*(x>y?x:y) + ((d&4)>>2); // total distance traveled + manhattan distance w/ unit diagonals
 				n->parent = cur;
-				//cout << temp.x << " " << temp.y << " " << n->rank << endl;
-				open.push(n);
+				set<AStarPoint*,ASPComp>::iterator node;
+				for(node = open.begin(); node != open.end(); ++node){
+					if((*node)->point == n->point){ // they're the same point, we only want the better one
+						if(n->rank < (*node)->rank){ // the new one is better than old
+							open.erase(node);
+							open.insert(n);
+						}
+						break;
+					}
+				}
+				if(node == open.end()){
+					open.insert(n);
+				}
 			}
 		}
 		if(!open.empty()){
-			cur = open.top();
+			cur = *(open.begin());
 		}
 	}
 	list<PointI> pathList;
@@ -126,7 +135,7 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 			cur = cur->parent;
 		}
 	}
-	for(vector<AStarPoint*>::iterator i = toDelete.begin(); i != toDelete.end(); ++i){
+	for(set<AStarPoint*>::iterator i = toDelete.begin(); i != toDelete.end(); ++i){
 		delete *i;
 	}
 	return pathList;

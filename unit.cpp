@@ -85,13 +85,16 @@ void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
 	glPushMatrix();
 	glTranslatef(pos.x*TILE_SIZE,2,pos.y*TILE_SIZE);
 	glColor3f(0,1,0);
-	gluSphere(q,.5,16,8);
+	gluSphere(q,.5,8,4);
 	glPopMatrix();
+	float x = 0;
 	for(list<PointI>::iterator i = moveList.begin(); i != moveList.end(); ++i){
+		x += 1;
+		float color = x/moveList.size();
 		glPushMatrix();
 		glTranslatef(i->x*TILE_SIZE,2,i->y*TILE_SIZE);
-		glColor3f(0,1,0);
-		gluSphere(q,.5,16,8);
+		glColor3f(color,1-color,0);
+		gluSphere(q,.5,8,4);
 		glPopMatrix();
 	}
 	gluDeleteQuadric(q);

@@ -159,7 +159,6 @@ void Game::Run(){
 		VertexF worldPos = display->ScreenToWorld(input->GetMousePos());
 
 		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED){
-			cout << worldPos.y << endl;
 			if(worldPos.y >= -1){ // If we're below -1 then we've definitely missed the platform
 				PointI pos;
 				pos.x = worldPos.x/TILE_SIZE;
@@ -206,13 +205,13 @@ void Game::Run(){
 
 			glNormal3f(0,1,0);
 
-			glTexCoord2f(0,10);
+			glTexCoord2f(0,1);
 			glVertex3f(0,0,0);
 
-			glTexCoord2f(10,10);
+			glTexCoord2f(1,1);
 			glVertex3f(50,0,0);
 
-			glTexCoord2f(10,0);
+			glTexCoord2f(1,0);
 			glVertex3f(50,0,50);
 
 			glTexCoord2f(0,0);
@@ -232,7 +231,7 @@ void Game::Run(){
 		frames++;
 
 		if(frames > 500){
-			cout << "FPS: " << (1000*frames)/(SDL_GetTicks() - lastFPSCheck) << endl;
+			//cout << "FPS: " << (1000*frames)/(SDL_GetTicks() - lastFPSCheck) << endl;
 			lastFPSCheck = SDL_GetTicks();
 			frames = 0;
 		}
