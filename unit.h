@@ -97,6 +97,8 @@ protected:
 	float mPercent; // the percent between pos and lastPos
 	list<PointI> moveList;
 	float angle;
+	float lastAngle;
+	float dAngle;
 	ModelRef model;
 	float cr, cg, cb;
 	int max_hp;

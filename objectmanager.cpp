@@ -1,6 +1,7 @@
 #include "objectmanager.h"
 #include "object.h"
 #include "gridmap.h"
+#include "input.h"
 
 #include <set>
 #include <map>
@@ -137,4 +138,40 @@ vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName)
 	mapFile.close();
 
 	return object_map;
+}
+
+void ObjectManager::HandleClick(VertexF location, ButtonName buttonName, GridMap *gridMap){
+	PointI pos;
+	pos.x = (int)(location.x/TILE_SIZE);
+	pos.y = (int)(location.z/TILE_SIZE);
+	ObjectRef ref = gridMap->GetObjectRefAt(pos);
+	if(ref != 0){
+		map<ObjectRef,Object*>::iterator obj = objects.find(ref);
+		if(obj != objects.end()){
+			if(obj->second->type&OBJ_UNIT){
+				Unit* unit = (Unit*)obj->second;
+				cout << unit->name << endl;
+			}
+		}
+	}
+	for(int y = -1; y <= 1; y++){
+		for(int x = -1; x <= 1; x++){
+			if(x != 0 || y != 0){ // we don't want to check center again
+				PointI temp;
+				temp.x = (int)location.x + x;
+				temp.y = (int)location.y + y;
+				if((ref = gridMap->GetObjectRefAt(temp)) != 0){ // there is an object at this point on the map
+					map<ObjectRef,Object*>::iterator obj = objects.find(ref);
+					if(obj != objects.end()){
+						if(obj->second->type&OBJ_UNIT){
+							Unit* unit = (Unit*)obj->second;
+							if(unit->lastPos == pos){
+								cout << unit->name << endl;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }

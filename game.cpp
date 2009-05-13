@@ -76,12 +76,14 @@ void Game::Run(){
 	TextureRef bell = textureManager->LoadTexture("bell.png");
 
 	gridMap = GridMap(objectManager->LoadObjectMap("test.map"));
-
-	objectManager->Add(new Unit_Worker(modelManager, textureManager, 0, 0),&gridMap);
-	objectManager->Add(new Unit_Worker(modelManager, textureManager, 1, 1),&gridMap);
-	objectManager->Add(new Unit_Worker(modelManager, textureManager, 2, 2),&gridMap);
-	objectManager->Add(new Unit_Worker(modelManager, textureManager, 3, 3),&gridMap);
-	objectManager->Add(new Unit_Worker(modelManager, textureManager, 4, 4),&gridMap);
+	
+	for(int x = 0; x < 10; x++){
+		for(int y = 0; y < 10; y++){
+			if(x*y != 81){
+			objectManager->Add(new Unit_Worker(modelManager, textureManager, x, y),&gridMap);
+			}
+		}
+	}
 
 	VertexF camPos;
 	camPos.x = 30;
@@ -151,11 +153,14 @@ void Game::Run(){
 
 		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED){
 			if(worldPos.y >= -1){ // If we're below -1 then we've definitely missed the platform
+				objectManager->HandleClick(worldPos,BUTTON_LEFT,&gridMap);
 				PointI pos;
 				pos.x = worldPos.x/TILE_SIZE;
 				pos.y = worldPos.z/TILE_SIZE;
-				selected = gridMap.GetObjectRefAt(pos);
-				cout << selected << ": Yes m'lord?" << endl;
+				ObjectRef ref = gridMap.GetObjectRefAt(pos);
+				if(ref != 0){
+					selected = ref;
+				}
 			}
 		}
 		if(input->GetMouseButtonState(BUTTON_RIGHT) == BS_PRESSED){
@@ -222,7 +227,7 @@ void Game::Run(){
 		frames++;
 
 		if(frames > 500){
-			//cout << "FPS: " << (1000*frames)/(SDL_GetTicks() - lastFPSCheck) << endl;
+			cout << "FPS: " << (1000*frames)/(SDL_GetTicks() - lastFPSCheck) << endl;
 			lastFPSCheck = SDL_GetTicks();
 			frames = 0;
 		}

@@ -19,7 +19,9 @@ Unit::Unit(ModelManager *modelManager, TextureManager *textureManager, int x, in
 	lastPos.y = y;
 	pos.x = x;
 	pos.y = y;
+	lastAngle = 0;
 	angle = 0;
+	dAngle = 0;
 	mPercent = 0;
 	model = 0;
 	animationName = "";
@@ -43,6 +45,7 @@ void Unit::Update(int ticks, GridMap* gridMap){
 	while(mPercent > 1){
 		mPercent -= 1;
 		lastPos = pos;
+		lastAngle = angle;
 		if(!moveList.empty()){
 			int occupiedTiles = 0;
 			while(!moveList.empty() && gridMap->GetObjectRefAt(moveList.front()) != 0){ // while there isn't an empty space found
@@ -67,6 +70,15 @@ void Unit::Update(int ticks, GridMap* gridMap){
 				gridMap->MoveObject(lastPos,pos);
 				moveList.pop_front();
 				angle = atan2(-(float)(pos.y-lastPos.y),(float)(pos.x-lastPos.x))+3.14159/2; // y is flipped on the map and 0 degrees is straight down the y axis
+				if(angle < 0){
+					angle += 2*3.14159;
+				}
+				dAngle = angle - lastAngle;
+				if(dAngle > 3.14159){
+					dAngle -= 2*3.14159;
+				} else if(dAngle < -3.14159){
+					dAngle += 2*3.14159;
+				}
 			}
 		}
 	}
@@ -78,9 +90,7 @@ void Unit::Update(int ticks){
 }
 
 void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
-	glDisable(GL_TEXTURE_2D);
-	glPushMatrix();
-	glTranslatef(2.5,0,2.5);
+	/*glDisable(GL_TEXTURE_2D);
 	GLUquadric* q = gluNewQuadric();
 	glPushMatrix();
 	glTranslatef(pos.x*TILE_SIZE,2,pos.y*TILE_SIZE);
@@ -97,9 +107,15 @@ void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
 		gluSphere(q,.5,8,4);
 		glPopMatrix();
 	}
-	gluDeleteQuadric(q);
-	glTranslatef(TILE_SIZE*((float)lastPos.x+(pos.x-lastPos.x)*mPercent),0,TILE_SIZE*((float)lastPos.y+(pos.y-lastPos.y)*mPercent));
-	glRotatef(180.0*angle/3.14159,0,1,0);
+	gluDeleteQuadric(q);*/
+	glPushMatrix();
+	glTranslatef(2.5+TILE_SIZE*((float)lastPos.x+(pos.x-lastPos.x)*mPercent),0,2.5+TILE_SIZE*((float)lastPos.y+(pos.y-lastPos.y)*mPercent));
+	if(mPercent < .1){
+		glRotatef(180.0*(lastAngle + (dAngle)*mPercent*10)/3.14159,0,1,0);
+	} else {
+		dAngle = 0;
+		glRotatef(180.0*angle/3.14159,0,1,0);
+	}
 	modelManager->DrawModel(model,textureManager,cr,cg,cb,animationInstance);
 	glPopMatrix();
 }

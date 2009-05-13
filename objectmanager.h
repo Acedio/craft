@@ -8,6 +8,7 @@ using namespace std;
 #include "object.h"
 #include "unit.h"
 #include "gridmap.h"
+#include "input.h"
 
 typedef unsigned int ObjectRef;
 
@@ -24,6 +25,7 @@ public:
 	void DrawObjects(ModelManager *modelManager, TextureManager *textureManager, set<ObjectRef> refs);
 	vector<vector<ObjectRef> > LoadObjectMap(string mapFileName);
 	Object* GetObject(ObjectRef ref);
+	void HandleClick(VertexF location, ButtonName buttonName, GridMap *gridMap);
 private:
 	map<ObjectRef,Object*> objects;
 	map<ObjectRef,int> refcounts;

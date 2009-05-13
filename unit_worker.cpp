@@ -9,7 +9,7 @@ Unit_Worker::Unit_Worker(ModelManager* modelManager, TextureManager *textureMana
 	animationInstance = modelManager->GetAnimationInstance(model,animationName);
 	name += "Worker";
 	mov_speed = 0.0012;
-	angle = 3.14159/4;
+	angle = 0;
 	cout << name << endl;
 }
 

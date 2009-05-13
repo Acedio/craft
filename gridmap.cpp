@@ -107,6 +107,7 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 				int y = b.y-n->point.y;
 				x = x<0?-x:x;
 				y = y<0?-y:y;
+				// TODO some sort of cross product?
 				n->rank = n->d + 2*(x>y?x:y) + ((d&4)>>2); // total distance traveled + manhattan distance w/ unit diagonals
 				n->parent = cur;
 				set<AStarPoint*,ASPComp>::iterator node;
