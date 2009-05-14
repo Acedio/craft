@@ -23,6 +23,7 @@ using namespace std;
 #include "input.h"
 #include "camera.h"
 #include "gridmap.h"
+#include "soundmanager.h"
 
 Game::Game() throw(GameInitException){
 	try{
@@ -96,6 +97,10 @@ void Game::Run(){
 
 	ObjectRef selected = 0;
 
+	SoundManager soundmanager;
+	SoundRef sound = soundmanager.LoadSound("data/sounds/low.wav");
+	
+
 	while(running){
 		ticks = SDL_GetTicks() - ticks;
 
@@ -137,6 +142,10 @@ void Game::Run(){
 		}
 		if(input->GetKeyState(KEY_RIGHT)){
 			camAngle.y -= .001*frameTicks;
+		}
+	/////////sound test
+		if(input->GetKeyState(KEY_p) == KS_PRESSED){
+			soundmanager.PlaySound(sound);
 		}
 
 		objectManager.UpdateAll(frameTicks,&gridMap,&modelManager);
