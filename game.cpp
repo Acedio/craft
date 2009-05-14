@@ -121,7 +121,6 @@ void Game::Run(){
 
 	SoundManager soundmanager;
 	SoundRef sound = soundmanager.LoadSound("data/sounds/low.wav");
-	
 
 	while(running){
 		ticks = SDL_GetTicks() - ticks;
@@ -135,6 +134,64 @@ void Game::Run(){
 		//\/\/\/\/\/\/\/\/\/\/\/\/\/\//
 
 		input->ProcessInput();
+
+		objectManager.UpdateAll(frameTicks,&gridMap,&modelManager);
+		
+		VertexF worldPos;
+		VertexF screenCorners[4];
+		//Uint32 b = SDL_GetTicks();
+		display->ScreenToWorld(input->GetMousePos(), &worldPos, screenCorners);
+		//cout << "t: " << SDL_GetTicks() - b << endl << endl;
+
+		PointF groundCorners[4];
+
+		for(int i = 0; i < 4; i++){
+			VertexF v = screenCorners[i] - camPos;
+			groundCorners[i].x = camPos.x - v.x*(camPos.y/v.y);
+			groundCorners[i].y = camPos.z - v.z*(camPos.y/v.y);
+		}
+
+		/*// UPPER LEFT CORNER POSITION
+		VertexF ulv = upperLeft - camPos;
+		PointF start;
+
+		start.x = camPos.x - ulv.x*(camPos.y/ulv.y);
+		start.y = camPos.z - ulv.z*(camPos.y/ulv.y);
+
+		// DIMENSIONS OF DRAWING AREA
+
+		VertexF lrv = lowerRight - camPos;
+		PointF end;
+
+		end.x = camPos.x - lrv.x*(camPos.y/lrv.y);
+		end.y = camPos.z - lrv.z*(camPos.y/lrv.y);*/
+
+		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_RELEASED){
+			if(worldPos.y >= -1){ // If we're below -1 then we've definitely missed the platform
+				objectManager.HandleClick(worldPos,BUTTON_LEFT,&gridMap);
+				PointI pos;
+				pos.x = worldPos.x/TILE_SIZE;
+				pos.y = worldPos.z/TILE_SIZE;
+				ObjectRef ref = gridMap.GetObjectRefAt(pos);
+				if(ref != 0){
+					selected = ref;
+				}
+			}
+		}
+		if(input->GetMouseButtonState(BUTTON_RIGHT) == BS_RELEASED){
+			if(worldPos.y >= -1){// If we're below -1 then we've definitely missed the platform
+				PointI pos;
+				pos.x = worldPos.x/TILE_SIZE;
+				pos.y = worldPos.z/TILE_SIZE;
+				Object *obj = objectManager.GetObject(selected);
+				if(obj != NULL){
+					if(obj->GetType()&OBJ_UNIT){
+						((Unit*)obj)->MoveTo(pos,&gridMap);
+					}
+				}
+			}
+		}
+
 		if(input->WindowClosed()){
 			running = false;
 		}
@@ -170,38 +227,6 @@ void Game::Run(){
 			soundmanager.PlaySound(sound);
 		}
 
-		objectManager.UpdateAll(frameTicks,&gridMap,&modelManager);
-
-		VertexF worldPos;
-		PointF upperLeft, dimensions;
-		display->ScreenToWorld(input->GetMousePos(), &worldPos, &upperLeft, &dimensions);
-
-		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_RELEASED){
-			if(worldPos.y >= -1){ // If we're below -1 then we've definitely missed the platform
-				objectManager.HandleClick(worldPos,BUTTON_LEFT,&gridMap);
-				PointI pos;
-				pos.x = worldPos.x/TILE_SIZE;
-				pos.y = worldPos.z/TILE_SIZE;
-				ObjectRef ref = gridMap.GetObjectRefAt(pos);
-				if(ref != 0){
-					selected = ref;
-				}
-			}
-		}
-		if(input->GetMouseButtonState(BUTTON_RIGHT) == BS_RELEASED){
-			if(worldPos.y >= -1){// If we're below -1 then we've definitely missed the platform
-				PointI pos;
-				pos.x = worldPos.x/TILE_SIZE;
-				pos.y = worldPos.z/TILE_SIZE;
-				Object *obj = objectManager.GetObject(selected);
-				if(obj != NULL){
-					if(obj->GetType()&OBJ_UNIT){
-						((Unit*)obj)->MoveTo(pos,&gridMap);
-					}
-				}
-			}
-		}
-
 		//\/\/\/\/\/\/\/\/\/\/\/\/\//
 		// END MAIN GAME LOOP CODE //
 		/////////////////////////////
@@ -216,7 +241,7 @@ void Game::Run(){
 		camera.ChangeAngle(camAngle);
 		camera.LookThrough();
 
-		GLfloat light[4] = {1000,1000,1000,1};
+		GLfloat light[4] = {600,1000,600,1};
 		glLightfv(GL_LIGHT0, GL_POSITION, light);
 
 		glPushMatrix(); // we want to save this matrix so we can use it for picking in the next game loop
@@ -244,9 +269,9 @@ void Game::Run(){
 			glVertex3f(0,0,5*s);
 		glEnd();
 
-		//set<ObjectRef> drawSet = gridMap.GetDrawSet(upperLeft,dimensions);
+		set<ObjectRef> drawSet = gridMap.GetDrawSet(groundCorners);
 
-		//objectManager.DrawObjects(&modelManager,textureManager,drawSet);
+		objectManager.DrawObjects(&modelManager,textureManager,drawSet);
 
 		glPopMatrix();
 
@@ -263,7 +288,7 @@ void Game::Run(){
 
 		ShadowMatrix(ground,light);
 		
-		//objectManager.DrawShadows(&modelManager,drawSet);
+		objectManager.DrawShadows(&modelManager,drawSet);
 
 		glDisable(GL_POLYGON_OFFSET_FILL);
 		glEnable(GL_LIGHTING);

@@ -30,7 +30,7 @@ class Display{
 public:
 	Display(int width, int height, int bitsperpixel) throw(DisplayException);
 	~Display();
-	void ScreenToWorld(PointI cursorScreenPos, VertexF *cursorPos, PointF *upperLeft, PointF *dimensions);
+	void ScreenToWorld(PointI cursorScreenPos, VertexF *cursorPos, VertexF screenCorners[4]);
 private:
 	SDL_Surface *screen;
 	int w, h, bpp;

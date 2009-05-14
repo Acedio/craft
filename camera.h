@@ -12,6 +12,7 @@ public:
 	void MoveTo(VertexF position);
 	void ChangeAngle(PointF a);
 	void LookThrough(); // I know, it's corny ;D
+	VertexF GetCamPos();
 private:
 	VertexF pos;
 	PointF angle;

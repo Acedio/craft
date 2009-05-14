@@ -3,6 +3,9 @@
 
 struct VertexF{
 	float x,y,z;
+	VertexF operator-(VertexF b){VertexF temp; temp.x = x - b.x; temp.y = y - b.y; temp.z = z - b.z; return temp;}
+	VertexF operator+(VertexF b){VertexF temp; temp.x = x + b.x; temp.y = y + b.y; temp.z = z + b.z; return temp;}
+	VertexF operator*(int b){VertexF temp; temp.x = x * b; temp.y = y * b; temp.z = z * b; return temp;}
 };
 
 struct VertexI{

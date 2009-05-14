@@ -45,7 +45,7 @@ public:
 
 	bool PointIsValid(PointI a);
 
-	set<ObjectRef> GetDrawSet(PointI upperLeft, PointI dimensions);
+	set<ObjectRef> GetDrawSet(PointF groundCorners[4]);
 
 	ObjectRef GetObjectRefAt(PointI pos);
 private:

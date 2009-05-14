@@ -52,32 +52,19 @@ bool GridMap::AddObject(ObjectRef ref, PointI pos){
 	return false;
 }
 
-set<ObjectRef> GridMap::GetDrawSet(PointI upperLeft, PointI dimensions){
+set<ObjectRef> GridMap::GetDrawSet(PointF groundCorners[4]){
 	set<ObjectRef> drawSet;
-	if(upperLeft.x < 0){
-		dimensions.x += upperLeft.x;
-		upperLeft.x = 0;
-	}
-	if(upperLeft.y < 0){
-		dimensions.x += upperLeft.y;
-		upperLeft.y = 0;
-	}
-	if(upperLeft.y >= (int)object_map.size() || upperLeft.x >= (int)object_map[0].size()){
+	int height = object_map.size();
+	if(height <= 0){
+		cout << "Map has zero height!" << endl;
 		return drawSet;
 	}
-	if(dimensions.x == 0 || dimensions.y == 0){
-		return drawSet;
-	}
-	if(upperLeft.y + dimensions.y >= (int)object_map.size()){
-		dimensions.y = object_map.size()-upperLeft.y;
-	}
-	if(upperLeft.x + dimensions.x >= (int)object_map[0].size()){
-		dimensions.x = object_map[0].size()-upperLeft.x;
-	}
-	for(int y = 0; y < dimensions.y; y++){
-		for(int x = 0; x < dimensions.x; x++){
-			drawSet.insert(object_map[y+upperLeft.y][x+upperLeft.x]);
-		}
+	int width = object_map[0].size();
+	for(int i = 0; i < 4; i++){
+		if(groundCorners[i].x < 0) groundCorners[i].x = 0;
+		if(groundCorners[i].y < 0) groundCorners[i].y = 0;
+		if(groundCorners[i].x > width) groundCorners[i].x = width;
+		if(groundCorners[i].y > height) groundCorners[i].y = height;
 	}
 	return drawSet;
 }
@@ -104,7 +91,6 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 	start->rank = 0;
 	open.insert(start);
 	AStarPoint* cur = *(open.begin());
-	// TODO open is getting really big really quickly. Might need to find some sort of priority set? I want to make sure that I have only the best of the current point.
 	while(!open.empty() && !(cur->point == b)){
 		open.erase(open.begin());
 		closed.insert(cur->point);

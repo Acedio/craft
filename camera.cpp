@@ -48,3 +48,7 @@ void Camera::LookThrough(){
 	glRotatef(-180*angle.y/3.14159,0,1,0);
 	glTranslatef(-pos.x,-pos.y,-pos.z);
 }
+
+VertexF Camera::GetCamPos(){
+	return pos;
+}
