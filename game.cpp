@@ -67,15 +67,15 @@ void Game::Run(){
 
 	TextureRef bell = textureManager->LoadTexture("bell.png");
 
-	gridMap = GridMap(objectManager.LoadObjectMap("test.map"));
+	gridMap = GridMap(objectManager.LoadObjectMap("test.map", &modelManager, textureManager));
 	
-	for(int x = 0; x < 10; x++){
+	/*for(int x = 0; x < 10; x++){
 		for(int y = 0; y < 10; y++){
 			if(x&1){
 			objectManager.Add(new Unit_Worker(&modelManager, textureManager, x, y),&gridMap);
 			}
 		}
-	}
+	}*/
 
 	VertexF camPos;
 	camPos.x = 30;

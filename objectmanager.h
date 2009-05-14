@@ -23,7 +23,7 @@ public:
 	void RemoveRef(ObjectRef ref);
 	void UpdateAll(int ticks,GridMap *gridMap, ModelManager *modelManager);
 	void DrawObjects(ModelManager *modelManager, TextureManager *textureManager, set<ObjectRef> refs);
-	vector<vector<ObjectRef> > LoadObjectMap(string mapFileName);
+	vector<vector<ObjectRef> > LoadObjectMap(string mapFileName, ModelManager *modelManager, TextureManager *textureManager);
 	Object* GetObject(ObjectRef ref);
 	void HandleClick(VertexF location, ButtonName buttonName, GridMap *gridMap);
 private:

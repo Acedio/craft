@@ -1,5 +1,7 @@
 #include "objectmanager.h"
 #include "object.h"
+#include "unit.h"
+#include "unit_worker.h"
 #include "gridmap.h"
 #include "input.h"
 
@@ -85,7 +87,7 @@ Object* ObjectManager::GetObject(ObjectRef ref){
 	return NULL;
 }
 
-vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName)
+vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName, ModelManager* modelManager, TextureManager *textureManager)
 {
 	fstream mapFile;
 	mapFile.open(mapFileName.c_str(), fstream::in);
@@ -101,7 +103,7 @@ vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName)
 	mapFile >> height;
 
 	vector<vector<ObjectRef> > object_map;
-	
+
 	for (int y = 0; y < height; y++)
 	{
 		vector<ObjectRef> temp;
@@ -124,6 +126,12 @@ vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName)
 					break;
 				case '2': //player2 start
 					break;*/
+				case '.':
+					temp.push_back(0);
+					break;
+				case '#':
+					temp.push_back(Add(new Unit_Worker(modelManager,textureManager,x,y)));
+					break;
 				default:
 					temp.push_back(0);
 					break;
