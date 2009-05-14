@@ -6,7 +6,7 @@
 #include "texturemanager.h"
 #include "gridmap.h"
 
-enum ObjectType { OBJ_UNIT = 0x10, OBJ_UNIT_WORKER = 0x10 };
+enum ObjectType { OBJ_UNIT = 0x10, OBJ_UNIT_WORKER = 0x10, OBJ_RESOURCE = 0x20, OBJ_RESOURCE_TREE = 0x20 };
 
 class Object{
 public:

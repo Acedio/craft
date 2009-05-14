@@ -24,10 +24,10 @@ SoundManager::SoundManager()
 {
 	nextUnusedRef = 1;
 
-	if( Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 512 ) == -1 )
-    {
+	if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 512 ) == -1 )
+	{
 		cout << "Encountered an error while initializing the sound." << endl;
-    }
+	}
 }
 
 SoundManager::~SoundManager()

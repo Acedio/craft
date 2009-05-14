@@ -2,6 +2,8 @@
 #include "object.h"
 #include "unit.h"
 #include "unit_worker.h"
+#include "resource.h"
+#include "resource_tree.h"
 #include "gridmap.h"
 #include "input.h"
 
@@ -114,23 +116,18 @@ vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName, Mode
 			
 			switch(s[0])
 			{
-				/*case '.': //walkable
+				/*case '*': //gold
+					break;*/
+				case '2': //player2 start
+				case '1': //player1 start
+					temp.push_back(Add(new Unit_Worker(modelManager,textureManager,x,y)));
+					break;
+				case '.':
 					temp.push_back(0);
 					break;
 				case '#': //non-walkable (trees for now)
 				case '^': //trees
-					break;
-				case '*': //gold
-					break;
-				case '1': //player1 start
-					break;
-				case '2': //player2 start
-					break;*/
-				case '.':
-					temp.push_back(0);
-					break;
-				case '#':
-					temp.push_back(Add(new Unit_Worker(modelManager,textureManager,x,y)));
+					temp.push_back(Add(new Resource_Tree(modelManager,textureManager,x,y)));
 					break;
 				default:
 					temp.push_back(0);
