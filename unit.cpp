@@ -22,10 +22,11 @@ Unit::Unit(ModelManager *modelManager, TextureManager *textureManager, int x, in
 	lastAngle = 0;
 	angle = 0;
 	dAngle = 0;
-	mPercent = 0;
+	mPercent = 1;
 	model = 0;
-	animationName = "";
+	animationName = "stand";
 	animationInstance = NULL;
+	animationChanged = true;
 	max_hp = 0;
 	cur_hp = 0;
 	def = 0;
@@ -35,58 +36,72 @@ Unit::Unit(ModelManager *modelManager, TextureManager *textureManager, int x, in
 	cr = 1;
 	cg = 1;
 	cb = 1;
+	moving = false;
 }
 
 Unit::~Unit(){
 }
 
-void Unit::Update(int ticks, GridMap* gridMap){
-	mPercent += ticks*mov_speed;
-	while(mPercent > 1){
-		mPercent -= 1;
-		lastPos = pos;
-		lastAngle = angle;
-		if(!moveList.empty()){
-			int occupiedTiles = 0;
-			while(!moveList.empty() && gridMap->GetObjectRefAt(moveList.front()) != 0){ // while there isn't an empty space found
-				occupiedTiles++;
-				moveList.pop_front();
-			}
-			if(!moveList.empty() && occupiedTiles > 0){ // something is in our way
-				if(occupiedTiles < MAX_OCCUPIED_TILES){
-					list<PointI> prepended = gridMap->AStar(pos, moveList.front());
-					if(!prepended.empty()){
-						prepended.pop_back(); // we already have prependeds destination in our moveList
-						moveList.insert(moveList.begin(),prepended.begin(),prepended.end());
-					} else { // there are no other paths to the destination
-						moveList.clear();
-					}
-				} else { // too many things in our current path so we just recalc
-					MoveTo(moveList.back(),gridMap);
-				}
-			}
+void Unit::Update(int ticks, GridMap* gridMap, ModelManager* modelManager){
+	if(animationChanged){
+		animationChanged = false;
+		if(animationInstance != NULL){
+			delete animationInstance;
+		}
+		animationInstance = modelManager->GetAnimationInstance(model, animationName);
+	}
+	if(moving){
+		mPercent += ticks*mov_speed;
+		while(mPercent > 1){
+			mPercent -= 1;
+			lastPos = pos;
+			lastAngle = angle;
 			if(!moveList.empty()){
-				pos = moveList.front();
-				gridMap->MoveObject(lastPos,pos);
-				moveList.pop_front();
-				angle = atan2(-(float)(pos.y-lastPos.y),(float)(pos.x-lastPos.x))+3.14159/2; // y is flipped on the map and 0 degrees is straight down the y axis
-				if(angle < 0){
-					angle += 2*3.14159;
+				int occupiedTiles = 0;
+				while(!moveList.empty() && gridMap->GetObjectRefAt(moveList.front()) != 0){ // while there isn't an empty space found
+					occupiedTiles++;
+					moveList.pop_front();
 				}
-				dAngle = angle - lastAngle;
-				if(dAngle > 3.14159){
-					dAngle -= 2*3.14159;
-				} else if(dAngle < -3.14159){
-					dAngle += 2*3.14159;
+				if(!moveList.empty() && occupiedTiles > 0){ // something is in our way
+					if(occupiedTiles < MAX_OCCUPIED_TILES){
+						list<PointI> prepended = gridMap->AStar(pos, moveList.front());
+						if(!prepended.empty()){
+							prepended.pop_back(); // we already have prependeds destination in our moveList
+							moveList.insert(moveList.begin(),prepended.begin(),prepended.end());
+						} else { // there are no other paths to the destination
+							moveList.clear();
+						}
+					} else { // too many things in our current path so we just recalc
+						MoveTo(moveList.back(),gridMap);
+					}
+				}
+				if(!moveList.empty()){
+					pos = moveList.front();
+					gridMap->MoveObject(lastPos,pos);
+					moveList.pop_front();
+					angle = atan2(-(float)(pos.y-lastPos.y),(float)(pos.x-lastPos.x))+3.14159/2; // y is flipped on the map and 0 degrees is straight down the y axis
+					if(angle < 0){
+						angle += 2*3.14159;
+					}
+					dAngle = angle - lastAngle;
+					if(dAngle > 3.14159){
+						dAngle -= 2*3.14159;
+					} else if(dAngle < -3.14159){
+						dAngle += 2*3.14159;
+					}
 				}
 			}
 		}
+		if(moveList.empty() && lastPos == pos){ // we're done moving
+			if(animationName != "stand"){
+				animationName = "stand";
+				animationChanged = true;
+			}
+			moving = false;
+			mPercent = 1;
+		}
 	}
 	animationInstance->AdvanceFrames(ticks);
-}
-
-void Unit::Update(int ticks){
-	cout << "Error: Unit: I'm blind, I'm blind! Where is my GridMap??" << endl;
 }
 
 void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
@@ -122,7 +137,13 @@ void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
 
 void Unit::MoveTo(PointI tgt, GridMap* gridMap){
 	moveList = gridMap->AStar(pos,tgt);
-	if(pos.x == lastPos.x && pos.y == lastPos.y){ // we're already at our current destination TODO this might be risky, not sure if we could ever have the same location twice in one path
-		mPercent = 1;
+	if(moveList.empty() && pos == lastPos){ // if we don't have any moves, we aren't moving
+		moving = false;
+	} else {
+		moving = true;
+		if(animationName != "walk"){
+			animationName = "walk";
+			animationChanged = true;
+		}
 	}
 }

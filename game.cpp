@@ -33,8 +33,6 @@ Game::Game() throw(GameInitException){
 		throw GameInitException(s); // don't run the game!
 	}
 	textureManager = new TextureManager();
-	modelManager = new ModelManager();
-	objectManager = new ObjectManager();
 	input = new Input();
 	VertexF camPos;
 	camPos.x = 0;
@@ -49,12 +47,6 @@ Game::Game() throw(GameInitException){
 Game::~Game(){
 	if(textureManager != NULL){
 		delete textureManager;
-	}
-	if(modelManager != NULL){
-		delete modelManager;
-	}
-	if(objectManager != NULL){
-		delete objectManager;
 	}
 	if(input != NULL){
 		delete input;
@@ -75,12 +67,12 @@ void Game::Run(){
 
 	TextureRef bell = textureManager->LoadTexture("bell.png");
 
-	gridMap = GridMap(objectManager->LoadObjectMap("test.map"));
+	gridMap = GridMap(objectManager.LoadObjectMap("test.map"));
 	
 	for(int x = 0; x < 10; x++){
 		for(int y = 0; y < 10; y++){
-			if(x*y != 81){
-			objectManager->Add(new Unit_Worker(modelManager, textureManager, x, y),&gridMap);
+			if(x&1){
+			objectManager.Add(new Unit_Worker(&modelManager, textureManager, x, y),&gridMap);
 			}
 		}
 	}
@@ -147,13 +139,13 @@ void Game::Run(){
 			camAngle.y -= .001*frameTicks;
 		}
 
-		objectManager->UpdateAll(frameTicks,&gridMap);
+		objectManager.UpdateAll(frameTicks,&gridMap,&modelManager);
 
 		VertexF worldPos = display->ScreenToWorld(input->GetMousePos());
 
 		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED){
 			if(worldPos.y >= -1){ // If we're below -1 then we've definitely missed the platform
-				objectManager->HandleClick(worldPos,BUTTON_LEFT,&gridMap);
+				objectManager.HandleClick(worldPos,BUTTON_LEFT,&gridMap);
 				PointI pos;
 				pos.x = worldPos.x/TILE_SIZE;
 				pos.y = worldPos.z/TILE_SIZE;
@@ -168,7 +160,7 @@ void Game::Run(){
 				PointI pos;
 				pos.x = worldPos.x/TILE_SIZE;
 				pos.y = worldPos.z/TILE_SIZE;
-				Object *obj = objectManager->GetObject(selected);
+				Object *obj = objectManager.GetObject(selected);
 				if(obj != NULL){
 					if(obj->GetType()&OBJ_UNIT){
 						((Unit*)obj)->MoveTo(pos,&gridMap);
@@ -214,7 +206,7 @@ void Game::Run(){
 			glVertex3f(0,0,50);
 		glEnd();
 
-		objectManager->DrawObjects(modelManager,textureManager,gridMap.GetDrawSet(camera));
+		objectManager.DrawObjects(&modelManager,textureManager,gridMap.GetDrawSet(camera));
 
 		glPopMatrix(); // bring back the matrix for picking
 

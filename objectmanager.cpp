@@ -13,14 +13,10 @@ ObjectManager::ObjectManager(){
 	next_unused_ref = 1;
 }
 
-void ObjectManager::UpdateAll(int ticks, GridMap *gridMap){
+void ObjectManager::UpdateAll(int ticks, GridMap *gridMap, ModelManager *modelManager){
 	for(map<ObjectRef,Object*>::iterator i = objects.begin(); i != objects.end(); ++i){
 		if(i->second != NULL){
-			if(i->second->type&OBJ_UNIT){
-				((Unit*)i->second)->Update(ticks,gridMap);
-			} else {
-				i->second->Update(ticks);
-			}
+			i->second->Update(ticks,gridMap,modelManager);
 		}
 	}
 }
