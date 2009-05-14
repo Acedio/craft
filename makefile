@@ -1,7 +1,7 @@
 CXX=g++ -g
 CXXFLAGS=-c -Wall `sdl-config --cflags`
 
-OBJ=craft.o game.o texturemanager.o display.o input.o gridmap.o modelmanager.o objectmanager.o object.o unit.o unit_worker.o camera.o soundmanager.o resource.o resource_tree.o
+OBJ=craft.o game.o texturemanager.o display.o input.o gridmap.o modelmanager.o objectmanager.o object.o unit.o unit_worker.o camera.o soundmanager.o resource.o resource_tree.o resource_gold.o
 
 all: craft
 
@@ -28,15 +28,17 @@ objectmanager.o: objectmanager.cpp objectmanager.h object.h
 
 object.o: object.cpp object.h globals.h modelmanager.h texturemanager.h
 
-unit.o: unit.cpp unit.h object.h
+unit.o: unit.cpp unit.h modelmanager.h texturemanager.h
 
-unit_worker.o: unit_worker.cpp unit_worker.h unit.h
+unit_worker.o: unit_worker.cpp unit_worker.h modelmanager.h texturemanager.h
 
 soundmanager.o: soundmanager.cpp soundmanager.h
 
-resource.o: resource.cpp resource.h object.h
+resource.o: resource.cpp resource.h modelmanager.h texturemanager.h
 
-resource_tree.o: resource_tree.cpp resource_tree.h resource.h
+resource_tree.o: resource_tree.cpp resource_tree.h modelmanager.h texturemanager.h
+
+resource_gold.o: resource_gold.cpp resource_gold.h modelmanager.h texturemanager.h
 
 clean:
 	rm -rf *.o craft

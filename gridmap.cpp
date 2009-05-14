@@ -9,7 +9,6 @@ using namespace std;
 
 #include "gridmap.h"
 #include "objectmanager.h"
-#include "camera.h"
 #include "globals.h"
 
 GridMap::GridMap(){
@@ -53,11 +52,31 @@ bool GridMap::AddObject(ObjectRef ref, PointI pos){
 	return false;
 }
 
-set<ObjectRef> GridMap::GetDrawSet(Camera camera){
+set<ObjectRef> GridMap::GetDrawSet(PointI upperLeft, PointI dimensions){
 	set<ObjectRef> drawSet;
-	for(vector<vector<ObjectRef> >::iterator row = object_map.begin(); row != object_map.end(); ++row){
-		for(vector<ObjectRef>::iterator tile = row->begin(); tile != row->end(); ++tile){
-			drawSet.insert(*tile);
+	if(upperLeft.x < 0){
+		dimensions.x += upperLeft.x;
+		upperLeft.x = 0;
+	}
+	if(upperLeft.y < 0){
+		dimensions.x += upperLeft.y;
+		upperLeft.y = 0;
+	}
+	if(upperLeft.y >= (int)object_map.size() || upperLeft.x >= (int)object_map[0].size()){
+		return drawSet;
+	}
+	if(dimensions.x == 0 || dimensions.y == 0){
+		return drawSet;
+	}
+	if(upperLeft.y + dimensions.y >= (int)object_map.size()){
+		dimensions.y = object_map.size()-upperLeft.y;
+	}
+	if(upperLeft.x + dimensions.x >= (int)object_map[0].size()){
+		dimensions.x = object_map[0].size()-upperLeft.x;
+	}
+	for(int y = 0; y < dimensions.y; y++){
+		for(int x = 0; x < dimensions.x; x++){
+			drawSet.insert(object_map[y+upperLeft.y][x+upperLeft.x]);
 		}
 	}
 	return drawSet;

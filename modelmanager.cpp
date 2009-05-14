@@ -513,7 +513,7 @@ ModelRef ModelManager::LoadModel(string filename, TextureManager* textureManager
 	}
 }
 
-void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, float cr, float cg, float cb, JointState **initials, JointState **vels){
+void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* textureManager, float cr, float cg, float cb, JointState **initials, JointState **vels, bool textured){
 	assert(piece != NULL);
 	glPushMatrix();
 	if((*initials) != NULL && (*vels) != NULL){
@@ -526,9 +526,7 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 			(*vels) = (*vels)->next;
 		}
 	}
-	if(piece->displayList == 0){ // we haven't created a display list for this piece yet
-		piece->displayList = glGenLists(1);
-		glNewList(piece->displayList,GL_COMPILE_AND_EXECUTE);
+	if(textured){
 		if(piece->textured){
 			glEnable(GL_TEXTURE_2D);
 			if(piece->texture != lastTexture){
@@ -543,6 +541,13 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 		} else {
 			glColor3f(1,1,1);
 		}
+	} else {
+		glDisable(GL_TEXTURE_2D);
+		glColor3f(cr,cg,cb);
+	}
+	if(piece->displayList == 0){ // we haven't created a display list for this piece yet
+		piece->displayList = glGenLists(1);
+		glNewList(piece->displayList,GL_COMPILE_AND_EXECUTE);
 		glBegin(GL_TRIANGLES);
 		for(vector<Triangle>::iterator tri = piece->triangles.begin(); tri != piece->triangles.end(); tri++){
 			for(int i = 0; i < 3; ++i){
@@ -559,12 +564,12 @@ void ModelManager::DrawPiece(Model* model, ModelPiece* piece, TextureManager* te
 		glCallList(piece->displayList);
 	}
 	for(vector<ModelPiece*>::iterator p = piece->children.begin(); p != piece->children.end(); p++){
-		DrawPiece(model,*p,textureManager, cr, cg, cb, initials, vels); // yay recursion :D
+		DrawPiece(model,*p,textureManager, cr, cg, cb, initials, vels, textured); // yay recursion :D
 	}
 	glPopMatrix();
 }
 
-void ModelManager::DrawModel(ModelRef ref, TextureManager *textureManager, float cr, float cg, float cb, AnimationInstance *animationInstance){
+void ModelManager::DrawModel(ModelRef ref, TextureManager *textureManager, float cr, float cg, float cb, AnimationInstance *animationInstance, bool textured){
 	JointState *initials, *vels;
 	if(animationInstance != NULL && animationInstance->animation != NULL){
 		initials = animationInstance->animation->keyFrames[animationInstance->key];
@@ -578,7 +583,7 @@ void ModelManager::DrawModel(ModelRef ref, TextureManager *textureManager, float
 	if(modelIter != models.end()){
 		Model* model = modelIter->second;
 		for(vector<ModelPiece*>::iterator p = model->pieces.begin(); p != model->pieces.end(); ++p){
-			DrawPiece(model,*p,textureManager,cr,cg,cb,&initials,&vels);
+			DrawPiece(model,*p,textureManager,cr,cg,cb,&initials,&vels,textured);
 		}
 	}
 }

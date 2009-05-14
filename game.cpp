@@ -25,9 +25,41 @@ using namespace std;
 #include "gridmap.h"
 #include "soundmanager.h"
 
+static void ShadowMatrix(float ground[4], float light[4]){
+	float  dot;
+	float  shadowMat[4][4];
+
+	dot = ground[0] * light[0] +
+		ground[1] * light[1] +
+		ground[2] * light[2] +
+		ground[3] * light[3];
+
+	shadowMat[0][0] = dot - light[0] * ground[0];
+	shadowMat[1][0] = 0.0 - light[0] * ground[1];
+	shadowMat[2][0] = 0.0 - light[0] * ground[2];
+	shadowMat[3][0] = 0.0 - light[0] * ground[3];
+
+	shadowMat[0][1] = 0.0 - light[1] * ground[0];
+	shadowMat[1][1] = dot - light[1] * ground[1];
+	shadowMat[2][1] = 0.0 - light[1] * ground[2];
+	shadowMat[3][1] = 0.0 - light[1] * ground[3];
+
+	shadowMat[0][2] = 0.0 - light[2] * ground[0];
+	shadowMat[1][2] = 0.0 - light[2] * ground[1];
+	shadowMat[2][2] = dot - light[2] * ground[2];
+	shadowMat[3][2] = 0.0 - light[2] * ground[3];
+
+	shadowMat[0][3] = 0.0 - light[3] * ground[0];
+	shadowMat[1][3] = 0.0 - light[3] * ground[1];
+	shadowMat[2][3] = 0.0 - light[3] * ground[2];
+	shadowMat[3][3] = dot - light[3] * ground[3];
+
+	glMultMatrixf((const GLfloat*)shadowMat);
+}
+
 Game::Game() throw(GameInitException){
 	try{
-		display = new Display(800,600,32); // display must be initialized first because it initializes SDL
+		display = new Display(1025,768,32); // display must be initialized first because it initializes SDL
 	} catch(DisplayException e){
 		cout << "Error initializing display: " << e.what() << endl;
 		const char* s = "Error initializing display."; // const char* so g++ doesn't complain about string -> char deprecation
@@ -63,24 +95,14 @@ void Game::Run(){
 	glEnable(GL_LIGHT0);
 	glEnable(GL_COLOR_MATERIAL);
 	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
-	GLfloat p[4] = {0,0,10,1};
-	glLightfv(GL_LIGHT0, GL_POSITION, p);
 
-	TextureRef bell = textureManager->LoadTexture("bell.png");
+	TextureRef grass = textureManager->LoadTexture("grass.png");
 
-	gridMap = GridMap(objectManager.LoadObjectMap("test.map", &modelManager, textureManager));
-	
-	/*for(int x = 0; x < 10; x++){
-		for(int y = 0; y < 10; y++){
-			if(x&1){
-			objectManager.Add(new Unit_Worker(&modelManager, textureManager, x, y),&gridMap);
-			}
-		}
-	}*/
+	gridMap = GridMap(objectManager.LoadObjectMap("map.map", &modelManager, textureManager));
 
 	VertexF camPos;
 	camPos.x = 30;
-	camPos.y = 40;
+	camPos.y = 60;
 	camPos.z = 30;
 
 	PointF camAngle;
@@ -116,7 +138,7 @@ void Game::Run(){
 		if(input->WindowClosed()){
 			running = false;
 		}
-		if(input->GetKeyState(KEY_ESCAPE) == KS_DOWN){
+		if(input->GetKeyState(KEY_ESCAPE) == KS_RELEASED){
 			running = false;
 		}
 		if(input->GetKeyState(KEY_w) == KS_DOWN){
@@ -150,9 +172,11 @@ void Game::Run(){
 
 		objectManager.UpdateAll(frameTicks,&gridMap,&modelManager);
 
-		VertexF worldPos = display->ScreenToWorld(input->GetMousePos());
+		VertexF worldPos;
+		PointF upperLeft, dimensions;
+		display->ScreenToWorld(input->GetMousePos(), &worldPos, &upperLeft, &dimensions);
 
-		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_PRESSED){
+		if(input->GetMouseButtonState(BUTTON_LEFT) == BS_RELEASED){
 			if(worldPos.y >= -1){ // If we're below -1 then we've definitely missed the platform
 				objectManager.HandleClick(worldPos,BUTTON_LEFT,&gridMap);
 				PointI pos;
@@ -164,7 +188,7 @@ void Game::Run(){
 				}
 			}
 		}
-		if(input->GetMouseButtonState(BUTTON_RIGHT) == BS_PRESSED){
+		if(input->GetMouseButtonState(BUTTON_RIGHT) == BS_RELEASED){
 			if(worldPos.y >= -1){// If we're below -1 then we've definitely missed the platform
 				PointI pos;
 				pos.x = worldPos.x/TILE_SIZE;
@@ -192,30 +216,58 @@ void Game::Run(){
 		camera.ChangeAngle(camAngle);
 		camera.LookThrough();
 
+		GLfloat light[4] = {1000,1000,1000,1};
+		glLightfv(GL_LIGHT0, GL_POSITION, light);
+
 		glPushMatrix(); // we want to save this matrix so we can use it for picking in the next game loop
 
 		glEnable(GL_TEXTURE_2D);
-		textureManager->BindTexture(bell);
+		textureManager->BindTexture(grass);
 
+		int s = 64;
+		
 		glBegin(GL_QUADS);
 			glColor3f(1,1,1);
 
 			glNormal3f(0,1,0);
 
-			glTexCoord2f(0,1);
+			glTexCoord2f(0,s/2);
 			glVertex3f(0,0,0);
 
-			glTexCoord2f(1,1);
-			glVertex3f(50,0,0);
+			glTexCoord2f(s/2,s/2);
+			glVertex3f(5*s,0,0);
 
-			glTexCoord2f(1,0);
-			glVertex3f(50,0,50);
+			glTexCoord2f(s/2,0);
+			glVertex3f(5*s,0,5*s);
 
 			glTexCoord2f(0,0);
-			glVertex3f(0,0,50);
+			glVertex3f(0,0,5*s);
 		glEnd();
 
-		objectManager.DrawObjects(&modelManager,textureManager,gridMap.GetDrawSet(camera));
+		//set<ObjectRef> drawSet = gridMap.GetDrawSet(upperLeft,dimensions);
+
+		//objectManager.DrawObjects(&modelManager,textureManager,drawSet);
+
+		glPopMatrix();
+
+		// SHADOWS
+
+		glPushMatrix();
+		
+		glDisable(GL_LIGHTING);
+		glDisable(GL_TEXTURE_2D);
+		glEnable(GL_POLYGON_OFFSET_FILL);
+		glPolygonOffset(-1,-1);
+
+		float ground[4] = {0,1,0,0};
+
+		ShadowMatrix(ground,light);
+		
+		//objectManager.DrawShadows(&modelManager,drawSet);
+
+		glDisable(GL_POLYGON_OFFSET_FILL);
+		glEnable(GL_LIGHTING);
+		glEnable(GL_TEXTURE_2D);
 
 		glPopMatrix(); // bring back the matrix for picking
 

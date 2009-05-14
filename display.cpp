@@ -50,7 +50,7 @@ Display::~Display(){
 	SDL_Quit();
 }
 
-VertexF Display::ScreenToWorld(PointI screenPos){
+void Display::ScreenToWorld(PointI cursorScreenPos, VertexF *cursorPos, PointF *upperLeft, PointF *dimensions){
 	GLdouble modelview[16];
 	GLdouble projection[16];
 	GLint viewport[4];
@@ -60,20 +60,36 @@ VertexF Display::ScreenToWorld(PointI screenPos){
 	glGetIntegerv(GL_VIEWPORT,viewport);
 
 	GLfloat z;
-	// TODO this is, sadly, HOLY CRAP slow. It works REALLY wellm but it's ridiculously slow.
-	glReadPixels(screenPos.x,viewport[3]-screenPos.y,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&z);
+	// TODO this is, sadly, HOLY CRAP slow. It works REALLY well but it's ridiculously slow.
+	glReadPixels(cursorScreenPos.x,viewport[3]-cursorScreenPos.y,1,1,GL_DEPTH_COMPONENT,GL_FLOAT,&z);
+	z = 0;
 
 	double ox,oy,oz;
 
-	VertexF temp;
-	if(gluUnProject(screenPos.x,viewport[3]-screenPos.y,z,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
-		temp.x = 0;
-		temp.y = 0;
-		temp.z = 0;
+	if(gluUnProject(cursorScreenPos.x,viewport[3]-cursorScreenPos.y,z,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
+		cursorPos->x = 0;
+		cursorPos->y = 0;
+		cursorPos->z = 0;
 	} else {
-		temp.x = ox;
-		temp.y = oy;
-		temp.z = oz;
+		cursorPos->x = ox;
+		cursorPos->y = oy;
+		cursorPos->z = oz;
 	}
-	return temp;
+	if(gluUnProject(0,0,0,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
+		upperLeft->x = 0;
+		upperLeft->y = 0;
+		dimensions->x = 0;
+		dimensions->y = 0;
+	} else {
+		upperLeft->x = ox;
+		upperLeft->y = oz;
+		if(gluUnProject(viewport[2],viewport[3],0,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
+			dimensions->x = 0;
+			dimensions->y = 0;
+		} else {
+			dimensions->x = ox - upperLeft->x;
+			dimensions->y = oz - upperLeft->y;
+		}
+	}
+	cout << upperLeft->x << " " << upperLeft->y << "     " << dimensions->x << " " << dimensions->y << endl;
 }

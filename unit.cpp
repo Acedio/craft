@@ -131,7 +131,20 @@ void Unit::Draw(ModelManager *modelManager, TextureManager *textureManager){
 		dAngle = 0;
 		glRotatef(180.0*angle/3.14159,0,1,0);
 	}
-	modelManager->DrawModel(model,textureManager,cr,cg,cb,animationInstance);
+	modelManager->DrawModel(model,textureManager,cr,cg,cb,animationInstance,true); // textured
+	glPopMatrix();
+}
+
+void Unit::DrawShadow(ModelManager *modelManager){
+	glPushMatrix();
+	glTranslatef(2.5+TILE_SIZE*((float)lastPos.x+(pos.x-lastPos.x)*mPercent),0,2.5+TILE_SIZE*((float)lastPos.y+(pos.y-lastPos.y)*mPercent));
+	if(mPercent < .1){
+		glRotatef(180.0*(lastAngle + (dAngle)*mPercent*10)/3.14159,0,1,0);
+	} else {
+		dAngle = 0;
+		glRotatef(180.0*angle/3.14159,0,1,0);
+	}
+	modelManager->DrawModel(model,NULL,0,0,0,animationInstance,false); // draw shadows (not textured)
 	glPopMatrix();
 }
 

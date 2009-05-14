@@ -12,6 +12,7 @@ class Resource : public Object {
 public:
 	Resource(ModelManager* modelManager, TextureManager* textureManager, int x, int y);
 	virtual void Draw(ModelManager *modelManager, TextureManager *textureManager);
+	virtual void DrawShadow(ModelManager *modelManager);
 	virtual void Update(int ticks, GridMap *gridMap, ModelManager* modelManager);
 protected:
 	PointI pos;

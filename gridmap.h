@@ -45,7 +45,7 @@ public:
 
 	bool PointIsValid(PointI a);
 
-	set<ObjectRef> GetDrawSet(Camera camera);
+	set<ObjectRef> GetDrawSet(PointI upperLeft, PointI dimensions);
 
 	ObjectRef GetObjectRefAt(PointI pos);
 private:

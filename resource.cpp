@@ -20,7 +20,15 @@ void Resource::Draw(ModelManager *modelManager, TextureManager *textureManager){
 	glPushMatrix();
 	glTranslatef(2.5+TILE_SIZE*(float)pos.x+offset.x,0,2.5+TILE_SIZE*(float)pos.y+offset.y);
 	glRotatef(angle,0,1,0);
-	modelManager->DrawModel(model,textureManager,1,1,1,NULL);
+	modelManager->DrawModel(model,textureManager,1,1,1,NULL,true);
+	glPopMatrix();
+}
+
+void Resource::DrawShadow(ModelManager *modelManager){
+	glPushMatrix();
+	glTranslatef(2.5+TILE_SIZE*(float)pos.x+offset.x,0,2.5+TILE_SIZE*(float)pos.y+offset.y);
+	glRotatef(angle,0,1,0);
+	modelManager->DrawModel(model,NULL,0,0,0,NULL,false);
 	glPopMatrix();
 }
 

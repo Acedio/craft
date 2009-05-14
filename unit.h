@@ -88,6 +88,7 @@ public:
 	Unit(ModelManager* modelManager, TextureManager* textureManager, int x, int y);
 	~Unit();
 	virtual void Draw(ModelManager *modelManager, TextureManager *textureManager);
+	virtual void DrawShadow(ModelManager *modelManager);
 	virtual void MoveTo(PointI tgt, GridMap *gridMap);
 	virtual void Update(int ticks, GridMap *gridMap, ModelManager* modelManager);
 protected:

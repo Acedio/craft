@@ -4,6 +4,7 @@
 #include "unit_worker.h"
 #include "resource.h"
 #include "resource_tree.h"
+#include "resource_gold.h"
 #include "gridmap.h"
 #include "input.h"
 
@@ -32,6 +33,20 @@ void ObjectManager::DrawObjects(ModelManager *modelManager, TextureManager *text
 			obj = objects.find(*ref);
 			if(obj != objects.end() && obj->second != NULL){
 				obj->second->Draw(modelManager,textureManager);
+			} else {
+				cout << "Can't find object " << *ref << "." << endl;
+			}
+		}
+	}
+}
+
+void ObjectManager::DrawShadows(ModelManager *modelManager, set<ObjectRef> refs){
+	for(set<ObjectRef>::iterator ref = refs.begin(); ref != refs.end(); ref++){
+		if(*ref != 0){ // there is no object 0
+			map<ObjectRef,Object*>::iterator obj;
+			obj = objects.find(*ref);
+			if(obj != objects.end() && obj->second != NULL){
+				obj->second->DrawShadow(modelManager);
 			} else {
 				cout << "Can't find object " << *ref << "." << endl;
 			}
@@ -116,8 +131,9 @@ vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName, Mode
 			
 			switch(s[0])
 			{
-				/*case '*': //gold
-					break;*/
+				case '*': //gold
+					temp.push_back(Add(new Resource_Gold(modelManager,textureManager,x,y)));
+					break;
 				case '2': //player2 start
 				case '1': //player1 start
 					temp.push_back(Add(new Unit_Worker(modelManager,textureManager,x,y)));
