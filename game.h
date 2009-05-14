@@ -31,8 +31,8 @@ private:
 	Display *display;
 	Input *input;
 	TextureManager *textureManager;
-	ModelManager *modelManager;
-	ObjectManager *objectManager;
+	ModelManager modelManager;
+	ObjectManager objectManager;
 	Camera camera;
 	GridMap gridMap;
 };

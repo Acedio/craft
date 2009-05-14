@@ -89,14 +89,15 @@ public:
 	~Unit();
 	virtual void Draw(ModelManager *modelManager, TextureManager *textureManager);
 	virtual void MoveTo(PointI tgt, GridMap *gridMap);
-	virtual void Update(int ticks);
-	virtual void Update(int ticks, GridMap *gridMap);
+	virtual void Update(int ticks, GridMap *gridMap, ModelManager* modelManager);
 protected:
 	PointI lastPos;
 	PointI pos;
 	float mPercent; // the percent between pos and lastPos
 	list<PointI> moveList;
 	float angle;
+	float lastAngle;
+	float dAngle;
 	ModelRef model;
 	float cr, cg, cb;
 	int max_hp;
@@ -108,6 +109,8 @@ protected:
 	AnimationInstance *animationInstance;
 	string animationName;
 	string name;
+	bool moving;
+	bool animationChanged;
 	friend class ObjectManager;
 };
 

@@ -2,7 +2,6 @@
 #define _CAMERA_H_
 
 #include "globals.h"
-#include "object.h"
 
 class Camera{
 public:
