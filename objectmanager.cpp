@@ -147,15 +147,10 @@ void ObjectManager::LoadObjectMap(string mapFileName, GridMap *gridMap, ModelMan
 					break;
 				case '2': //player2 start
 				case '1': //player1 start
-<<<<<<< HEAD:objectmanager.cpp
-					tile.objRef = Add(new Unit_Lancer(modelManager,textureManager,x,y));
-					tile.passType = PT_PASSABLE;
-=======
 					gridMap->AddObject(Add(new Unit_Worker(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
 					break;
 				case 'b':
-					gridMap->AddObject(Add(new Building_Keep(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
->>>>>>> 43c4b9ba81b8ac7b4c7afc40d3685c570f4e1c52:objectmanager.cpp
+					gridMap->AddObject(Add(new Building_Farm(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*2);
 					break;
 				case '#': //non-walkable (trees for now)
 				case '^': //trees

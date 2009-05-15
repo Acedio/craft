@@ -6,8 +6,8 @@
 using namespace std;
 
 Building::Building(ModelManager* modelManager,TextureManager* textureManager,int x,int y){
-	pos.x = 0;
-	pos.y = 0;
+	pos.x = x;
+	pos.y = y;
 	model = 0;
 	build_time = 0;
 	max_hp = 1;
