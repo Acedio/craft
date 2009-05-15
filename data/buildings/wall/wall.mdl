@@ -1,0 +1,4 @@
+# wall model
+OBJ data/buildings/wall/wall.obj
+
+PIECETREE MAIN TC_TEAM

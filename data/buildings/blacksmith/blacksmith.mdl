@@ -1,0 +1,4 @@
+# blacksmith model
+OBJ data/buildings/blacksmith/blacksmith.obj
+
+PIECETREE MAIN TC_TEAM
