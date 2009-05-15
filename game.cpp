@@ -202,6 +202,14 @@ void Game::Run(){
 			}
 		}
 
+		if(input->GetKeyState(KEY_a) == KS_RELEASED){
+			Object* obj = objectManager.GetObject(selected);
+			if (obj != NULL && (obj->GetType() & OBJ_UNIT))
+			{
+				Unit* unit = (Unit*)obj;
+			}
+		}
+
 		if(input->WindowClosed()){
 			running = false;
 		}
