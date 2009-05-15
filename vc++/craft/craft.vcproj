@@ -181,6 +181,54 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\building_barracks.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_barracks.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_blacksmith.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_blacksmith.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_farm.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_farm.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_keep.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_keep.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_lumbermill.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_lumbermill.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_wall.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\building_wall.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\camera.cpp"
 				>
 			</File>
@@ -274,6 +322,46 @@
 			</File>
 			<File
 				RelativePath="..\..\unit.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\unit_archer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\unit_archer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\unit_catapult.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\unit_catapult.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\unit_knight.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\unit_knight.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\unit_lancer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\unit_lancer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\unit_swordsman.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\unit_swordsman.h"
 				>
 			</File>
 			<File
