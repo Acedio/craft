@@ -46,13 +46,13 @@ SoundManager::~SoundManager()
 	}
 }
 
-SoundManager::PlayMusic(string filename)
+void SoundManager::PlayMusic(string filename)
 {
 	if(music != NULL)
 	{
 		 Mix_FreeMusic( music );
 	}
-	music = Mix_LoadMUS(filename);
+	music = Mix_LoadMUS(filename.c_str());
 	Mix_PlayMusic( music, -1 );
 }
 SoundRef SoundManager::LoadSound(string filename)

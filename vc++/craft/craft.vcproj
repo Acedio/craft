@@ -396,6 +396,10 @@
 				RelativePath="..\..\unit_worker.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\units.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"

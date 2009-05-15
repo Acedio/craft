@@ -130,7 +130,10 @@ void ObjectManager::LoadObjectMap(string mapFileName, GridMap *gridMap, ModelMan
 	*gridMap = GridMap(object_map);
 
 	PointI p;
-	PointI unitSize;
+	PointI lmSize;  // dont keep...
+	lmSize.x = 2;
+	lmSize.y = 3;
+	PointI unitSize; // dont keep...
 	unitSize.x = unitSize.y = 1;
 
 	for (p.y = 0; p.y < height; p.y++)
@@ -158,29 +161,29 @@ void ObjectManager::LoadObjectMap(string mapFileName, GridMap *gridMap, ModelMan
 				case '5': //player1 start
 					gridMap->AddObject(Add(new Unit_Lancer(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
 					break;
-				case '1': //player1 start
+				case '6': //player1 start
 					gridMap->AddObject(Add(new Unit_Knight(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
 					break;
-				case '1': //player1 start
+				case '7': //player1 start
 					gridMap->AddObject(Add(new Unit_Catapult(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
 					break;
 				case 'k':
 					gridMap->AddObject(Add(new Building_Keep(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
 					break;
 				case 'f':
-					gridMap->AddObject(Add(new Building_Farm(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
+					gridMap->AddObject(Add(new Building_Farm(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*2);
 					break;
 				case 'l':
-					gridMap->AddObject(Add(new Building_Lumbermill(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
+					gridMap->AddObject(Add(new Building_Lumbermill(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,lmSize);
 					break;
 				case 'w':
-					gridMap->AddObject(Add(new Building_Wall(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
+					gridMap->AddObject(Add(new Building_Wall(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*1);
 					break;
 				case 's':
-					gridMap->AddObject(Add(new Building_Blacksmith(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
+					gridMap->AddObject(Add(new Building_Blacksmith(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*2);
 					break;
 				case 'b':
-					gridMap->AddObject(Add(new Building_Barracks(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
+					gridMap->AddObject(Add(new Building_Barracks(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*3);
 					break;
 				case '#': //non-walkable (trees for now)
 				case '^': //trees
