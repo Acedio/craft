@@ -19,6 +19,8 @@ private:
 	map<string, SoundRef> filenames;
 	SoundRef nextUnusedRef;
 
+	Mix_Music *music;
+
 public:
 	SoundManager();
 	~SoundManager();
@@ -26,6 +28,7 @@ public:
 	SoundRef LoadSound(string filename);
 	void UnloadSound(SoundRef ref);
 	void PlaySound(SoundRef ref);
+	void PlayMusic(string filename);
 };
 
 #endif
