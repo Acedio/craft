@@ -2,6 +2,9 @@
 #include "object.h"
 #include "building.h"
 
+#include <iostream>
+using namespace std;
+
 Building::Building(ModelManager* modelManager,TextureManager* textureManager,int x,int y){
 	pos.x = 0;
 	pos.y = 0;
@@ -28,6 +31,9 @@ Building::Building(PointI p){
 }
 
 Building::~Building(){
+}
+
+void Building::Update(int ticks, GridMap *gridMap, ModelManager* modelManager){
 }
 
 void Building::Draw(ModelManager *modelManager, TextureManager *textureManager){

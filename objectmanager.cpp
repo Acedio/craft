@@ -1,10 +1,11 @@
 #include "objectmanager.h"
 #include "object.h"
 #include "unit.h"
-#include "unit_worker.h"
+#include "units.h"
+#include "building.h"
+#include "buildings.h"
 #include "resource.h"
-#include "resource_tree.h"
-#include "resource_gold.h"
+#include "resources.h"
 #include "gridmap.h"
 #include "input.h"
 
@@ -147,6 +148,9 @@ void ObjectManager::LoadObjectMap(string mapFileName, GridMap *gridMap, ModelMan
 				case '2': //player2 start
 				case '1': //player1 start
 					gridMap->AddObject(Add(new Unit_Worker(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
+					break;
+				case 'b':
+					gridMap->AddObject(Add(new Building_Keep(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
 					break;
 				case '#': //non-walkable (trees for now)
 				case '^': //trees
