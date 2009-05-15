@@ -79,8 +79,8 @@ set<ObjectRef> GridMap::GetDrawSet(PointF corners[4]){
 	for(int i = 0; i < 4; i++){
 		corners[i].x /= TILE_SIZE;
 		corners[i].y /= TILE_SIZE;
-		corners[i].x += (i&1)*2-1;
-		corners[i].y += (i&2)-1;
+		corners[i].x += ((i&1)*2-1)*3;
+		corners[i].y += ((i&2)-1)*3;
 		if(corners[i].x < 0) corners[i].x = 0;
 		if(corners[i].y < 0) corners[i].y = 0;
 		if(corners[i].x > width) corners[i].x = width;

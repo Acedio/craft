@@ -33,9 +33,9 @@ Unit::Unit(ModelManager *modelManager, TextureManager *textureManager, int x, in
 	atk = 0;
 	mov_speed = 0;
 	atk_speed = 0;
-	cr = 1;
-	cg = 1;
-	cb = 1;
+	cr = .8;
+	cg = .2;
+	cb = .2;
 	moving = false;
 }
 

@@ -13,9 +13,9 @@ Building::Building(ModelManager* modelManager,TextureManager* textureManager,int
 	max_hp = 1;
 	cur_hp = 1;
 	defense = 20;
-	cr = 1;
-	cg = 1;
-	cb = 1;
+	cr = .2;
+	cg = .2;
+	cb = .8;
 }
 
 Building::Building(PointI p){
@@ -25,9 +25,9 @@ Building::Building(PointI p){
 	max_hp = 1;
 	cur_hp = 1;
 	defense = 20;
-	cr = 1;
-	cg = 1;
-	cb = 1;
+	cr = .8;
+	cg = .2;
+	cb = .2;
 }
 
 Building::~Building(){
