@@ -27,7 +27,7 @@ Display::Display(int width, int height, int bitsperpixel) throw (DisplayExceptio
 		SDL_Quit();
 		throw DisplayException(SDL_GetError());
 	}
-	SDL_WM_SetCaption("Craft", NULL);
+	SDL_WM_SetCaption("Super Fight: Super Duper", NULL);
 
 	// Initialize OpenGL
 	glClearColor(0,0,0,1);

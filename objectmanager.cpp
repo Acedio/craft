@@ -70,7 +70,9 @@ ObjectRef ObjectManager::Add(Object* obj){
 
 ObjectRef ObjectManager::Add(Unit *unit, GridMap *gridMap){
 	objects[next_unused_ref] = unit;
-	gridMap->AddObject(next_unused_ref,PT_PASSABLE,unit->pos);
+	PointI size;
+	size.x = size.y = 1;
+	gridMap->AddObject(next_unused_ref,PT_PASSABLE,unit->pos,size);
 	++next_unused_ref;
 	return next_unused_ref - 1;
 }
@@ -104,14 +106,13 @@ Object* ObjectManager::GetObject(ObjectRef ref){
 	return NULL;
 }
 
-vector<vector<TileState> > ObjectManager::LoadObjectMap(string mapFileName, ModelManager* modelManager, TextureManager *textureManager)
+void ObjectManager::LoadObjectMap(string mapFileName, GridMap *gridMap, ModelManager* modelManager, TextureManager *textureManager)
 {
 	fstream mapFile;
 	mapFile.open(mapFileName.c_str(), fstream::in);
 	
 	if(mapFile.fail()){
 		cout << "Error: Could not load object map file \"" << mapFileName << "\"." << endl;
-		return vector<vector<TileState> >();
 	}
 
 	int width, height;
@@ -119,47 +120,45 @@ vector<vector<TileState> > ObjectManager::LoadObjectMap(string mapFileName, Mode
 	mapFile >> width;
 	mapFile >> height;
 
-	vector<vector<TileState> > object_map;
+	TileState empty;
+	empty.objRef = 0;
+	empty.passType = PT_EMPTY;
 
-	for (int y = 0; y < height; y++)
+	vector<vector<TileState> > object_map(height,vector<TileState>(width,empty));
+
+	*gridMap = GridMap(object_map);
+
+	PointI p;
+	PointI unitSize;
+	unitSize.x = unitSize.y = 1;
+
+	for (p.y = 0; p.y < height; p.y++)
 	{
-		vector<TileState> temp;
-		for (int x = 0; x < width; x++)
+		for (p.x = 0; p.x < width; p.x++)
 		{
 			string s;
 			mapFile >> s;
 
-			TileState tile;
-			
 			switch(s[0])
 			{
 				case '*': //gold
-					tile.objRef = Add(new Resource_Gold(modelManager,textureManager,x,y)); 
-					tile.passType = PT_IMPASSABLE;
+					gridMap->AddObject(Add(new Resource_Gold(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize); 
 					break;
 				case '2': //player2 start
 				case '1': //player1 start
-					tile.objRef = Add(new Unit_Worker(modelManager,textureManager,x,y));
-					tile.passType = PT_PASSABLE;
+					gridMap->AddObject(Add(new Unit_Worker(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
 					break;
 				case '#': //non-walkable (trees for now)
 				case '^': //trees
-					tile.objRef = Add(new Resource_Tree(modelManager,textureManager,x,y));
-					tile.passType = PT_IMPASSABLE;
+					gridMap->AddObject(Add(new Resource_Tree(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize);
 					break;
 				case '.':
 				default:
-					tile.objRef = 0;
-					tile.passType = PT_EMPTY;
 					break;
 			}
-			temp.push_back(tile);
 		}
-		object_map.push_back(temp);
 	}
 	mapFile.close();
-
-	return object_map;
 }
 
 void ObjectManager::HandleClick(VertexF location, ButtonName buttonName, GridMap *gridMap){

@@ -48,7 +48,7 @@ public:
 
 	bool MoveObject(PointI a, PointI b);
 
-	bool AddObject(ObjectRef ref, PassType passType, PointI pos);
+	bool AddObject(ObjectRef ref, PassType passType, PointI pos, PointI size);
 
 	bool PointIsValid(PointI a);
 
