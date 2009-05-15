@@ -301,6 +301,30 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\resource.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resource.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resource_gold.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resource_gold.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resource_tree.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\resource_tree.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\soundmanager.cpp"
 				>
 			</File>
