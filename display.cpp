@@ -92,7 +92,7 @@ void Display::ScreenToWorld(PointI cursorScreenPos, VertexF *cursorPos, VertexF 
 		screenCorners[1].y = oy;
 		screenCorners[1].z = oz;
 	}
-	if(gluUnProject(viewport[2],0,0,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
+	if(gluUnProject(0,0,0,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
 		screenCorners[2].x = 0;
 		screenCorners[2].y = 0;
 		screenCorners[2].z = 0;
@@ -101,7 +101,7 @@ void Display::ScreenToWorld(PointI cursorScreenPos, VertexF *cursorPos, VertexF 
 		screenCorners[2].y = oy;
 		screenCorners[2].z = oz;
 	}
-	if(gluUnProject(0,0,0,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
+	if(gluUnProject(viewport[2],0,0,modelview,projection,viewport,&ox,&oy,&oz) == GLU_FALSE){
 		screenCorners[3].x = 0;
 		screenCorners[3].y = 0;
 		screenCorners[3].z = 0;

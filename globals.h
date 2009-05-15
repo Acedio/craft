@@ -14,6 +14,7 @@ struct VertexI{
 
 struct PointF{
 	float x,y;
+	PointF operator+(PointF b){PointF temp; temp.x = x + b.x; temp.y = y + b.y; return temp;}
 };
 
 struct PointI{

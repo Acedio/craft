@@ -52,7 +52,7 @@ bool GridMap::AddObject(ObjectRef ref, PointI pos){
 	return false;
 }
 
-set<ObjectRef> GridMap::GetDrawSet(PointF groundCorners[4]){
+set<ObjectRef> GridMap::GetDrawSet(PointF corners[4]){
 	set<ObjectRef> drawSet;
 	int height = object_map.size();
 	if(height <= 0){
@@ -61,10 +61,49 @@ set<ObjectRef> GridMap::GetDrawSet(PointF groundCorners[4]){
 	}
 	int width = object_map[0].size();
 	for(int i = 0; i < 4; i++){
-		if(groundCorners[i].x < 0) groundCorners[i].x = 0;
-		if(groundCorners[i].y < 0) groundCorners[i].y = 0;
-		if(groundCorners[i].x > width) groundCorners[i].x = width;
-		if(groundCorners[i].y > height) groundCorners[i].y = height;
+		corners[i].x /= TILE_SIZE;
+		corners[i].y /= TILE_SIZE;
+		if(corners[i].x < 0) corners[i].x = 0;
+		if(corners[i].y < 0) corners[i].y = 0;
+		if(corners[i].x > width) corners[i].x = width;
+		if(corners[i].y > height) corners[i].y = height;
+	}
+	float leftSquared = pow(corners[2].x-corners[0].x,2) + pow(corners[2].y-corners[0].y,2);
+	float rightSquared = pow(corners[3].x-corners[1].x,2) + pow(corners[3].y-corners[1].y,2);
+	int rows;
+	if(leftSquared > rightSquared){
+		rows = 2*sqrt(leftSquared);
+	} else {
+		rows = 2*sqrt(rightSquared);
+	}
+	float topSquared = pow(corners[1].x-corners[0].x,2) + pow(corners[1].y-corners[0].y,2);
+	float bottomSquared = pow(corners[3].x-corners[2].x,2) + pow(corners[3].y-corners[2].y,2);
+	int cols;
+	if(topSquared > bottomSquared){
+		cols = 2*sqrt(topSquared);
+	} else {
+		cols = 2*sqrt(bottomSquared);
+	}
+	PointF lInc,rInc; // amount to increment on the left and right corners per row
+	lInc.x = (corners[2].x-corners[0].x)/rows;
+	lInc.y = (corners[2].y-corners[0].y)/rows;
+	rInc.x = (corners[3].x-corners[1].x)/rows;
+	rInc.y = (corners[3].y-corners[1].y)/rows;
+	PointF left = corners[0], right = corners[1];
+	for(int row = 0; row <= rows; row++){
+		PointF p = left;
+		PointF inc;
+		inc.x = (right.x-left.x)/cols;
+		inc.y = (right.y-left.y)/cols;
+		for(int col = 0; col <= cols; col++){
+			if((int)p.x >= 0 && (int)p.y >= 0 && (int)p.x < width && (int)p.y < height){
+				drawSet.insert(object_map[(int)p.y][(int)p.x]);
+			} else {
+			}
+			p = p + inc;
+		}
+		left = left + lInc;
+		right = right + rInc;
 	}
 	return drawSet;
 }
