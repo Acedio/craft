@@ -23,6 +23,7 @@ using namespace std;
 SoundManager::SoundManager()
 {
 	nextUnusedRef = 1;
+	music = NULL;
 
 	if( Mix_OpenAudio( 44100, MIX_DEFAULT_FORMAT, 2, 512 ) == -1 )
 	{
@@ -39,8 +40,21 @@ SoundManager::~SoundManager()
 	}
 	sounds.clear();
 	Mix_CloseAudio();
+	if(music != NULL)
+	{
+		 Mix_FreeMusic( music );
+	}
 }
 
+SoundManager::PlayMusic(string filename)
+{
+	if(music != NULL)
+	{
+		 Mix_FreeMusic( music );
+	}
+	music = Mix_LoadMUS(filename);
+	Mix_PlayMusic( music, -1 );
+}
 SoundRef SoundManager::LoadSound(string filename)
 {
 	SoundRef ref;

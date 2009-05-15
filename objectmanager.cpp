@@ -149,8 +149,38 @@ void ObjectManager::LoadObjectMap(string mapFileName, GridMap *gridMap, ModelMan
 				case '1': //player1 start
 					gridMap->AddObject(Add(new Unit_Worker(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
 					break;
+				case '3': //player1 start
+					gridMap->AddObject(Add(new Unit_Swordsman(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
+					break;
+				case '4': //player1 start
+					gridMap->AddObject(Add(new Unit_Archer(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
+					break;
+				case '5': //player1 start
+					gridMap->AddObject(Add(new Unit_Lancer(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
+					break;
+				case '1': //player1 start
+					gridMap->AddObject(Add(new Unit_Knight(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
+					break;
+				case '1': //player1 start
+					gridMap->AddObject(Add(new Unit_Catapult(modelManager,textureManager,p.x,p.y)),PT_PASSABLE,p,unitSize);
+					break;
+				case 'k':
+					gridMap->AddObject(Add(new Building_Keep(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
+					break;
+				case 'f':
+					gridMap->AddObject(Add(new Building_Farm(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
+					break;
+				case 'l':
+					gridMap->AddObject(Add(new Building_Lumbermill(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
+					break;
+				case 'w':
+					gridMap->AddObject(Add(new Building_Wall(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
+					break;
+				case 's':
+					gridMap->AddObject(Add(new Building_Blacksmith(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
+					break;
 				case 'b':
-					gridMap->AddObject(Add(new Building_Farm(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*2);
+					gridMap->AddObject(Add(new Building_Barracks(modelManager,textureManager,p.x,p.y)),PT_IMPASSABLE,p,unitSize*4);
 					break;
 				case '#': //non-walkable (trees for now)
 				case '^': //trees

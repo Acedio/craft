@@ -125,6 +125,8 @@ void Game::Run(){
 	SoundRef go_here = soundmanager.LoadSound("data/sounds/go.wav");
 	SoundRef select_unit = soundmanager.LoadSound("data/sounds/click.wav");
 
+	soundmanager.PlayMusic("data/sounds/music1.mp3");
+
 	while(running){
 		ticks = SDL_GetTicks() - ticks;
 
