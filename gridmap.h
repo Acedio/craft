@@ -27,21 +27,28 @@ public:
 	bool operator() (AStarPoint* a, AStarPoint* b){if(a->rank == b->rank){return a < b;} else {return a->rank < b->rank;}}
 };
 
+enum PassType { PT_EMPTY = 0, PT_PASSABLE = 1, PT_IMPASSABLE = 2 };
+
+struct TileState{
+	ObjectRef objRef;
+	PassType passType;
+};
+
 const float TILE_SIZE = 5;
 
 class GridMap{
 public:
 	GridMap();
-	GridMap(vector<vector<ObjectRef> > omap);
+	GridMap(vector<vector<TileState> > omap);
 	GridMap(int w, int h, ObjectRef def = 0);
 
 	void WriteOut();
 
-	list<PointI> AStar(PointI start, PointI end);
+	list<PointI> AStar(PointI start, PointI end, int stopMask = PT_IMPASSABLE);
 
 	bool MoveObject(PointI a, PointI b);
 
-	bool AddObject(ObjectRef ref, PointI pos);
+	bool AddObject(ObjectRef ref, PassType passType, PointI pos);
 
 	bool PointIsValid(PointI a);
 
@@ -49,7 +56,7 @@ public:
 
 	ObjectRef GetObjectRefAt(PointI pos);
 private:
-	vector<vector<ObjectRef> > object_map;
+	vector<vector<TileState> > object_map;
 };
 
 

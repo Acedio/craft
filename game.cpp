@@ -113,6 +113,8 @@ void Game::Run(){
 	
 	bool running = true;
 
+	float zoom = 0;
+
 	Uint32 lastFPSCheck = SDL_GetTicks();
 
 	Uint32 ticks = SDL_GetTicks();
@@ -198,34 +200,37 @@ void Game::Run(){
 		if(input->GetKeyState(KEY_ESCAPE) == KS_RELEASED){
 			running = false;
 		}
-		if(input->GetKeyState(KEY_w) == KS_DOWN){
-			camPos.z -= .05*frameTicks;
+		if(input->GetKeyState(KEY_UP) == KS_DOWN){
+			camPos.z -= .1*frameTicks;
 		}
-		if(input->GetKeyState(KEY_s) == KS_DOWN){
-			camPos.z += .05*frameTicks;
+		if(input->GetKeyState(KEY_DOWN) == KS_DOWN){
+			camPos.z += .1*frameTicks;
 		}
-		if(input->GetKeyState(KEY_a) == KS_DOWN){
-			camPos.x -= .05*frameTicks;
+		if(input->GetKeyState(KEY_LEFT) == KS_DOWN){
+			camPos.x -= .1*frameTicks;
 		}
-		if(input->GetKeyState(KEY_d) == KS_DOWN){
-			camPos.x += .05*frameTicks;
+		if(input->GetKeyState(KEY_RIGHT) == KS_DOWN){
+			camPos.x += .1*frameTicks;
 		}
-		if(input->GetKeyState(KEY_DOWN)){
-			camAngle.x -= .001*frameTicks;
+		if(input->GetMouseButtonState(BUTTON_WHEELUP) == BS_RELEASED){
+			zoom += .1;
+			if(zoom > 1){
+				zoom = 1;
+			}
 		}
-		if(input->GetKeyState(KEY_UP)){
-			camAngle.x += .001*frameTicks;
-		}
-		if(input->GetKeyState(KEY_LEFT)){
-			camAngle.y += .001*frameTicks;
-		}
-		if(input->GetKeyState(KEY_RIGHT)){
-			camAngle.y -= .001*frameTicks;
+		if(input->GetMouseButtonState(BUTTON_WHEELDOWN) == BS_RELEASED){
+			zoom -= .1;
+			if(zoom < 0){
+				zoom = 0;
+			}
 		}
 	/////////sound test
 		if(input->GetKeyState(KEY_p) == KS_PRESSED){
 			soundmanager.PlaySound(sound);
 		}
+
+		camAngle.x = -3.14159/3+(3.14159/6)*zoom;
+		camPos.y = 80-60*zoom;
 
 		//\/\/\/\/\/\/\/\/\/\/\/\/\//
 		// END MAIN GAME LOOP CODE //
@@ -241,7 +246,7 @@ void Game::Run(){
 		camera.ChangeAngle(camAngle);
 		camera.LookThrough();
 
-		GLfloat light[4] = {600,1000,600,1};
+		GLfloat light[4] = {1000,1000,1000,1};
 		glLightfv(GL_LIGHT0, GL_POSITION, light);
 
 		glPushMatrix(); // we want to save this matrix so we can use it for picking in the next game loop
@@ -268,7 +273,7 @@ void Game::Run(){
 			glTexCoord2f(0,0);
 			glVertex3f(0,0,5*s);
 		glEnd();
-
+		
 		set<ObjectRef> drawSet = gridMap.GetDrawSet(groundCorners);
 
 		objectManager.DrawObjects(&modelManager,textureManager,drawSet);

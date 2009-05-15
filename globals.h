@@ -1,6 +1,9 @@
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
 
+#include <string>
+using namespace std;
+
 struct VertexF{
 	float x,y,z;
 	VertexF operator-(VertexF b){VertexF temp; temp.x = x - b.x; temp.y = y - b.y; temp.z = z - b.z; return temp;}
@@ -22,5 +25,7 @@ struct PointI{
 	bool operator<(const PointI b) const {if(x == b.x){ return y < b.y; } else { return x < b.x;}};
 	bool operator==(const PointI b) const {return (x == b.x) && (y == b.y);};
 };
+
+string TrimFileName(string filepath);
 
 #endif

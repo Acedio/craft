@@ -64,7 +64,7 @@ void Unit::Update(int ticks, GridMap* gridMap, ModelManager* modelManager){
 				}
 				if(!moveList.empty() && occupiedTiles > 0){ // something is in our way
 					if(occupiedTiles < MAX_OCCUPIED_TILES){
-						list<PointI> prepended = gridMap->AStar(pos, moveList.front());
+						list<PointI> prepended = gridMap->AStar(pos, moveList.front(),PT_IMPASSABLE|PT_PASSABLE);//only pass through empty squares
 						if(!prepended.empty()){
 							prepended.pop_back(); // we already have prependeds destination in our moveList
 							moveList.insert(moveList.begin(),prepended.begin(),prepended.end());
@@ -77,17 +77,18 @@ void Unit::Update(int ticks, GridMap* gridMap, ModelManager* modelManager){
 				}
 				if(!moveList.empty()){
 					pos = moveList.front();
-					gridMap->MoveObject(lastPos,pos);
-					moveList.pop_front();
-					angle = atan2(-(float)(pos.y-lastPos.y),(float)(pos.x-lastPos.x))+3.14159/2; // y is flipped on the map and 0 degrees is straight down the y axis
-					if(angle < 0){
-						angle += 2*3.14159;
-					}
-					dAngle = angle - lastAngle;
-					if(dAngle > 3.14159){
-						dAngle -= 2*3.14159;
-					} else if(dAngle < -3.14159){
-						dAngle += 2*3.14159;
+					if(gridMap->MoveObject(lastPos,pos)){
+						moveList.pop_front();
+						angle = atan2(-(float)(pos.y-lastPos.y),(float)(pos.x-lastPos.x))+3.14159/2; // y is flipped on the map and 0 degrees is straight down the y axis
+						if(angle < 0){
+							angle += 2*3.14159;
+						}
+						dAngle = angle - lastAngle;
+						if(dAngle > 3.14159){
+							dAngle -= 2*3.14159;
+						} else if(dAngle < -3.14159){
+							dAngle += 2*3.14159;
+						}
 					}
 				}
 			}
@@ -149,7 +150,7 @@ void Unit::DrawShadow(ModelManager *modelManager){
 }
 
 void Unit::MoveTo(PointI tgt, GridMap* gridMap){
-	moveList = gridMap->AStar(pos,tgt);
+	moveList = gridMap->AStar(pos,tgt,PT_IMPASSABLE); // find a path through anything that's EMPTY or IMPASSABLE
 	if(moveList.empty() && pos == lastPos){ // if we don't have any moves, we aren't moving
 		moving = false;
 	} else {

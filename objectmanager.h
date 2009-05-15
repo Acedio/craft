@@ -24,7 +24,7 @@ public:
 	void UpdateAll(int ticks,GridMap *gridMap, ModelManager *modelManager);
 	void DrawObjects(ModelManager *modelManager, TextureManager *textureManager, set<ObjectRef> refs);
 	void DrawShadows(ModelManager *modelManager, set<ObjectRef> refs);
-	vector<vector<ObjectRef> > LoadObjectMap(string mapFileName, ModelManager *modelManager, TextureManager *textureManager);
+	vector<vector<TileState> > LoadObjectMap(string mapFileName, ModelManager *modelManager, TextureManager *textureManager);
 	Object* GetObject(ObjectRef ref);
 	void HandleClick(VertexF location, ButtonName buttonName, GridMap *gridMap);
 private:

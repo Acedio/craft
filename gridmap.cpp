@@ -14,15 +14,18 @@ using namespace std;
 GridMap::GridMap(){
 }
 
-GridMap::GridMap(vector<vector<ObjectRef> > omap){
+GridMap::GridMap(vector<vector<TileState> > omap){
 	object_map = omap;
 }
 
 GridMap::GridMap(int w, int h, ObjectRef def){
 	for(int y = 0; y < h; y++){
-		vector<ObjectRef> temp;
+		vector<TileState> temp;
 		for(int x = 0; x < w; x++){
-			temp.push_back(def);
+			TileState tile;
+			tile.objRef = def;
+			tile.passType = PT_PASSABLE;
+			temp.push_back(tile);
 		}
 		object_map.push_back(temp);
 	}
@@ -35,18 +38,22 @@ bool GridMap::PointIsValid(PointI a){
 bool GridMap::MoveObject(PointI a, PointI b){
 	// Attempts to move object at point A to point B
 	// If an object exists at point B, return false, else return true
-	if(PointIsValid(a) && PointIsValid(b) && object_map[b.y][b.x] == 0){
+	if(PointIsValid(a) && PointIsValid(b) && object_map[b.y][b.x].objRef == 0){
 		// Points are valid and no object is at B
+		TileState empty;
+		empty.objRef = 0;
+		empty.passType = PT_EMPTY;
 		object_map[b.y][b.x] = object_map[a.y][a.x];
-		object_map[a.y][a.x] = 0;
+		object_map[a.y][a.x] = empty;
 		return true;
 	}
 	return false;
 }
 
-bool GridMap::AddObject(ObjectRef ref, PointI pos){
-	if(PointIsValid(pos) && object_map[pos.y][pos.x] == 0){
-		object_map[pos.y][pos.x] = ref;
+bool GridMap::AddObject(ObjectRef ref, PassType passType, PointI pos){
+	if(PointIsValid(pos) && object_map[pos.y][pos.x].objRef == 0){
+		object_map[pos.y][pos.x].objRef = ref;
+		object_map[pos.y][pos.x].passType = passType;
 		return true;
 	}
 	return false;
@@ -63,6 +70,8 @@ set<ObjectRef> GridMap::GetDrawSet(PointF corners[4]){
 	for(int i = 0; i < 4; i++){
 		corners[i].x /= TILE_SIZE;
 		corners[i].y /= TILE_SIZE;
+		corners[i].x += (i&1)*2-1;
+		corners[i].y += (i&2)-1;
 		if(corners[i].x < 0) corners[i].x = 0;
 		if(corners[i].y < 0) corners[i].y = 0;
 		if(corners[i].x > width) corners[i].x = width;
@@ -97,7 +106,7 @@ set<ObjectRef> GridMap::GetDrawSet(PointF corners[4]){
 		inc.y = (right.y-left.y)/cols;
 		for(int col = 0; col <= cols; col++){
 			if((int)p.x >= 0 && (int)p.y >= 0 && (int)p.x < width && (int)p.y < height){
-				drawSet.insert(object_map[(int)p.y][(int)p.x]);
+				drawSet.insert(object_map[(int)p.y][(int)p.x].objRef);
 			} else {
 			}
 			p = p + inc;
@@ -110,12 +119,12 @@ set<ObjectRef> GridMap::GetDrawSet(PointF corners[4]){
 
 ObjectRef GridMap::GetObjectRefAt(PointI pos){
 	if(PointIsValid(pos)){
-		return object_map[pos.y][pos.x];
+		return object_map[pos.y][pos.x].objRef;
 	}
 	return 0;
 }
 
-list<PointI> GridMap::AStar(PointI a, PointI b){
+list<PointI> GridMap::AStar(PointI a, PointI b, int stopMask){ // stopMask : what to not walk through
 	if(!PointIsValid(a) || !PointIsValid(b) || GetObjectRefAt(b) != 0){ // we're trying to move into a filled space
 		return list<PointI>();
 	}
@@ -142,7 +151,7 @@ list<PointI> GridMap::AStar(PointI a, PointI b){
 				temp.x = cur->point.x + ((d&1)?((d&2)-1):0);
 				temp.y = cur->point.y + ((d&1)?0:((d&2)-1));
 			}
-			if(PointIsValid(temp) && object_map[temp.y][temp.x] == 0 && closed.find(temp) == closed.end()){
+			if(PointIsValid(temp) && (object_map[temp.y][temp.x].passType&stopMask) == 0 && closed.find(temp) == closed.end()){
 				AStarPoint* n = new AStarPoint;
 				toDelete.insert(n);
 				n->point = temp;

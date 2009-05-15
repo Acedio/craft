@@ -70,7 +70,7 @@ ObjectRef ObjectManager::Add(Object* obj){
 
 ObjectRef ObjectManager::Add(Unit *unit, GridMap *gridMap){
 	objects[next_unused_ref] = unit;
-	gridMap->AddObject(next_unused_ref,unit->pos);
+	gridMap->AddObject(next_unused_ref,PT_PASSABLE,unit->pos);
 	++next_unused_ref;
 	return next_unused_ref - 1;
 }
@@ -104,14 +104,14 @@ Object* ObjectManager::GetObject(ObjectRef ref){
 	return NULL;
 }
 
-vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName, ModelManager* modelManager, TextureManager *textureManager)
+vector<vector<TileState> > ObjectManager::LoadObjectMap(string mapFileName, ModelManager* modelManager, TextureManager *textureManager)
 {
 	fstream mapFile;
 	mapFile.open(mapFileName.c_str(), fstream::in);
 	
 	if(mapFile.fail()){
 		cout << "Error: Could not load object map file \"" << mapFileName << "\"." << endl;
-		return vector<vector<ObjectRef> >();
+		return vector<vector<TileState> >();
 	}
 
 	int width, height;
@@ -119,36 +119,41 @@ vector<vector<ObjectRef> > ObjectManager::LoadObjectMap(string mapFileName, Mode
 	mapFile >> width;
 	mapFile >> height;
 
-	vector<vector<ObjectRef> > object_map;
+	vector<vector<TileState> > object_map;
 
 	for (int y = 0; y < height; y++)
 	{
-		vector<ObjectRef> temp;
+		vector<TileState> temp;
 		for (int x = 0; x < width; x++)
 		{
 			string s;
 			mapFile >> s;
+
+			TileState tile;
 			
 			switch(s[0])
 			{
 				case '*': //gold
-					temp.push_back(Add(new Resource_Gold(modelManager,textureManager,x,y)));
+					tile.objRef = Add(new Resource_Gold(modelManager,textureManager,x,y)); 
+					tile.passType = PT_IMPASSABLE;
 					break;
 				case '2': //player2 start
 				case '1': //player1 start
-					temp.push_back(Add(new Unit_Worker(modelManager,textureManager,x,y)));
-					break;
-				case '.':
-					temp.push_back(0);
+					tile.objRef = Add(new Unit_Worker(modelManager,textureManager,x,y));
+					tile.passType = PT_PASSABLE;
 					break;
 				case '#': //non-walkable (trees for now)
 				case '^': //trees
-					temp.push_back(Add(new Resource_Tree(modelManager,textureManager,x,y)));
+					tile.objRef = Add(new Resource_Tree(modelManager,textureManager,x,y));
+					tile.passType = PT_IMPASSABLE;
 					break;
+				case '.':
 				default:
-					temp.push_back(0);
+					tile.objRef = 0;
+					tile.passType = PT_EMPTY;
 					break;
 			}
+			temp.push_back(tile);
 		}
 		object_map.push_back(temp);
 	}
@@ -171,7 +176,7 @@ void ObjectManager::HandleClick(VertexF location, ButtonName buttonName, GridMap
 			}
 		}
 	}
-	for(int y = -1; y <= 1; y++){
+	/*for(int y = -1; y <= 1; y++){
 		for(int x = -1; x <= 1; x++){
 			if(x != 0 || y != 0){ // we don't want to check center again
 				PointI temp;
@@ -190,5 +195,5 @@ void ObjectManager::HandleClick(VertexF location, ButtonName buttonName, GridMap
 				}
 			}
 		}
-	}
+	}*/
 }
