@@ -1,7 +1,7 @@
 #include "objectmanager.h"
 #include "object.h"
 #include "unit.h"
-#include "unit_worker.h"
+#include "unit_lancer.h"
 #include "resource.h"
 #include "resource_tree.h"
 #include "resource_gold.h"
@@ -139,7 +139,7 @@ vector<vector<TileState> > ObjectManager::LoadObjectMap(string mapFileName, Mode
 					break;
 				case '2': //player2 start
 				case '1': //player1 start
-					tile.objRef = Add(new Unit_Worker(modelManager,textureManager,x,y));
+					tile.objRef = Add(new Unit_Lancer(modelManager,textureManager,x,y));
 					tile.passType = PT_PASSABLE;
 					break;
 				case '#': //non-walkable (trees for now)

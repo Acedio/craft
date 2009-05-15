@@ -122,7 +122,8 @@ void Game::Run(){
 	ObjectRef selected = 0;
 
 	SoundManager soundmanager;
-	SoundRef sound = soundmanager.LoadSound("data/sounds/low.wav");
+	SoundRef go_here = soundmanager.LoadSound("data/sounds/go.wav");
+	SoundRef select_unit = soundmanager.LoadSound("data/sounds/click.wav");
 
 	while(running){
 		ticks = SDL_GetTicks() - ticks;
@@ -177,6 +178,10 @@ void Game::Run(){
 				ObjectRef ref = gridMap.GetObjectRefAt(pos);
 				if(ref != 0){
 					selected = ref;
+					if (objectManager.GetObject(ref) != NULL && (objectManager.GetObject(ref)->GetType() & OBJ_UNIT))
+					{
+						soundmanager.PlaySound(select_unit);
+					}
 				}
 			}
 		}
@@ -189,6 +194,7 @@ void Game::Run(){
 				if(obj != NULL){
 					if(obj->GetType()&OBJ_UNIT){
 						((Unit*)obj)->MoveTo(pos,&gridMap);
+						soundmanager.PlaySound(go_here);
 					}
 				}
 			}
@@ -223,10 +229,6 @@ void Game::Run(){
 			if(zoom < 0){
 				zoom = 0;
 			}
-		}
-	/////////sound test
-		if(input->GetKeyState(KEY_p) == KS_PRESSED){
-			soundmanager.PlaySound(sound);
 		}
 
 		camAngle.x = -3.14159/3+(3.14159/6)*zoom;
