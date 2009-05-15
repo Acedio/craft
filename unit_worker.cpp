@@ -6,6 +6,11 @@ Unit_Worker::Unit_Worker(ModelManager* modelManager, TextureManager *textureMana
 	type = OBJ_UNIT_WORKER;
 	model = modelManager->LoadModel("data/units/worker/worker.mdl", textureManager);
 	name += "Worker";
+	max_hp = 80;
+	cur_hp = max_hp;
+	atk = 4;
+	def = 0;
+	atk_speed = 1200; //milliseconds per attack
 	mov_speed = 0.0012;
 	cout << name << endl;
 }

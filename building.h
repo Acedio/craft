@@ -11,7 +11,7 @@ using namespace std;
 
 class Building : public Object {
 public:
-	Building();
+	Building(ModelManager* modelManager,TextureManager* textureManager,int x,int y);
 	Building(PointI p);
 	~Building();
 	virtual void Draw();
@@ -22,6 +22,9 @@ protected:
 	int max_hp;
 	int cur_hp;
 	int defense;
+	int build_time;
+	int build_complete;
+	string name;
 };
 
 #endif
