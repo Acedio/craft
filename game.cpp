@@ -204,7 +204,7 @@ void Game::Run(){
 			Object* obj = objectManager.GetObject(selected);
 			if (obj != NULL && (obj->GetType() & OBJ_UNIT))
 			{
-				Unit* unit = (Unit*)obj;
+				((Unit*)obj)->ChangeAnimation("attack");
 			}
 		}
 

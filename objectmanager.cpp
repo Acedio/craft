@@ -170,7 +170,7 @@ void ObjectManager::HandleClick(VertexF location, ButtonName buttonName, GridMap
 	pos.x = (int)(location.x/TILE_SIZE);
 	pos.y = (int)(location.z/TILE_SIZE);
 	ObjectRef ref = gridMap->GetObjectRefAt(pos);
-	if(ref != 0){
+	/*if(ref != 0){
 		map<ObjectRef,Object*>::iterator obj = objects.find(ref);
 		if(obj != objects.end()){
 			if(obj->second->type&OBJ_UNIT){
@@ -178,7 +178,7 @@ void ObjectManager::HandleClick(VertexF location, ButtonName buttonName, GridMap
 				cout << unit->name << endl;
 			}
 		}
-	}
+	}*/
 	/*for(int y = -1; y <= 1; y++){
 		for(int x = -1; x <= 1; x++){
 			if(x != 0 || y != 0){ // we don't want to check center again

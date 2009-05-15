@@ -91,6 +91,7 @@ public:
 	virtual void DrawShadow(ModelManager *modelManager);
 	virtual void MoveTo(PointI tgt, GridMap *gridMap);
 	virtual void Update(int ticks, GridMap *gridMap, ModelManager* modelManager);
+	void ChangeAnimation(string name); // TODO don't use this! bad!
 protected:
 	PointI lastPos;
 	PointI pos;

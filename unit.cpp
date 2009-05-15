@@ -42,6 +42,11 @@ Unit::Unit(ModelManager *modelManager, TextureManager *textureManager, int x, in
 Unit::~Unit(){
 }
 
+void Unit::ChangeAnimation(string name){
+	animationName = name;
+	animationChanged = true;
+}
+
 void Unit::Update(int ticks, GridMap* gridMap, ModelManager* modelManager){
 	if(animationChanged){
 		animationChanged = false;
