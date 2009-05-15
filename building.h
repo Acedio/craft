@@ -14,7 +14,9 @@ public:
 	Building(ModelManager* modelManager,TextureManager* textureManager,int x,int y);
 	Building(PointI p);
 	~Building();
-	virtual void Draw();
+	virtual void Update(int ticks, GridMap *gridMap, ModelManager* modelManager);
+	virtual void Draw(ModelManager *modelManager, TextureManager *textureManager);
+	virtual void DrawShadow(ModelManager *modelManager);
 protected:
 	PointI pos;
 	ModelRef model;
@@ -24,6 +26,7 @@ protected:
 	int defense;
 	int build_time;
 	int build_complete;
+	float cr,cg,cb;
 	string name;
 };
 

@@ -50,13 +50,22 @@ bool GridMap::MoveObject(PointI a, PointI b){
 	return false;
 }
 
-bool GridMap::AddObject(ObjectRef ref, PassType passType, PointI pos){
-	if(PointIsValid(pos) && object_map[pos.y][pos.x].objRef == 0){
-		object_map[pos.y][pos.x].objRef = ref;
-		object_map[pos.y][pos.x].passType = passType;
-		return true;
+bool GridMap::AddObject(ObjectRef ref, PassType passType, PointI pos, PointI size){
+	PointI temp;
+	for(temp.y = 0; temp.y < size.y; temp.y++){
+		for(temp.x = 0; temp.x < size.x; temp.x++){
+			if(!PointIsValid(pos + temp) && object_map[pos.x+temp.x][pos.y+temp.y].objRef == 0){
+				return false;
+			}
+		}
 	}
-	return false;
+	for(temp.y = 0; temp.y < size.y; temp.y++){
+		for(temp.x = 0; temp.x < size.x; temp.x++){
+			object_map[pos.y+temp.x][pos.x+temp.y].objRef = ref;
+			object_map[pos.y+temp.x][pos.x+temp.y].passType = passType;
+		}
+	}
+	return true;
 }
 
 set<ObjectRef> GridMap::GetDrawSet(PointF corners[4]){

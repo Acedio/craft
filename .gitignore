@@ -1,4 +1,5 @@
 *.o
+*.out
 /craft
 *.ppm
 *.pgm

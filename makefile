@@ -1,8 +1,7 @@
 CXX=g++ -g
 CXXFLAGS=-c -Wall `sdl-config --cflags`
 
-OBJ=craft.o game.o texturemanager.o display.o input.o gridmap.o modelmanager.o objectmanager.o object.o unit.o unit_worker.o camera.o soundmanager.o resource.o resource_tree.o resource_gold.o globals.o
-
+OBJ=craft.o game.o texturemanager.o display.o input.o gridmap.o modelmanager.o objectmanager.o object.o unit.o $(patsubst unit_%.cpp,unit_%.o,$(wildcard unit_*.cpp)) camera.o soundmanager.o resource.o $(patsubst resource_%.cpp,resource_%.o,$(wildcard resource_*.cpp)) building.o $(patsubst building_%.cpp,building_%.o,$(wildcard building_*.cpp)) globals.o 
 all: craft
 
 craft: $(OBJ)
@@ -32,15 +31,17 @@ object.o: object.cpp object.h globals.h modelmanager.h texturemanager.h
 
 unit.o: unit.cpp unit.h modelmanager.h texturemanager.h
 
-unit_worker.o: unit_worker.cpp unit_worker.h modelmanager.h texturemanager.h
+unit_%.o: unit_%.cpp unit_%.h modelmanager.h texturemanager.h
+
+building.o: building.cpp building.h modelmanager.h texturemanager.h
+
+building_%.o: building_%.cpp building_%.h modelmanager.h texturemanager.h
 
 soundmanager.o: soundmanager.cpp soundmanager.h
 
 resource.o: resource.cpp resource.h modelmanager.h texturemanager.h
 
-resource_tree.o: resource_tree.cpp resource_tree.h modelmanager.h texturemanager.h
-
-resource_gold.o: resource_gold.cpp resource_gold.h modelmanager.h texturemanager.h
+resource_%.o: resource_%.cpp resource_%.h modelmanager.h texturemanager.h
 
 clean:
 	rm -rf *.o craft

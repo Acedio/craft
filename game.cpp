@@ -98,7 +98,7 @@ void Game::Run(){
 
 	TextureRef grass = textureManager->LoadTexture("grass.png");
 
-	gridMap = GridMap(objectManager.LoadObjectMap("map.map", &modelManager, textureManager));
+	objectManager.LoadObjectMap("map.map", &gridMap, &modelManager, textureManager);
 
 	VertexF camPos;
 	camPos.x = 30;
